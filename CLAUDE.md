@@ -1,0 +1,140 @@
+# Kairos — prototipo
+
+Proyecto personal de Raúl Ruiz. Repo privado en `Kairos-PMC/kairos_prototipo`.
+
+**Estado: andamiaje.** La especificación del producto todavía no está escrita, así
+que aquí no hay stack elegido ni código de aplicación. Lo que sí está montado es el
+flujo de desarrollo con subagentes, listo para usarse desde el primer commit real.
+
+---
+
+## Flujo de desarrollo
+
+Todo cambio que no sea trivial sigue el mismo camino:
+
+```
+crear branch → cambios/commits → REVISAR → PR → CI → merge
+                                    ▲
+                             /revisar-cambio
+```
+
+```bash
+git checkout main && git pull
+git checkout -b feature/nombre-descriptivo
+# ... cambios ...
+/revisar-cambio                    # ← antes de abrir el PR
+git push -u origin feature/nombre-descriptivo
+gh pr create --base main
+/revisar-pr <N>                    # ← si el cambio lo amerita
+```
+
+Prefijos de branch: `feature/`, `fix/`, `docs/`, `refactor/`.
+
+### La regla en una línea
+
+> **Ante la duda, corre `/revisar-cambio`.** Decide solo qué tan profunda debe ser
+> la revisión y, si hace falta, te manda al comando correcto.
+
+---
+
+## Comandos disponibles
+
+| Comando | Para qué | Equipo |
+|---|---|---|
+| `/revisar-cambio` | Router de entrada. Clasifica profundidad (niveles 0-4) y revisa inline los niveles 0-2 | 0-2 Codex |
+| `/revisar-pr <N>` | Un PR antes de mergear. Crea worktree de la branch del PR | 1 Codex por dominio (hasta 8) |
+| `/revisar-plan <ruta>` | Un plan de trabajo antes de implementarlo | Claude + Codex, hasta consenso |
+| `/revisar-implementacion <ruta>` | Código terminado contra el plan que lo originó | Claude + Codex, hasta consenso |
+| `/equipo-headless` | Coordinar un equipo multi-agente arbitrario en background | configurable |
+
+Reglas de revisión por dominio: [`docs/estandares/guia-code-review.md`](docs/estandares/guia-code-review.md).
+Es una guía **heredada** — leé su nota de procedencia antes de aplicar una regla al pie de la letra.
+
+### Cómo decide `/revisar-cambio` la profundidad
+
+Scoring determinista (tamaño + dominio + scope, más un regex de secrets). No hay
+un LLM decidiendo:
+
+| Nivel | Caso | Acción |
+|---|---|---|
+| 0 · Trivial | typo, comentario, rename puro | Claude lee el diff, reporte breve |
+| 1 · Ligero | <50 LOC, tests/docs/cosmético | 1 Codex, inline |
+| 2 · Medio | 50-300 LOC, 1-2 dominios | 2 Codex en paralelo, inline |
+| 3 · Estándar | 300-800 LOC, multi-dominio o crítico | delega a `/revisar-pr` |
+| 4 · Profundo | >800 LOC, infra crítica | delega a `/revisar-pr` con equipo grande |
+
+**Escalado forzado a nivel ≥ 3**, aunque el cambio sea chico, si toca auth,
+secrets, permisos o migraciones, o si el regex detecta un posible secret. En esos
+casos aprobar con Enter no basta: pide confirmación explícita.
+
+### Cómo aprueban los revisores
+
+- **Consenso**: se aprueba solo si *todos* los revisores dicen APROBADO. Si uno
+  pide cambios, se itera (máximo 5 rondas).
+- **Revisores frescos**: los revisores Claude se lanzan con contexto limpio
+  (`subagent_type: "general-purpose"`), no como forks de la sesión, para que
+  lleguen sin los sesgos de quien escribió el código.
+- **Anti-complacencia**: los briefs prohíben "¡Tienes toda la razón!" y la
+  gratitud antes de verificar. Si el cambio está bien, se dice APROBADO; no se
+  inventan hallazgos para justificar la revisión.
+- **Siempre hay reporte**, aunque el cambio esté limpio.
+
+Dónde quedan los reportes: `docs/revisiones/`, `docs/revisiones-pr/`,
+`evaluaciones/plan/`, `evaluaciones/ejecucion/`.
+
+---
+
+## Requisitos
+
+| Herramienta | Verificado | Para qué |
+|---|---|---|
+| `codex` | 0.146.0 | revisores adversariales |
+| `gh` | 2.86.0 | PRs y worktrees |
+| `git` | — | todo |
+
+**Gotcha crítico — `codex` en background:** toda invocación `codex exec*` lanzada
+con `run_in_background: true` lleva `</dev/null` al final. Sin eso Codex detecta
+stdin no-TTY pero abierto, entra en modo "leer prompt desde stdin hasta EOF" y se
+cuelga indefinidamente: proceso vivo, 0% CPU, archivo de output que nunca aparece.
+
+```bash
+# MAL — se cuelga
+codex exec --full-auto -o /tmp/out.md "prompt"
+# BIEN
+codex exec --full-auto -o /tmp/out.md "prompt" </dev/null
+```
+
+---
+
+## Qué NO aplica en este repo
+
+Este flujo se portó desde el ecosistema FaroNova quitándole toda la capa de
+coordinación de equipo. **No corras aquí** — y no hacen falta:
+
+- `/registrar-trabajo` y su guard
+- `/guardar-historial-equipo`, `/re-exportar-historial` (S3 + PostgreSQL)
+- `/crear-tarea`, `/mis-tareas`, `/ver-equipo` y demás comandos del tablero
+- Snapshots periódicos de sesión y enforcement de worktrees
+
+Los hooks de FaroNova instalados en `~/.claude/settings.json` se auto-desactivan
+aquí: identifican el repo por `git config remote.origin.url` y solo actúan sobre
+un roster fijo de repos `FaroNovaDevs/*` y `FaroNovaCorp/*`. Como el remote de
+este repo es `Kairos-PMC/kairos_prototipo`, el team guard hace `exit 0` y no
+interviene. No hay nada que desactivar a mano.
+
+> Cuidado con una trampa práctica: si en una sesión haces `cd` a un repo FaroNova,
+> el directorio de trabajo persiste entre comandos y el guard **sí** se activa
+> desde ese momento, bloqueando todo lo que no sea lectura hasta que vuelvas.
+
+---
+
+## Estructura
+
+```
+.claude/commands/          los 5 comandos del flujo
+docs/estandares/           guía de code review (heredada, a podar)
+docs/revisiones/           reportes de /revisar-cambio
+docs/revisiones-pr/        reportes de /revisar-pr
+evaluaciones/plan/         reportes de /revisar-plan
+evaluaciones/ejecucion/    reportes de /revisar-implementacion
+```
