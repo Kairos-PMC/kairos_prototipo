@@ -3,9 +3,11 @@ import { calcular } from "@/domain/calculo";
 import { pesosCompactos, porcentaje } from "@/lib/formato";
 import { LeyendaProcedencia, Procedencia } from "@/components/procedencia";
 import { EncabezadoPanel, Panel, TituloPagina } from "@/components/ui";
+import { MapaSedes } from "@/components/mapa-sedes";
 
 export default function Sedes() {
   const resultado = calcular(escenarioDemo);
+  const maxExposicion = Math.max(...resultado.porSede.map((s) => s.perdidaEsperada));
 
   return (
     <>
@@ -13,6 +15,29 @@ export default function Sedes() {
         titulo="Sedes y amenazas"
         bajada="El catálogo de fenómenos no es una lista fija que traemos de fábrica: se configura por sede. Esto salió de la validación en campo — un floricultor nos señaló la tormenta eléctrica, que no estaba en nuestro planteamiento original."
       />
+
+      <Panel className="mb-4">
+        <EncabezadoPanel
+          titulo="Dónde está tu exposición"
+          descripcion="El tamaño del punto es la pérdida esperada de cada sede. Dos sedes a 20 km de distancia, con exposiciones que no se parecen."
+        />
+        <div className="p-4">
+          <MapaSedes
+            puntos={escenarioDemo.sedes.map((s) => {
+              const exp =
+                resultado.porSede.find((x) => x.sedeId === s.id)?.perdidaEsperada ?? 0;
+              return {
+                id: s.id,
+                nombre: s.nombre,
+                detalle: `${s.municipio} · ${pesosCompactos(exp)} al año`,
+                lat: s.lat,
+                lon: s.lon,
+                peso: maxExposicion > 0 ? exp / maxExposicion : 0,
+              };
+            })}
+          />
+        </div>
+      </Panel>
 
       <div className="space-y-4">
         {escenarioDemo.sedes.map((sede) => {

@@ -9,6 +9,7 @@ const secciones = [
   { href: "/plano", etiqueta: "Plano de sitio", pista: "Qué depende de qué" },
   { href: "/simulacion", etiqueta: "Simulación", pista: "Cuánto perdería" },
   { href: "/priorizador", etiqueta: "Priorizador", pista: "En qué invertir" },
+  { href: "/reporte", etiqueta: "Reporte", pista: "Para el comité" },
 ];
 
 export function Nav() {
