@@ -210,17 +210,55 @@ export function TrazoActivo({
  * Es también el único argumento del producto que ningún competidor está
  * contando: lo que golpea el fenómeno rara vez es lo caro. En la sede de
  * Facatativá, una subestación de $240 M arrastra $5.600 M en invernaderos.
+ *
+ * ── Dos versiones, no dos opciones ───────────────────────────────────────────
+ * `papel` es la de uso normal: dentro de la aplicación todas las superficies son
+ * claras y la caja oscura pesa de más. `tinta` existe para donde hace falta un
+ * ícono sólido —favicon, ícono de aplicación, un fondo que no controlamos—,
+ * porque ahí una marca sin caja se pierde.
+ *
+ * El verde cambia entre las dos a propósito: el de tinta (#2c6446) se apaga
+ * sobre el tile oscuro y deja de leerse como "en pie".
  */
-export function Logotipo({ className = "h-9 w-9" }: { className?: string }) {
+export function Logotipo({
+  className = "h-9 w-9",
+  variante = "papel",
+}: {
+  className?: string;
+  variante?: "papel" | "tinta";
+}) {
+  const sobreTinta = variante === "tinta";
+
   return (
     <svg viewBox="0 0 40 40" className={className} aria-hidden>
-      <rect width="40" height="40" rx="3" fill="var(--tinta)" />
+      {sobreTinta ? (
+        <rect width="40" height="40" rx="3" fill="var(--tinta)" />
+      ) : (
+        <rect
+          width="40"
+          height="40"
+          rx="3"
+          fill="var(--papel-alto)"
+          stroke="var(--linea)"
+          strokeWidth="0.9"
+        />
+      )}
 
       {/* Suelo */}
-      <path d="M4 32.4h32" stroke="var(--papel)" strokeWidth="0.9" opacity="0.32" />
+      <path
+        d="M4 32.4h32"
+        stroke={sobreTinta ? "var(--papel)" : "var(--tinta)"}
+        strokeWidth="0.9"
+        opacity={sobreTinta ? 0.32 : 0.25}
+      />
 
       {/* Rayas de impulso: dan el movimiento y desaparecen limpio al reducir. */}
-      <g stroke="var(--papel)" strokeWidth="0.9" strokeLinecap="round" opacity="0.4">
+      <g
+        stroke={sobreTinta ? "var(--papel)" : "var(--tinta)"}
+        strokeWidth="0.9"
+        strokeLinecap="round"
+        opacity={sobreTinta ? 0.4 : 0.3}
+      >
         <path d="M4.5 9.5h3M3 13.5h2.4" />
       </g>
 
@@ -245,7 +283,14 @@ export function Logotipo({ className = "h-9 w-9" }: { className?: string }) {
         fill="var(--ocre)"
         transform="rotate(16 18.7 31)"
       />
-      <rect x="26.2" y="10" width="4.6" height="21" rx="0.9" fill="var(--verde-claro)" />
+      <rect
+        x="26.2"
+        y="10"
+        width="4.6"
+        height="21"
+        rx="0.9"
+        fill={sobreTinta ? "var(--verde-claro)" : "var(--verde)"}
+      />
     </svg>
   );
 }
