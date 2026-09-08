@@ -72,7 +72,7 @@ export const empresaDemo: Escenario["empresa"] = {
   nombre: "Flores del Oriente S.A.S.",
   sector: "Floricultura de exportación",
   usuarioDemo: {
-    nombre: "Santiago Arboleda",
+    nombre: "Camila Restrepo",
     cargo: "Jefe de Operaciones",
     correo: "operaciones@floresdeloriente.co",
   },
@@ -129,7 +129,7 @@ export const escenarioDemo: Escenario = {
           severidad: 0.25,
           procedencia: "ilustrativo",
           fuente: "Valor de demostración. El río Botello atraviesa el municipio y tiene historial de desbordamiento.",
-          fuenteUrl: "http://www.ideam.gov.co/web/pronosticos-y-alertas",
+          fuenteUrl: "https://www.ideam.gov.co/",
         },
         {
           amenaza: "sequia",
@@ -179,7 +179,7 @@ export const escenarioDemo: Escenario = {
           severidad: 0.28,
           procedencia: "ilustrativo",
           fuente: "Valor de demostración. Funza está en la llanura de inundación del río Bogotá.",
-          fuenteUrl: "http://www.ideam.gov.co/web/pronosticos-y-alertas",
+          fuenteUrl: "https://www.ideam.gov.co/",
         },
         {
           amenaza: "tormenta-electrica",

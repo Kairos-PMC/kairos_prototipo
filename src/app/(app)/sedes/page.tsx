@@ -4,7 +4,7 @@ import { pesosCompactos, porcentaje } from "@/lib/formato";
 import { IconoAmenaza } from "@/components/iconos";
 import { LeyendaProcedencia, Procedencia } from "@/components/procedencia";
 import { CabeceraLamina, Lamina, TituloPagina } from "@/components/ui";
-import { MapaSedes } from "@/components/mapa-sedes";
+import { CroquisSedes } from "@/components/croquis-sedes";
 
 export default function Sedes() {
   const resultado = calcular(escenarioDemo);
@@ -21,19 +21,16 @@ export default function Sedes() {
       <Lamina className="mb-4">
         <CabeceraLamina
           titulo="Dónde está tu exposición"
-          descripcion="El tamaño del punto es la pérdida esperada de cada sede. Dos sedes a 20 km de distancia, con exposiciones que no se parecen."
+          descripcion="El tamaño de la marca es la pérdida esperada de cada sede. Dos sedes a menos de 20 km, con exposiciones que no se parecen."
         />
         <div className="p-4">
-          <MapaSedes
+          <CroquisSedes
             puntos={escenarioDemo.sedes.map((s) => {
               const exp =
                 resultado.porSede.find((x) => x.sedeId === s.id)?.perdidaEsperada ?? 0;
               return {
-                id: s.id,
-                nombre: s.nombre,
-                detalle: `${s.municipio} · ${pesosCompactos(exp)} al año`,
-                lat: s.lat,
-                lon: s.lon,
+                sede: s,
+                detalle: `${pesosCompactos(exp)} al año`,
                 peso: maxExposicion > 0 ? exp / maxExposicion : 0,
               };
             })}

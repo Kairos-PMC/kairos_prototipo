@@ -12,6 +12,11 @@ interface Props {
   seleccionado: string | null;
   onAlternar: (id: string) => void;
   onSeleccionar: (id: string | null) => void;
+  /** Datos del cajetín. */
+  empresa: string;
+  lamina: string;
+  revision: string;
+  fecha: string;
 }
 
 const rellenoZona: Record<string, string> = {
@@ -41,6 +46,10 @@ export function PlanoPlanta({
   seleccionado,
   onAlternar,
   onSeleccionar,
+  empresa,
+  lamina,
+  revision,
+  fecha,
 }: Props) {
   const { ancho, alto, zonas, via, cota } = sede.plano;
   const porId = new Map(activos.map((a) => [a.id, a]));
@@ -56,7 +65,7 @@ export function PlanoPlanta({
 
   return (
     <svg
-      viewBox={`-5 -5 ${ancho + 10} ${alto + 16}`}
+      viewBox={`-5 -6 ${ancho + 10} ${alto + 28}`}
       className="w-full select-none"
       role="img"
       aria-label={`Plano de ${sede.nombre}`}
@@ -113,7 +122,7 @@ export function PlanoPlanta({
       </defs>
 
       {/* Papel milimetrado y marco del lote */}
-      <rect x="-5" y="-5" width={ancho + 10} height={alto + 16} fill="url(#mm)" />
+      <rect x="-5" y="-6" width={ancho + 10} height={alto + 28} fill="url(#mm)" />
       <rect
         x="0"
         y="0"
@@ -354,23 +363,161 @@ export function PlanoPlanta({
         );
       })}
 
-      {/* Cota inferior */}
-      <g stroke="var(--tinta-tenue)" strokeWidth="0.25">
-        <line x1="0" y1={alto + 6} x2={ancho} y2={alto + 6} />
-        <line x1="0" y1={alto + 4.6} x2="0" y2={alto + 7.4} />
-        <line x1={ancho} y1={alto + 4.6} x2={ancho} y2={alto + 7.4} />
+      {/* Norte */}
+      <g transform={`translate(${ancho - 6} 4)`} stroke="var(--tinta-media)">
+        <path
+          d="M0 -3.4 L2 3 L0 1.6 L-2 3 Z"
+          fill="var(--tinta-media)"
+          strokeWidth="0.2"
+        />
+        <text
+          y="6.6"
+          textAnchor="middle"
+          fontSize="2.3"
+          className="mono"
+          fill="var(--tinta-media)"
+          stroke="none"
+        >
+          N
+        </text>
       </g>
+
+      {/* Escala gráfica */}
+      <g stroke="var(--tinta-media)" strokeWidth="0.25">
+        <line x1="0" y1={alto + 5} x2="24" y2={alto + 5} />
+        <line x1="0" y1={alto + 3.8} x2="0" y2={alto + 6.2} />
+        <line x1="12" y1={alto + 4.4} x2="12" y2={alto + 5.6} />
+        <line x1="24" y1={alto + 3.8} x2="24" y2={alto + 6.2} />
+        <rect x="0" y={alto + 4.4} width="12" height="1.2" fill="var(--tinta-media)" stroke="none" />
+      </g>
+      <text x="0" y={alto + 9} fontSize="2" className="mono" fill="var(--tinta-tenue)">
+        0
+      </text>
+      <text x="24" y={alto + 9} fontSize="2" className="mono" fill="var(--tinta-tenue)">
+        ~100 m
+      </text>
+
+      {/* Cajetín — todo plano lleva uno. Aquí no es decoración: dice qué se está
+          mirando, de quién es y en qué revisión va. */}
+      <Cajetin
+        x={ancho - 52}
+        y={alto + 8}
+        ancho={52}
+        alto={13}
+        filas={[
+          [
+            { rotulo: "Proyecto", valor: "Kairos", ancho: 26 },
+            { rotulo: "Lámina", valor: lamina, ancho: 12 },
+            { rotulo: "Rev.", valor: revision, ancho: 14 },
+          ],
+          [
+            { rotulo: "Cliente", valor: empresa, ancho: 26 },
+            { rotulo: "Escala", valor: "s/e", ancho: 12 },
+            { rotulo: "Fecha", valor: fecha, ancho: 14 },
+          ],
+        ]}
+      />
+
       <text
-        x={ancho / 2}
-        y={alto + 10.5}
-        textAnchor="middle"
-        fontSize="2.1"
+        x="0"
+        y={alto + 19.5}
+        fontSize="2"
         className="mono"
         fill="var(--tinta-tenue)"
-        style={{ letterSpacing: "0.08em" }}
+        style={{ letterSpacing: "0.06em" }}
       >
         {cota.toUpperCase()}
       </text>
     </svg>
+  );
+}
+
+interface Celda {
+  rotulo: string;
+  valor: string;
+  ancho: number;
+}
+
+function Cajetin({
+  x,
+  y,
+  ancho,
+  alto,
+  filas,
+}: {
+  x: number;
+  y: number;
+  ancho: number;
+  alto: number;
+  filas: Celda[][];
+}) {
+  const altoFila = alto / filas.length;
+
+  return (
+    <g>
+      <rect
+        x={x}
+        y={y}
+        width={ancho}
+        height={alto}
+        fill="var(--papel-alto)"
+        stroke="var(--tinta-media)"
+        strokeWidth="0.35"
+      />
+      {filas.map((fila, f) => {
+        let acumulado = 0;
+        return (
+          <g key={f}>
+            {f > 0 && (
+              <line
+                x1={x}
+                y1={y + f * altoFila}
+                x2={x + ancho}
+                y2={y + f * altoFila}
+                stroke="var(--linea)"
+                strokeWidth="0.25"
+              />
+            )}
+            {fila.map((celda) => {
+              const cx = x + acumulado;
+              acumulado += celda.ancho;
+              return (
+                <g key={celda.rotulo}>
+                  {cx > x && (
+                    <line
+                      x1={cx}
+                      y1={y + f * altoFila}
+                      x2={cx}
+                      y2={y + (f + 1) * altoFila}
+                      stroke="var(--linea)"
+                      strokeWidth="0.25"
+                    />
+                  )}
+                  <text
+                    x={cx + 1}
+                    y={y + f * altoFila + 2.4}
+                    fontSize="1.6"
+                    className="mono"
+                    fill="var(--tinta-tenue)"
+                    style={{ letterSpacing: "0.08em" }}
+                  >
+                    {celda.rotulo.toUpperCase()}
+                  </text>
+                  <text
+                    x={cx + 1}
+                    y={y + f * altoFila + 5.2}
+                    fontSize="2.2"
+                    className="mono"
+                    fill="var(--tinta)"
+                  >
+                    {celda.valor}
+                  </text>
+                </g>
+              );
+            })}
+          </g>
+        );
+      })}
+    </g>
   );
 }

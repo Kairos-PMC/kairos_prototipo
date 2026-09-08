@@ -9,6 +9,7 @@ import { IconoActivo, IconoAmenaza } from "@/components/iconos";
 import { PlanoPlanta } from "@/components/plano-planta";
 import { Procedencia } from "@/components/procedencia";
 import { Lamina, Rotulo, TituloPagina } from "@/components/ui";
+import { DOCUMENTO } from "@/lib/documento";
 
 export default function Simulacion() {
   const [sedeId, setSedeId] = useState(escenarioDemo.sedes[0].id);
@@ -142,6 +143,10 @@ export default function Simulacion() {
               seleccionado={sobre}
               onAlternar={alternar}
               onSeleccionar={setSobre}
+              empresa={escenarioDemo.empresa.nombre}
+              lamina={sedeId === escenarioDemo.sedes[0].id ? "03-A" : "03-B"}
+              revision={DOCUMENTO.revision}
+              fecha={DOCUMENTO.fechaEmision}
             />
           </div>
 

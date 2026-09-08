@@ -32,11 +32,17 @@ export default function LoginPage() {
             perderías, y en qué te conviene invertir primero.
           </p>
 
-          <dl className="mt-12 grid max-w-lg grid-cols-3 gap-px border border-linea bg-linea">
-            <Cifra valor="7" etiqueta="fenómenos modelados" />
-            <Cifra valor="2" etiqueta="fuentes en vivo" />
-            <Cifra valor="13" etiqueta="activos en el plano" />
-          </dl>
+          {/* De la validación en campo, no de un argumento de venta. Es lo que
+              hizo cambiar el planteamiento del proyecto. */}
+          <figure className="mt-12 max-w-lg border-l-2 border-bermellon pl-5">
+            <blockquote className="text-[15px] leading-relaxed">
+              La empresa ya maneja análisis detallados de fenómenos naturales. El
+              problema es que son generales y no aplican a las regiones donde opera.
+            </blockquote>
+            <figcaption className="rotulo mt-3">
+              Hallazgo de la entrevista de validación · sector floricultor · ago 2026
+            </figcaption>
+          </figure>
         </div>
 
         <p className="mono text-[11px] leading-relaxed text-tinta-tenue">
@@ -87,17 +93,6 @@ export default function LoginPage() {
         </div>
       </section>
     </main>
-  );
-}
-
-function Cifra({ valor, etiqueta }: { valor: string; etiqueta: string }) {
-  return (
-    <div className="bg-papel px-4 py-4">
-      <dt className="display text-3xl text-azul">{valor}</dt>
-      <dd className="mono mt-1 text-[10px] uppercase leading-snug tracking-wider text-tinta-tenue">
-        {etiqueta}
-      </dd>
-    </div>
   );
 }
 

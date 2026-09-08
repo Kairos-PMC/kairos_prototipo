@@ -188,7 +188,7 @@ export const fuentesInstitucionales: FuenteInstitucional[] = [
     que: "Boletín diario de alertas por amenaza de deslizamientos (BADT), pronósticos y avisos hidrológicos por municipio.",
     porQueNoEstaEnVivo:
       "Publica en PDF y HTML, sin API documentada. Traerlo exige raspar el boletín y normalizarlo.",
-    url: "http://www.ideam.gov.co/web/pronosticos-y-alertas",
+    url: "https://www.ideam.gov.co/",
   },
   {
     sigla: "SGC",
