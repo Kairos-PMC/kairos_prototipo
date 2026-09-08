@@ -1,26 +1,29 @@
 // Alias: el componente exportado se llama igual que el tipo.
 import type { Procedencia as TipoProcedencia } from "@/domain/tipos";
 
-const estilos: Record<TipoProcedencia, { texto: string; clase: string; ayuda: string }> = {
+const estilos: Record<
+  TipoProcedencia,
+  { texto: string; color: string; ayuda: string }
+> = {
   vivo: {
     texto: "En vivo",
-    clase: "bg-[color-mix(in_srgb,var(--exito)_18%,transparent)] text-[var(--exito)] border-[color-mix(in_srgb,var(--exito)_35%,transparent)]",
+    color: "var(--verde)",
     ayuda: "Consultado ahora mismo a una API pública.",
   },
   referencia: {
     texto: "Referencia",
-    clase: "bg-[color-mix(in_srgb,var(--info)_18%,transparent)] text-[var(--info)] border-[color-mix(in_srgb,var(--info)_35%,transparent)]",
+    color: "var(--azul)",
     ayuda: "Valor real tomado de una fuente citada, no consultado en vivo.",
   },
   ilustrativo: {
     texto: "Ilustrativo",
-    clase: "bg-[color-mix(in_srgb,var(--acento)_18%,transparent)] text-[var(--acento)] border-[color-mix(in_srgb,var(--acento)_35%,transparent)]",
+    color: "var(--ocre)",
     ayuda: "Cifra inventada para la demostración. No proviene de ninguna fuente.",
   },
 };
 
 /**
- * Rótulo de procedencia. Acompaña a toda cifra en pantalla, sin excepción.
+ * Sello de procedencia. Acompaña a toda cifra en pantalla, sin excepción.
  *
  * Es la regla de honestidad del prototipo: un dato inventado y marcado es
  * legítimo en una demostración; uno inventado y presentado como oficial, no.
@@ -36,8 +39,18 @@ export function Procedencia({
   return (
     <span
       title={e.ayuda}
-      className={`inline-flex shrink-0 items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide ${e.clase} ${className}`}
+      className={`mono inline-flex shrink-0 items-center gap-1.5 rounded-sm border px-1.5 py-0.5 text-[10px] uppercase tracking-[0.1em] ${className}`}
+      style={{
+        color: e.color,
+        borderColor: `color-mix(in srgb, ${e.color} 40%, transparent)`,
+        background: `color-mix(in srgb, ${e.color} 8%, transparent)`,
+      }}
     >
+      <span
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ background: e.color }}
+        aria-hidden
+      />
       {e.texto}
     </span>
   );
@@ -45,14 +58,16 @@ export function Procedencia({
 
 export function LeyendaProcedencia() {
   return (
-    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-[var(--texto-tenue)]">
-      <span className="font-medium text-[var(--texto)]">¿De dónde salen las cifras?</span>
-      {(Object.keys(estilos) as TipoProcedencia[]).map((tipo) => (
-        <span key={tipo} className="inline-flex items-center gap-2">
-          <Procedencia tipo={tipo} />
-          {estilos[tipo].ayuda}
-        </span>
-      ))}
+    <div className="lamina rounded px-5 py-4">
+      <p className="rotulo">¿De dónde salen las cifras?</p>
+      <ul className="mt-3 space-y-2">
+        {(Object.keys(estilos) as TipoProcedencia[]).map((tipo) => (
+          <li key={tipo} className="flex flex-wrap items-center gap-2.5 text-sm">
+            <Procedencia tipo={tipo} />
+            <span className="text-tinta-media">{estilos[tipo].ayuda}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }

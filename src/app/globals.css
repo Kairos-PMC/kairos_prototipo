@@ -1,57 +1,158 @@
 @import "tailwindcss";
 
+/**
+ * Kairos — sistema visual.
+ *
+ * Dirección: documento técnico. La pieza central del producto es un plano de
+ * planta, así que la interfaz entera se comporta como el papel sobre el que ese
+ * plano está dibujado: fondo cálido, tinta oscura, líneas finas, y color usado
+ * solo cuando significa algo.
+ *
+ * Cada color tiene UN rol y no se usa para decorar:
+ *   azul     → estructura dibujada (muros, ejes, cotas)
+ *   bermellón→ falla: lo que cayó y lo que arrastra
+ *   ocre     → dinero en riesgo
+ *   verde    → dinero salvado
+ */
+
 :root {
-  --fondo: #0b1220;
-  --fondo-panel: #121b2e;
-  --fondo-panel-alto: #18243c;
-  --borde: #24334f;
-  --texto: #e8edf7;
-  --texto-tenue: #93a3c0;
-  --acento: #f0a500;
-  --acento-tenue: #6b4c00;
-  --peligro: #e5484d;
-  --exito: #30a46c;
-  --info: #4c8dff;
+  --papel: #f0ece1;
+  --papel-alto: #faf8f3;
+  --papel-hundido: #e6e1d4;
+
+  --tinta: #16191d;
+  --tinta-media: #55606d;
+  --tinta-tenue: #8b95a1;
+
+  --linea: #cdc6b5;
+  --linea-fina: #ded8ca;
+
+  --azul: #1b4a7a;
+  --azul-claro: #4a7ca8;
+  --bermellon: #c4372a;
+  --ocre: #a8710c;
+  --verde: #2c6446;
+
+  --sombra-papel: 0 1px 0 rgba(22, 25, 29, 0.04), 0 2px 8px rgba(22, 25, 29, 0.05);
 }
 
 @theme inline {
-  --color-fondo: var(--fondo);
-  --color-panel: var(--fondo-panel);
-  --color-panel-alto: var(--fondo-panel-alto);
-  --color-borde: var(--borde);
-  --color-texto: var(--texto);
-  --color-tenue: var(--texto-tenue);
-  --color-acento: var(--acento);
-  --color-peligro: var(--peligro);
-  --color-exito: var(--exito);
-  --color-info: var(--info);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --color-papel: var(--papel);
+  --color-papel-alto: var(--papel-alto);
+  --color-papel-hundido: var(--papel-hundido);
+  --color-linea-fina: var(--linea-fina);
+  --color-azul-claro: var(--azul-claro);
+  --color-tinta: var(--tinta);
+  --color-tinta-media: var(--tinta-media);
+  --color-tinta-tenue: var(--tinta-tenue);
+  --color-linea: var(--linea);
+  --color-azul: var(--azul);
+  --color-bermellon: var(--bermellon);
+  --color-ocre: var(--ocre);
+  --color-verde: var(--verde);
 }
 
-html,
-body {
-  background: var(--fondo);
-  color: var(--texto);
+html {
+  background: var(--papel);
 }
 
 body {
-  font-family: var(--font-sans);
+  color: var(--tinta);
+  font-family: var(--fuente-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+
+  /* Retícula de papel milimetrado: se ve al mirarla de cerca, no compite. */
+  background-color: var(--papel);
+  background-image:
+    linear-gradient(var(--linea-fina) 1px, transparent 1px),
+    linear-gradient(90deg, var(--linea-fina) 1px, transparent 1px);
+  background-size: 28px 28px;
+  background-position: -1px -1px;
 }
 
-/* Barras de scroll discretas, coherentes con el tema oscuro */
+/* ── Tipografía ──────────────────────────────────────────────────────────── */
+
+.display {
+  font-family: var(--fuente-serif), Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+
+.mono {
+  font-family: var(--fuente-mono), ui-monospace, monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Etiqueta de campo técnico: mayúsculas espaciadas, como en una lámina. */
+.rotulo {
+  font-family: var(--fuente-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--tinta-tenue);
+}
+
+/* ── Superficies ─────────────────────────────────────────────────────────── */
+
+.lamina {
+  background: var(--papel-alto);
+  border: 1px solid var(--linea);
+  box-shadow: var(--sombra-papel);
+}
+
+/* Esquina doblada: da materialidad sin recurrir a sombras genéricas. */
+.lamina-esquina {
+  position: relative;
+}
+.lamina-esquina::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 18px;
+  height: 18px;
+  background: linear-gradient(
+    225deg,
+    var(--papel) 0 50%,
+    var(--linea) 50% calc(50% + 1px),
+    var(--papel-alto) calc(50% + 1px)
+  );
+}
+
+/* ── Detalles ────────────────────────────────────────────────────────────── */
+
+::selection {
+  background: color-mix(in srgb, var(--ocre) 28%, transparent);
+}
+
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--fondo);
+  background: var(--papel-hundido);
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--borde);
-  border-radius: 5px;
+  background: var(--linea);
+  border: 3px solid var(--papel-hundido);
+  border-radius: 6px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #33456b;
+  background: var(--tinta-tenue);
+}
+
+a {
+  text-underline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .aparece {
+    animation: aparece 0.45s cubic-bezier(0.2, 0.7, 0.3, 1) backwards;
+  }
+  @keyframes aparece {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
 }

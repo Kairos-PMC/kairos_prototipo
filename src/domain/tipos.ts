@@ -67,7 +67,9 @@ export interface Activo {
   vulnerabilidad: Partial<Record<AmenazaId, number>>;
   /** Días fuera de servicio ante daño total. */
   diasReparacion: number;
-  /** Posición en el plano esquemático de la sede, en porcentaje (0..100). */
+  /** Zona del plano donde vive. */
+  zonaId: string;
+  /** Punto donde se dibuja su marca, en unidades del plano. */
   plano: { x: number; y: number };
 }
 
@@ -76,6 +78,28 @@ export interface Dependencia {
   origen: string;
   objetivo: string;
   nota: string;
+}
+
+/** Huella de una edificación o superficie en el plano de la sede. */
+export interface Zona {
+  id: string;
+  nombre: string;
+  /** Rectángulo en unidades del plano (ver `Plano.ancho` / `Plano.alto`). */
+  x: number;
+  y: number;
+  ancho: number;
+  alto: number;
+  tipo: "edificacion" | "cultivo" | "patio" | "agua";
+}
+
+export interface Plano {
+  ancho: number;
+  alto: number;
+  zonas: Zona[];
+  /** Trazado de la vía interna, como path de SVG. */
+  via: string;
+  /** Texto de la cota que se dibuja bajo el plano. */
+  cota: string;
 }
 
 export interface Sede {
@@ -87,6 +111,7 @@ export interface Sede {
   lon: number;
   descripcion: string;
   amenazas: PerfilAmenaza[];
+  plano: Plano;
 }
 
 export interface Medida {

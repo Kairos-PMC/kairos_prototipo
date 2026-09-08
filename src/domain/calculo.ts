@@ -247,6 +247,73 @@ export function calcular(escenario: Escenario): Resultado {
   };
 }
 
+export interface SimulacionCaida {
+  caidos: string[];
+  /** Los que caen por dependencia, sin haber recibido daño. */
+  arrastrados: string[];
+  fueraDeServicio: string[];
+  margenDiarioDetenido: number;
+  /** Fracción del margen diario de toda la empresa que se detiene. 0..1 */
+  fraccionOperacion: number;
+  danioFisico: number;
+  diasEstimados: number;
+  perdidaEvento: number;
+}
+
+/**
+ * Simulación operativa: "si HOY cae esto, ¿qué pasa?".
+ *
+ * Distinta de `calcular()`, que da una pérdida esperada anual promediada por
+ * probabilidades. Aquí no hay probabilidad: el evento ya ocurrió y lo que se
+ * responde es el alcance. Es la pregunta que hace un jefe de planta, no la que
+ * hace un actuario.
+ *
+ * Supuesto explícito: un activo marcado como caído se da por perdido por
+ * completo. Es el peor caso de ese activo, no su daño esperado.
+ */
+export function simularCaida(
+  escenario: Escenario,
+  caidos: string[],
+): SimulacionCaida {
+  const porId = new Map(escenario.activos.map((a) => [a.id, a]));
+
+  const arrastrados = new Set<string>();
+  for (const id of caidos) {
+    const sede = porId.get(id)?.sedeId;
+    for (const hijo of descendientes(id, escenario.dependencias)) {
+      if (caidos.includes(hijo)) continue;
+      if (porId.get(hijo)?.sedeId !== sede) continue;
+      arrastrados.add(hijo);
+    }
+  }
+
+  const fueraDeServicio = [...caidos, ...arrastrados];
+  const margenDiarioDetenido = fueraDeServicio.reduce(
+    (s, id) => s + (porId.get(id)?.margenDiario ?? 0),
+    0,
+  );
+  const margenTotal = escenario.activos.reduce((s, a) => s + a.margenDiario, 0);
+  const danioFisico = caidos.reduce(
+    (s, id) => s + (porId.get(id)?.valorReposicion ?? 0),
+    0,
+  );
+  const diasEstimados = caidos.reduce(
+    (max, id) => Math.max(max, porId.get(id)?.diasReparacion ?? 0),
+    0,
+  );
+
+  return {
+    caidos,
+    arrastrados: [...arrastrados],
+    fueraDeServicio,
+    margenDiarioDetenido,
+    fraccionOperacion: margenTotal > 0 ? margenDiarioDetenido / margenTotal : 0,
+    danioFisico,
+    diasEstimados,
+    perdidaEvento: danioFisico + margenDiarioDetenido * diasEstimados,
+  };
+}
+
 export interface MedidaEvaluada {
   medida: Medida;
   perdidaEvitada: number;

@@ -1,8 +1,9 @@
 import { PRESUPUESTO_INICIAL, amenazaPorId, escenarioDemo } from "@/data/empresa-demo";
 import { calcular, priorizar } from "@/domain/calculo";
 import { formatearPesos, numero, pesosCompactos, porcentaje } from "@/lib/formato";
+import { IconoAmenaza } from "@/components/iconos";
 import { Procedencia } from "@/components/procedencia";
-import { EncabezadoPanel, Panel, TituloPagina } from "@/components/ui";
+import { CabeceraLamina, Lamina, TituloPagina } from "@/components/ui";
 
 export default function Reporte() {
   const r = calcular(escenarioDemo);
@@ -17,18 +18,19 @@ export default function Reporte() {
   return (
     <>
       <TituloPagina
+        rotulo="Lámina 05"
         titulo="Reporte"
         bajada="El documento que se lleva al comité. Todo lo que sustenta cada cifra está aquí — porque la pregunta que decide la inversión no es cuánto perdería, sino de dónde salió ese número."
         extra={
-          <p className="text-sm text-[var(--texto-tenue)]">
+          <p className="text-sm text-tinta-media">
             Generado el {hoy}
           </p>
         }
       />
 
       {/* Resumen ejecutivo */}
-      <Panel>
-        <EncabezadoPanel
+      <Lamina>
+        <CabeceraLamina
           titulo="Resumen ejecutivo"
           descripcion={`${escenarioDemo.empresa.nombre} · ${escenarioDemo.empresa.sector}`}
           extra={<Procedencia tipo="ilustrativo" />}
@@ -48,7 +50,7 @@ export default function Reporte() {
           </p>
           <p>
             La pérdida esperada es de{" "}
-            <strong className="text-[var(--acento)]">
+            <strong className="text-ocre">
               {formatearPesos(r.perdidaEsperadaAnual)} al año
             </strong>
             . De esa cifra, {porcentaje(r.danioFisicoTotal / r.perdidaEsperadaAnual)}{" "}
@@ -63,22 +65,22 @@ export default function Reporte() {
             concentran el 80 % de esa pérdida. Con un presupuesto de{" "}
             {formatearPesos(plan.presupuesto)} se pueden ejecutar{" "}
             {seleccionadas.length} medidas que evitan{" "}
-            <strong className="text-[var(--exito)]">
+            <strong className="text-verde">
               {formatearPesos(plan.perdidaEvitadaTotal)} al año
             </strong>
             , recuperando la inversión en{" "}
             {numero(plan.inversionTotal / plan.perdidaEvitadaTotal, 1)} años.
           </p>
         </div>
-      </Panel>
+      </Lamina>
 
       {/* Plan recomendado */}
-      <Panel className="mt-4">
-        <EncabezadoPanel titulo="Plan de inversión recomendado" />
+      <Lamina className="mt-4">
+        <CabeceraLamina titulo="Plan de inversión recomendado" />
         <div className="overflow-x-auto p-5">
           <table className="w-full min-w-[620px] text-sm">
             <thead>
-              <tr className="border-b border-[var(--borde)] text-left text-xs uppercase tracking-wide text-[var(--texto-tenue)]">
+              <tr className="border-b border-linea text-left text-xs uppercase tracking-wide text-tinta-media">
                 <th className="pb-2 font-medium">#</th>
                 <th className="pb-2 font-medium">Medida</th>
                 <th className="pb-2 text-right font-medium">Inversión</th>
@@ -90,19 +92,19 @@ export default function Reporte() {
               {seleccionadas.map((m) => (
                 <tr
                   key={m.medida.id}
-                  className="border-b border-[var(--borde)] last:border-0"
+                  className="border-b border-linea last:border-0"
                 >
-                  <td className="py-2.5 pr-3 tabular-nums text-[var(--texto-tenue)]">
+                  <td className="py-2.5 pr-3 mono text-tinta-media">
                     {m.orden}
                   </td>
                   <td className="py-2.5 pr-4">{m.medida.nombre}</td>
-                  <td className="py-2.5 text-right tabular-nums">
+                  <td className="py-2.5 text-right mono">
                     {pesosCompactos(m.costo)}
                   </td>
-                  <td className="py-2.5 text-right tabular-nums text-[var(--exito)]">
+                  <td className="py-2.5 text-right mono text-verde">
                     {pesosCompactos(m.perdidaEvitada)}
                   </td>
-                  <td className="py-2.5 text-right tabular-nums">
+                  <td className="py-2.5 text-right mono">
                     {numero(m.aniosRetorno, 1)} años
                   </td>
                 </tr>
@@ -110,31 +112,31 @@ export default function Reporte() {
               <tr className="font-semibold">
                 <td />
                 <td className="py-2.5">Total</td>
-                <td className="py-2.5 text-right tabular-nums">
+                <td className="py-2.5 text-right mono">
                   {pesosCompactos(plan.inversionTotal)}
                 </td>
-                <td className="py-2.5 text-right tabular-nums text-[var(--exito)]">
+                <td className="py-2.5 text-right mono text-verde">
                   {pesosCompactos(plan.perdidaEvitadaTotal)}
                 </td>
-                <td className="py-2.5 text-right tabular-nums">
+                <td className="py-2.5 text-right mono">
                   {numero(plan.inversionTotal / plan.perdidaEvitadaTotal, 1)} años
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </Panel>
+      </Lamina>
 
       {/* Supuestos */}
-      <Panel className="mt-4">
-        <EncabezadoPanel
+      <Lamina className="mt-4">
+        <CabeceraLamina
           titulo="Supuestos y fuentes"
           descripcion="Cada probabilidad y severidad usada en el cálculo, con su procedencia. Si un supuesto no te convence, cámbialo: la cifra se mueve con él."
         />
         <div className="overflow-x-auto p-5">
           <table className="w-full min-w-[680px] text-sm">
             <thead>
-              <tr className="border-b border-[var(--borde)] text-left text-xs uppercase tracking-wide text-[var(--texto-tenue)]">
+              <tr className="border-b border-linea text-left text-xs uppercase tracking-wide text-tinta-media">
                 <th className="pb-2 font-medium">Sede</th>
                 <th className="pb-2 font-medium">Fenómeno</th>
                 <th className="pb-2 text-right font-medium">Prob. anual</th>
@@ -147,24 +149,23 @@ export default function Reporte() {
                 sede.amenazas.map((p) => (
                   <tr
                     key={`${sede.id}-${p.amenaza}`}
-                    className="border-b border-[var(--borde)] align-top last:border-0"
+                    className="border-b border-linea align-top last:border-0"
                   >
-                    <td className="py-2.5 pr-4 text-[var(--texto-tenue)]">
+                    <td className="py-2.5 pr-4 text-tinta-media">
                       {sede.municipio}
                     </td>
                     <td className="py-2.5 pr-4">
-                      {amenazaPorId.get(p.amenaza)?.simbolo}{" "}
-                      {amenazaPorId.get(p.amenaza)?.nombre}
+                      <span className="inline-flex items-center gap-1.5"><IconoAmenaza id={p.amenaza} className="h-3.5 w-3.5 text-azul" />{amenazaPorId.get(p.amenaza)?.nombre}</span>
                     </td>
-                    <td className="py-2.5 text-right tabular-nums">
+                    <td className="py-2.5 text-right mono">
                       {porcentaje(p.probabilidadAnual)}
                     </td>
-                    <td className="py-2.5 text-right tabular-nums">
+                    <td className="py-2.5 text-right mono">
                       {porcentaje(p.severidad)}
                     </td>
                     <td className="max-w-md py-2.5 pl-4">
                       <Procedencia tipo={p.procedencia} />
-                      <p className="mt-1 text-xs leading-relaxed text-[var(--texto-tenue)]">
+                      <p className="mt-1 text-xs leading-relaxed text-tinta-media">
                         {p.fuente}
                       </p>
                     </td>
@@ -174,13 +175,13 @@ export default function Reporte() {
             </tbody>
           </table>
         </div>
-      </Panel>
+      </Lamina>
 
       {/* Metodología */}
-      <Panel className="mt-4">
-        <EncabezadoPanel titulo="Cómo se calculó" />
+      <Lamina className="mt-4">
+        <CabeceraLamina titulo="Cómo se calculó" />
         <div className="space-y-4 p-5 text-sm leading-relaxed">
-          <pre className="overflow-x-auto rounded-lg border border-[var(--borde)] bg-[var(--fondo)] p-4 font-mono text-xs text-[var(--texto-tenue)]">
+          <pre className="overflow-x-auto rounded-lg border border-linea bg-papel-hundido p-4 font-mono text-xs text-tinta-media">
 {`daño físico       = valor de reposición × severidad × vulnerabilidad
 días fuera        = días de reparación × severidad × vulnerabilidad
 lucro cesante     = (margen propio + margen de lo que depende) × días fuera
@@ -194,14 +195,14 @@ pérdida esperada  = probabilidad anual × (daño físico + lucro cesante)`}
             y el plan quedaría sobreestimado.
           </p>
         </div>
-      </Panel>
+      </Lamina>
 
       {/* Límites */}
-      <Panel className="mt-4 border-[color-mix(in_srgb,var(--acento)_35%,transparent)]">
-        <EncabezadoPanel titulo="Límites de este análisis" />
-        <ul className="space-y-3 p-5 text-sm leading-relaxed text-[var(--texto-tenue)]">
+      <Lamina className="mt-4 border-[color-mix(in_srgb,var(--ocre)_45%,transparent)]">
+        <CabeceraLamina titulo="Límites de este análisis" />
+        <ul className="space-y-3 p-5 text-sm leading-relaxed text-tinta-media">
           <li>
-            <strong className="text-[var(--texto)]">
+            <strong className="text-tinta">
               Kairos informa decisiones, no las garantiza.
             </strong>{" "}
             El análisis estima pérdidas esperadas bajo supuestos declarados. No predice
@@ -209,7 +210,7 @@ pérdida esperada  = probabilidad anual × (daño físico + lucro cesante)`}
             con la precisión que eso exigiría.
           </li>
           <li>
-            <strong className="text-[var(--texto)]">
+            <strong className="text-tinta">
               El resultado es un promedio, no un escenario.
             </strong>{" "}
             La pérdida esperada anual no dice cuánto se pierde en el peor año. Un
@@ -217,7 +218,7 @@ pérdida esperada  = probabilidad anual × (daño físico + lucro cesante)`}
             pérdida, no solo su valor central.
           </li>
           <li>
-            <strong className="text-[var(--texto)]">
+            <strong className="text-tinta">
               Las cifras de esta demostración son ilustrativas.
             </strong>{" "}
             Las probabilidades y severidades no provienen de series históricas. Para un
@@ -225,7 +226,7 @@ pérdida esperada  = probabilidad anual × (daño físico + lucro cesante)`}
             y las estaciones del IDEAM cercanas a cada sede.
           </li>
         </ul>
-      </Panel>
+      </Lamina>
     </>
   );
 }

@@ -1,275 +1,485 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import { amenazaPorId, escenarioDemo } from "@/data/empresa-demo";
-import { calcular } from "@/domain/calculo";
+import { calcular, simularCaida } from "@/domain/calculo";
+import { descendientes } from "@/domain/calculo";
 import { formatearPesos, numero, pesosCompactos, porcentaje } from "@/lib/formato";
-import { LeyendaProcedencia, Procedencia } from "@/components/procedencia";
-import {
-  EncabezadoPanel,
-  Metrica,
-  Panel,
-  TituloPagina,
-} from "@/components/ui";
+import { IconoActivo, IconoAmenaza } from "@/components/iconos";
+import { PlanoPlanta } from "@/components/plano-planta";
+import { Procedencia } from "@/components/procedencia";
+import { Lamina, Rotulo, TituloPagina } from "@/components/ui";
 
 export default function Simulacion() {
-  const r = calcular(escenarioDemo);
-  const maxAmenaza = Math.max(...r.porAmenaza.map((a) => a.perdidaEsperada));
+  const [sedeId, setSedeId] = useState(escenarioDemo.sedes[0].id);
+  const [caidos, setCaidos] = useState<string[]>([]);
+  const [sobre, setSobre] = useState<string | null>(null);
 
-  // Para el destacado no interesa el activo con más pérdida, sino aquel cuya
-  // pérdida la sufren OTROS: es lo que un inventario asegurado no ve.
-  const eslabon = [...r.porActivo].sort(
-    (a, b) => b.lucroCesantePropagado - a.lucroCesantePropagado,
-  )[0];
+  const sede = escenarioDemo.sedes.find((s) => s.id === sedeId)!;
+  const activosSede = escenarioDemo.activos.filter((a) => a.sedeId === sedeId);
+  const dependenciasSede = escenarioDemo.dependencias.filter(
+    (d) => escenarioDemo.activos.find((a) => a.id === d.origen)?.sedeId === sedeId,
+  );
+
+  const evento = useMemo(() => simularCaida(escenarioDemo, caidos), [caidos]);
+  const anual = useMemo(() => calcular(escenarioDemo), []);
+
+  const setCaidosSet = new Set(evento.caidos);
+  const setArrastrados = new Set(evento.arrastrados);
+
+  const alternar = (id: string) =>
+    setCaidos((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+
+  const activoSobre = escenarioDemo.activos.find((a) => a.id === sobre);
+  const arrastreDeSobre = activoSobre
+    ? descendientes(activoSobre.id, escenarioDemo.dependencias).filter(
+        (id) =>
+          escenarioDemo.activos.find((a) => a.id === id)?.sedeId ===
+          activoSobre.sedeId,
+      )
+    : [];
 
   return (
     <>
       <TituloPagina
-        titulo="Simulación"
-        bajada="Qué pasa si los fenómenos de cada sede golpean tus activos. La cifra no es solo el daño físico: incluye lo que dejas de producir mientras reparas, y lo que dejan de producir los activos que dependen del que cayó."
+        rotulo="Lámina 03"
+        titulo="Simulación sobre planta"
+        bajada="Este es el plano de la sede. Haz clic sobre cualquier instalación para darla por caída: el dibujo marca en rojo lo que recibió el golpe y en ocre lo que deja de operar sin haberlo recibido. Las cifras de arriba se recalculan en el momento."
+        extra={
+          <div className="flex overflow-hidden rounded border border-linea">
+            {escenarioDemo.sedes.map((s) => (
+              <button
+                key={s.id}
+                onClick={() => {
+                  setSedeId(s.id);
+                  setCaidos([]);
+                }}
+                className={`mono px-3 py-2 text-xs tracking-wide transition ${
+                  s.id === sedeId
+                    ? "bg-tinta text-papel"
+                    : "bg-papel-alto text-tinta-media hover:bg-papel"
+                }`}
+              >
+                {s.municipio.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        }
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Metrica
-          etiqueta="Pérdida esperada al año"
-          valor={pesosCompactos(r.perdidaEsperadaAnual)}
-          detalle={formatearPesos(r.perdidaEsperadaAnual)}
-          acento
-          extra={<Procedencia tipo="ilustrativo" />}
+      {/* Lectura en vivo del evento */}
+      <div className="grid gap-px overflow-hidden rounded border border-linea bg-linea sm:grid-cols-2 lg:grid-cols-4">
+        <Lectura
+          rotulo="Fuera de servicio"
+          valor={`${evento.fueraDeServicio.length}`}
+          unidad={`de ${activosSede.length + (escenarioDemo.activos.length - activosSede.length)} activos`}
+          detalle={
+            evento.arrastrados.length > 0
+              ? `${evento.arrastrados.length} sin recibir daño`
+              : "Ninguno arrastrado"
+          }
+          alerta={evento.arrastrados.length > 0}
         />
-        <Metrica
-          etiqueta="Activos comprometidos"
-          valor={`${r.activosComprometidos} de ${escenarioDemo.activos.length}`}
-          detalle="Concentran el 80 % de la pérdida. Son los que hay que atender primero."
+        <Lectura
+          rotulo="Operación detenida"
+          valor={porcentaje(evento.fraccionOperacion)}
+          unidad="del margen diario"
+          detalle={`${pesosCompactos(evento.margenDiarioDetenido)} por día`}
+          alerta={evento.fraccionOperacion > 0.4}
         />
-        <Metrica
-          etiqueta="Daño físico"
-          valor={pesosCompactos(r.danioFisicoTotal)}
-          detalle={`${porcentaje(
-            r.danioFisicoTotal / r.perdidaEsperadaAnual,
-          )} del total — reponer lo dañado`}
+        <Lectura
+          rotulo="Reposición"
+          valor={pesosCompactos(evento.danioFisico)}
+          unidad="daño físico"
+          detalle={
+            evento.diasEstimados > 0
+              ? `${evento.diasEstimados} días de reparación`
+              : "Sin daño físico"
+          }
         />
-        <Metrica
-          etiqueta="Lucro cesante"
-          valor={pesosCompactos(r.lucroCesanteTotal)}
-          detalle={`${porcentaje(
-            r.lucroCesanteTotal / r.perdidaEsperadaAnual,
-          )} del total — lo que dejas de producir`}
+        <Lectura
+          rotulo="Costo del evento"
+          valor={pesosCompactos(evento.perdidaEvento)}
+          unidad="reposición + lucro cesante"
+          detalle={
+            caidos.length === 0
+              ? "Marca una instalación en el plano"
+              : formatearPesos(evento.perdidaEvento)
+          }
+          destacada
         />
       </div>
 
-      <div className="mt-4 rounded-xl border border-[color-mix(in_srgb,var(--acento)_30%,transparent)] bg-[color-mix(in_srgb,var(--acento)_7%,transparent)] p-5">
-        <p className="text-sm leading-relaxed">
-          <span className="font-medium text-[var(--acento)]">
-            Lo que un inventario asegurado no te dice:
-          </span>{" "}
-          <span className="font-medium">{eslabon.activo.nombre}</span> vale apenas{" "}
-          {pesosCompactos(eslabon.activo.valorReposicion)} — de los más baratos de la
-          empresa. Pero al caer arrastra{" "}
-          <span className="font-medium">
-            {eslabon.arrastra.length}{" "}
-            {eslabon.arrastra.length === 1 ? "activo" : "activos"}
-          </span>{" "}
-          que dejan de operar sin haber sufrido un solo golpe, y eso solo cuesta{" "}
-          <span className="font-medium text-[var(--acento)]">
-            {pesosCompactos(eslabon.lucroCesantePropagado)}
-          </span>{" "}
-          al año. Es{" "}
-          {porcentaje(eslabon.lucroCesantePropagado / eslabon.perdidaEsperada)} de toda
-          su pérdida esperada, y ninguna póliza sobre el activo la cubre.
-        </p>
-      </div>
-
-      <div className="mt-4 grid gap-4 lg:grid-cols-3">
-        {/* Por amenaza */}
-        <Panel className="lg:col-span-1">
-          <EncabezadoPanel titulo="Por fenómeno" />
-          <div className="space-y-3 p-5">
-            {r.porAmenaza.map((a) => {
-              const info = amenazaPorId.get(a.amenaza);
-              return (
-                <div key={a.amenaza}>
-                  <div className="flex items-baseline justify-between gap-2 text-sm">
-                    <span className="flex items-center gap-2">
-                      <span aria-hidden>{info?.simbolo}</span>
-                      {info?.nombre}
-                    </span>
-                    <span className="tabular-nums text-[var(--texto-tenue)]">
-                      {pesosCompactos(a.perdidaEsperada)}
-                    </span>
-                  </div>
-                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[var(--fondo-panel-alto)]">
-                    <div
-                      className="h-full rounded-full bg-[var(--acento)]"
-                      style={{
-                        width: `${(a.perdidaEsperada / maxAmenaza) * 100}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+      <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_19rem]">
+        {/* El plano */}
+        <Lamina className="lamina-esquina">
+          <div className="flex items-baseline justify-between border-b border-linea px-5 py-3">
+            <div>
+              <h2 className="display text-lg">{sede.nombre}</h2>
+              <p className="mono mt-0.5 text-xs text-tinta-tenue">
+                {sede.municipio}, {sede.departamento}
+              </p>
+            </div>
+            {caidos.length > 0 && (
+              <button
+                onClick={() => setCaidos([])}
+                className="mono rounded border border-linea px-2.5 py-1 text-[11px] uppercase tracking-wide text-tinta-media transition hover:border-tinta-media hover:text-tinta"
+              >
+                Restablecer
+              </button>
+            )}
           </div>
-        </Panel>
 
-        {/* Por sede */}
-        <Panel className="lg:col-span-2">
-          <EncabezadoPanel
-            titulo="Por sede"
-            descripcion="La misma empresa, dos exposiciones distintas. Un boletín regional las trataría igual."
-          />
-          <div className="grid gap-px bg-[var(--borde)] sm:grid-cols-2">
-            {r.porSede.map((s) => {
-              const sede = escenarioDemo.sedes.find((x) => x.id === s.sedeId)!;
-              return (
-                <div key={s.sedeId} className="bg-[var(--fondo-panel)] p-5">
-                  <p className="font-medium">{sede.nombre}</p>
-                  <p className="text-xs text-[var(--texto-tenue)]">
-                    {sede.municipio}, {sede.departamento}
-                  </p>
-                  <p className="mt-3 text-2xl font-semibold tabular-nums text-[var(--acento)]">
-                    {pesosCompactos(s.perdidaEsperada)}
-                  </p>
-                  <p className="mt-1 text-xs text-[var(--texto-tenue)]">
-                    {porcentaje(s.perdidaEsperada / r.perdidaEsperadaAnual)} de la
-                    exposición total
-                  </p>
-                  <div className="mt-4 flex flex-wrap gap-1.5">
-                    {sede.amenazas.map((p) => (
-                      <span
-                        key={p.amenaza}
-                        title={`${porcentaje(p.probabilidadAnual)} de probabilidad anual`}
-                        className="rounded border border-[var(--borde)] bg-[var(--fondo-panel-alto)] px-2 py-0.5 text-[11px] text-[var(--texto-tenue)]"
-                      >
-                        {amenazaPorId.get(p.amenaza)?.simbolo}{" "}
-                        {amenazaPorId.get(p.amenaza)?.nombre}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
+          <div className="p-3">
+            <PlanoPlanta
+              sede={sede}
+              activos={activosSede}
+              dependencias={dependenciasSede}
+              caidos={setCaidosSet}
+              arrastrados={setArrastrados}
+              seleccionado={sobre}
+              onAlternar={alternar}
+              onSeleccionar={setSobre}
+            />
           </div>
-        </Panel>
-      </div>
 
-      {/* Detalle por activo */}
-      <Panel className="mt-4">
-        <EncabezadoPanel
-          titulo="Detalle por activo"
-          descripcion="Cada fila abre su desglose: de qué fenómeno viene la pérdida y cuánto de ella es arrastre de otros activos."
-          extra={<Procedencia tipo="ilustrativo" />}
-        />
-        <div className="divide-y divide-[var(--borde)]">
-          {r.porActivo.map((fila) => (
-            <details key={fila.activo.id} className="group">
-              <summary className="flex cursor-pointer list-none items-center gap-4 px-5 py-3 hover:bg-[var(--fondo-panel-alto)]">
-                <svg
-                  viewBox="0 0 12 12"
-                  className="h-3 w-3 shrink-0 text-[var(--texto-tenue)] transition group-open:rotate-90"
-                  aria-hidden
-                >
-                  <path d="M4 2l4 4-4 4" fill="none" stroke="currentColor" strokeWidth="2" />
-                </svg>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{fila.activo.nombre}</p>
-                  <p className="text-xs text-[var(--texto-tenue)]">
-                    {fila.sede.municipio} · valor{" "}
-                    {pesosCompactos(fila.activo.valorReposicion)}
-                    {fila.arrastra.length > 0 && (
-                      <>
-                        {" "}
-                        · <span className="text-[var(--acento)]">
-                          arrastra {fila.arrastra.length}
-                        </span>
-                      </>
-                    )}
-                  </p>
-                </div>
-                <div className="hidden w-40 shrink-0 sm:block">
-                  <div className="h-1.5 overflow-hidden rounded-full bg-[var(--fondo-panel-alto)]">
-                    <div
-                      className="h-full rounded-full bg-[var(--acento)]"
-                      style={{
-                        width: `${
-                          (fila.perdidaEsperada / r.porActivo[0].perdidaEsperada) * 100
-                        }%`,
-                      }}
-                    />
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-linea px-5 py-3">
+            <Leyenda color="var(--azul)" texto="En operación" />
+            <Leyenda color="var(--bermellon)" texto="Caído — recibió el golpe" />
+            <Leyenda color="var(--ocre)" texto="Arrastrado — sin daño, sin operar" />
+          </div>
+        </Lamina>
+
+        {/* Panel lateral */}
+        <div className="space-y-4">
+          <Lamina>
+            <div className="border-b border-linea px-4 py-3">
+              <Rotulo>{activoSobre ? "Instalación" : "Qué hay en la sede"}</Rotulo>
+            </div>
+
+            {activoSobre ? (
+              <div className="space-y-4 p-4">
+                <div className="flex items-start gap-3">
+                  <span className="text-azul">
+                    <IconoActivo tipo={activoSobre.tipo} className="h-6 w-6" />
+                  </span>
+                  <div>
+                    <p className="font-medium leading-tight">{activoSobre.nombre}</p>
+                    <p className="mono mt-1 text-xs text-tinta-tenue">
+                      {
+                        sede.plano.zonas.find((z) => z.id === activoSobre.zonaId)
+                          ?.nombre
+                      }
+                    </p>
                   </div>
                 </div>
-                <p className="w-28 shrink-0 text-right text-sm font-semibold tabular-nums">
-                  {pesosCompactos(fila.perdidaEsperada)}
-                </p>
-              </summary>
 
-              <div className="bg-[var(--fondo)] px-5 py-4 pl-12">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="text-left text-xs uppercase tracking-wide text-[var(--texto-tenue)]">
-                      <th className="pb-2 font-medium">Fenómeno</th>
-                      <th className="pb-2 text-right font-medium">Daño físico</th>
-                      <th className="pb-2 text-right font-medium">Lucro cesante</th>
-                      <th className="pb-2 text-right font-medium">Arrastre</th>
-                      <th className="pb-2 text-right font-medium">Días fuera</th>
-                      <th className="pb-2 text-right font-medium">Pérdida esperada</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-[var(--texto-tenue)]">
-                    {fila.porAmenaza.map((a) => (
-                      <tr key={a.amenaza}>
-                        <td className="py-1.5 text-[var(--texto)]">
-                          {amenazaPorId.get(a.amenaza)?.simbolo}{" "}
-                          {amenazaPorId.get(a.amenaza)?.nombre}
-                        </td>
-                        <td className="py-1.5 text-right tabular-nums">
-                          {pesosCompactos(a.danioFisico)}
-                        </td>
-                        <td className="py-1.5 text-right tabular-nums">
-                          {pesosCompactos(a.lucroCesantePropio)}
-                        </td>
-                        <td className="py-1.5 text-right tabular-nums">
-                          {a.lucroCesantePropagado > 0
-                            ? pesosCompactos(a.lucroCesantePropagado)
-                            : "—"}
-                        </td>
-                        <td className="py-1.5 text-right tabular-nums">
-                          {numero(a.diasFuera, 1)}
-                        </td>
-                        <td className="py-1.5 text-right font-medium tabular-nums text-[var(--texto)]">
-                          {pesosCompactos(a.perdidaEsperada)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                <dl className="space-y-2 text-sm">
+                  <Fila
+                    termino="Reposición"
+                    valor={pesosCompactos(activoSobre.valorReposicion)}
+                  />
+                  <Fila
+                    termino="Aporta al día"
+                    valor={
+                      activoSobre.margenDiario > 0
+                        ? pesosCompactos(activoSobre.margenDiario)
+                        : "no produce directo"
+                    }
+                  />
+                  <Fila
+                    termino="Reparación"
+                    valor={`${activoSobre.diasReparacion} días`}
+                  />
+                </dl>
 
-                <p className="mt-4 max-w-3xl text-xs leading-relaxed text-[var(--texto-tenue)]">
-                  <span className="font-medium text-[var(--texto)]">De dónde sale:</span>{" "}
-                  valor de reposición {formatearPesos(fila.activo.valorReposicion)} ×
-                  severidad del fenómeno × vulnerabilidad del activo, más{" "}
-                  {formatearPesos(fila.activo.margenDiario)} por día fuera de servicio
-                  {fila.arrastra.length > 0 && (
-                    <>
-                      , más el margen de{" "}
-                      {fila.arrastra
-                        .map(
-                          (id) =>
-                            escenarioDemo.activos.find((a) => a.id === id)?.nombre,
-                        )
-                        .join(", ")}
-                      , que no operan sin este activo
-                    </>
-                  )}
-                  . Todo ponderado por la probabilidad anual del fenómeno en{" "}
-                  {fila.sede.municipio}.
+                {arrastreDeSobre.length > 0 && (
+                  <div className="border-t border-linea pt-3">
+                    <Rotulo>Si cae, se detiene</Rotulo>
+                    <ul className="mt-2 space-y-1.5">
+                      {arrastreDeSobre.map((id) => {
+                        const a = escenarioDemo.activos.find((x) => x.id === id)!;
+                        return (
+                          <li key={id} className="flex items-center gap-2 text-sm">
+                            <span className="text-ocre">
+                              <IconoActivo tipo={a.tipo} className="h-4 w-4" />
+                            </span>
+                            {a.nombre}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+
+                <p className="mono text-[11px] leading-relaxed text-tinta-tenue">
+                  Clic para {caidos.includes(activoSobre.id) ? "restablecer" : "darlo por caído"}
                 </p>
               </div>
-            </details>
-          ))}
-        </div>
-      </Panel>
+            ) : (
+              <ul className="divide-y divide-linea">
+                {activosSede.map((a) => (
+                  <li
+                    key={a.id}
+                    onMouseEnter={() => setSobre(a.id)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm transition hover:bg-papel"
+                  >
+                    <span
+                      className={
+                        setCaidosSet.has(a.id)
+                          ? "text-bermellon"
+                          : setArrastrados.has(a.id)
+                            ? "text-ocre"
+                            : "text-tinta-tenue"
+                      }
+                    >
+                      <IconoActivo tipo={a.tipo} className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{a.nombre}</span>
+                    <span className="mono text-xs text-tinta-tenue">
+                      {pesosCompactos(a.valorReposicion)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Lamina>
 
-      <div className="mt-6">
-        <LeyendaProcedencia />
+          {evento.arrastrados.length > 0 && (
+            <Lamina className="border-bermellon/40 aparece">
+              <div className="border-b border-linea px-4 py-3">
+                <Rotulo>Efecto en cadena</Rotulo>
+              </div>
+              <div className="p-4">
+                <p className="text-sm leading-relaxed">
+                  {evento.arrastrados.length}{" "}
+                  {evento.arrastrados.length === 1 ? "instalación" : "instalaciones"} sin
+                  un rasguño{" "}
+                  {evento.arrastrados.length === 1 ? "quedó" : "quedaron"} fuera de
+                  operación. Ninguna póliza sobre el activo caído las cubre.
+                </p>
+                <ul className="mt-3 space-y-1.5">
+                  {evento.arrastrados.map((id) => {
+                    const a = escenarioDemo.activos.find((x) => x.id === id)!;
+                    return (
+                      <li
+                        key={id}
+                        className="flex items-center justify-between gap-2 text-sm"
+                      >
+                        <span className="flex items-center gap-2">
+                          <span className="text-ocre">
+                            <IconoActivo tipo={a.tipo} className="h-4 w-4" />
+                          </span>
+                          {a.nombre}
+                        </span>
+                        <span className="mono text-xs text-tinta-tenue">
+                          {pesosCompactos(a.margenDiario)}/día
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            </Lamina>
+          )}
+        </div>
+      </div>
+
+      {/* Análisis anual */}
+      <div className="mt-10">
+        <TituloPagina
+          rotulo="Lámina 03 · continuación"
+          titulo="Exposición anual"
+          bajada="El plano de arriba responde qué pasa si algo cae hoy. Esto responde cuánto cuesta, en promedio, un año de operación con estas amenazas."
+        />
+
+        <div className="grid gap-4 lg:grid-cols-3">
+          <Lamina className="p-5">
+            <Rotulo>Pérdida esperada al año</Rotulo>
+            <p className="display mt-2 text-4xl text-ocre">
+              {pesosCompactos(anual.perdidaEsperadaAnual)}
+            </p>
+            <p className="mono mt-1 text-xs text-tinta-tenue">
+              {formatearPesos(anual.perdidaEsperadaAnual)}
+            </p>
+            <div className="mt-4 flex h-2 overflow-hidden rounded-full border border-linea">
+              <div
+                className="bg-ocre"
+                style={{
+                  width: `${(anual.danioFisicoTotal / anual.perdidaEsperadaAnual) * 100}%`,
+                }}
+              />
+              <div className="flex-1 bg-azul" />
+            </div>
+            <div className="mt-2 flex justify-between text-xs text-tinta-media">
+              <span>
+                {porcentaje(anual.danioFisicoTotal / anual.perdidaEsperadaAnual)} daño
+                físico
+              </span>
+              <span>
+                {porcentaje(anual.lucroCesanteTotal / anual.perdidaEsperadaAnual)} lucro
+                cesante
+              </span>
+            </div>
+            <p className="mt-4 border-t border-linea pt-3 text-sm leading-relaxed text-tinta-media">
+              {anual.activosComprometidos} de {escenarioDemo.activos.length} activos
+              concentran el 80 % de esa pérdida.
+            </p>
+            <div className="mt-3">
+              <Procedencia tipo="ilustrativo" />
+            </div>
+          </Lamina>
+
+          <Lamina className="lg:col-span-2">
+            <div className="border-b border-linea px-5 py-3">
+              <Rotulo>Dónde se concentra</Rotulo>
+            </div>
+            <div className="grid gap-px bg-linea sm:grid-cols-2">
+              <div className="bg-papel-alto p-5">
+                <Rotulo>Por fenómeno</Rotulo>
+                <ul className="mt-3 space-y-2.5">
+                  {anual.porAmenaza.map((a) => {
+                    const info = amenazaPorId.get(a.amenaza)!;
+                    const max = anual.porAmenaza[0].perdidaEsperada;
+                    return (
+                      <li key={a.amenaza}>
+                        <div className="flex items-center justify-between gap-2 text-sm">
+                          <span className="flex items-center gap-2">
+                            <span className="text-azul">
+                              <IconoAmenaza id={a.amenaza} className="h-4 w-4" />
+                            </span>
+                            {info.nombre}
+                          </span>
+                          <span className="mono text-xs text-tinta-media">
+                            {pesosCompactos(a.perdidaEsperada)}
+                          </span>
+                        </div>
+                        <div className="mt-1 h-[3px] bg-papel-hundido">
+                          <div
+                            className="h-full bg-ocre"
+                            style={{ width: `${(a.perdidaEsperada / max) * 100}%` }}
+                          />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+
+              <div className="bg-papel-alto p-5">
+                <Rotulo>Por activo — los cinco primeros</Rotulo>
+                <ul className="mt-3 space-y-2.5">
+                  {anual.porActivo.slice(0, 5).map((r) => {
+                    const max = anual.porActivo[0].perdidaEsperada;
+                    return (
+                      <li key={r.activo.id}>
+                        <div className="flex items-center justify-between gap-2 text-sm">
+                          <span className="flex min-w-0 items-center gap-2">
+                            <span className="text-azul">
+                              <IconoActivo tipo={r.activo.tipo} className="h-4 w-4" />
+                            </span>
+                            <span className="truncate">{r.activo.nombre}</span>
+                          </span>
+                          <span className="mono shrink-0 text-xs text-tinta-media">
+                            {pesosCompactos(r.perdidaEsperada)}
+                          </span>
+                        </div>
+                        <div className="mt-1 h-[3px] bg-papel-hundido">
+                          <div
+                            className="h-full bg-azul"
+                            style={{ width: `${(r.perdidaEsperada / max) * 100}%` }}
+                          />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+                <p className="mt-4 text-xs leading-relaxed text-tinta-media">
+                  El detalle completo, con el desglose por fenómeno de cada activo, está
+                  en el reporte.
+                </p>
+              </div>
+            </div>
+          </Lamina>
+        </div>
       </div>
     </>
+  );
+}
+
+function Lectura({
+  rotulo,
+  valor,
+  unidad,
+  detalle,
+  alerta = false,
+  destacada = false,
+}: {
+  rotulo: string;
+  valor: string;
+  unidad: string;
+  detalle: string;
+  alerta?: boolean;
+  destacada?: boolean;
+}) {
+  return (
+    <div className={`bg-papel-alto p-4 ${destacada ? "bg-tinta text-papel" : ""}`}>
+      <p
+        className="rotulo"
+        style={destacada ? { color: "color-mix(in srgb, var(--papel) 65%, transparent)" } : undefined}
+      >
+        {rotulo}
+      </p>
+      <p
+        className={`display mt-1.5 text-2xl transition-colors ${
+          destacada ? "" : alerta ? "text-bermellon" : ""
+        }`}
+      >
+        {valor}
+      </p>
+      <p
+        className="mono mt-0.5 text-[11px]"
+        style={{
+          color: destacada
+            ? "color-mix(in srgb, var(--papel) 60%, transparent)"
+            : "var(--tinta-tenue)",
+        }}
+      >
+        {unidad}
+      </p>
+      <p
+        className="mt-2 text-xs"
+        style={{
+          color: destacada
+            ? "color-mix(in srgb, var(--papel) 75%, transparent)"
+            : "var(--tinta-media)",
+        }}
+      >
+        {detalle}
+      </p>
+    </div>
+  );
+}
+
+function Leyenda({ color, texto }: { color: string; texto: string }) {
+  return (
+    <span className="flex items-center gap-2 text-xs text-tinta-media">
+      <span
+        className="h-3 w-3 rounded-[2px] border"
+        style={{ borderColor: color, background: `color-mix(in srgb, ${color} 15%, transparent)` }}
+      />
+      {texto}
+    </span>
+  );
+}
+
+function Fila({ termino, valor }: { termino: string; valor: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 border-b border-linea pb-2 last:border-0">
+      <dt className="text-tinta-media">{termino}</dt>
+      <dd className="mono text-right">{valor}</dd>
+    </div>
   );
 }

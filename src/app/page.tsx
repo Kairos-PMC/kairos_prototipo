@@ -1,59 +1,57 @@
 import Link from "next/link";
+import { Logotipo } from "@/components/iconos";
 import { empresaDemo } from "@/data/empresa-demo";
 
 export default function LoginPage() {
   return (
-    <main className="min-h-dvh grid lg:grid-cols-2">
-      {/* Panel de marca */}
-      <section className="relative hidden lg:flex flex-col justify-between p-12 bg-[var(--fondo-panel)] border-r border-[var(--borde)] overflow-hidden">
-        <div
-          aria-hidden
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 20% 30%, var(--acento) 0, transparent 45%), radial-gradient(circle at 75% 70%, var(--info) 0, transparent 40%)",
-          }}
-        />
-        <div className="relative">
-          <Marca />
+    <main className="grid min-h-dvh lg:grid-cols-[1.15fr_1fr]">
+      {/* Lámina de portada */}
+      <section className="relative flex flex-col justify-between overflow-hidden border-linea px-8 py-10 lg:border-r lg:px-14 lg:py-14">
+        <div className="flex items-center gap-3">
+          <Logotipo className="h-10 w-10" />
+          <div>
+            <p className="display text-xl leading-none">Kairos</p>
+            <p className="rotulo mt-1.5">Simulador digital de riesgos</p>
+          </div>
         </div>
 
-        <div className="relative max-w-lg">
-          <h1 className="text-4xl font-semibold leading-tight tracking-tight">
+        <div className="max-w-xl py-12">
+          <p className="rotulo mb-4 flex items-center gap-2">
+            <span className="inline-block h-px w-8 bg-tinta-tenue" />
+            El problema
+          </p>
+          <h1 className="display text-[2.6rem] leading-[1.1] sm:text-5xl">
             La información ya existe.
             <br />
-            <span className="text-[var(--acento)]">Lo que falta es traducirla.</span>
+            <span className="text-bermellon">Lo que falta es traducirla.</span>
           </h1>
-          <p className="mt-6 text-[var(--texto-tenue)] leading-relaxed">
+          <p className="mt-6 max-w-lg text-[15px] leading-relaxed text-tinta-media">
             El IDEAM, el Servicio Geológico y la UNGRD publican datos todos los días. Son
-            regionales, y no dicen nada sobre <em>tu</em> bodega. Kairos toma esos datos,
-            los aterriza sobre cada activo de tu empresa y los convierte en una decisión:
-            cuánto perderías, y en qué te conviene invertir primero.
+            regionales, y no dicen nada sobre <em>tu</em> bodega. Kairos los aterriza
+            sobre cada activo de tu empresa y los convierte en una decisión: cuánto
+            perderías, y en qué te conviene invertir primero.
           </p>
 
-          <dl className="mt-10 grid grid-cols-3 gap-4">
-            <Cifra valor="6" etiqueta="fenómenos modelados" />
-            <Cifra valor="3" etiqueta="fuentes públicas conectadas" />
-            <Cifra valor="$" etiqueta="pérdida estimada en pesos" />
+          <dl className="mt-12 grid max-w-lg grid-cols-3 gap-px border border-linea bg-linea">
+            <Cifra valor="7" etiqueta="fenómenos modelados" />
+            <Cifra valor="2" etiqueta="fuentes en vivo" />
+            <Cifra valor="13" etiqueta="activos en el plano" />
           </dl>
         </div>
 
-        <p className="relative text-xs text-[var(--texto-tenue)]">
-          Prototipo académico · ISIS 2007 — Diseño de Productos e Innovación con TI ·
-          Universidad de los Andes
+        <p className="mono text-[11px] leading-relaxed text-tinta-tenue">
+          ISIS 2007 — Diseño de Productos e Innovación con TI · Grupo 1 · Universidad de
+          los Andes
         </p>
       </section>
 
-      {/* Panel de acceso */}
-      <section className="flex items-center justify-center p-8">
+      {/* Acceso */}
+      <section className="flex items-center justify-center bg-papel-alto px-8 py-14">
         <div className="w-full max-w-sm">
-          <div className="lg:hidden mb-10">
-            <Marca />
-          </div>
-
-          <h2 className="text-2xl font-semibold tracking-tight">Ingresar</h2>
-          <p className="mt-2 text-sm text-[var(--texto-tenue)]">
-            Entra como responsable de riesgos de {empresaDemo.nombre}.
+          <p className="rotulo">Acceso</p>
+          <h2 className="display mt-2 text-2xl">Entrar a la plataforma</h2>
+          <p className="mt-2 text-sm leading-relaxed text-tinta-media">
+            Como {empresaDemo.usuarioDemo.cargo.toLowerCase()} de {empresaDemo.nombre}.
           </p>
 
           <div className="mt-8 space-y-4">
@@ -63,16 +61,27 @@ export default function LoginPage() {
 
           <Link
             href="/datos"
-            className="mt-8 flex w-full items-center justify-center rounded-lg bg-[var(--acento)] px-4 py-3 font-medium text-[#1a1200] transition hover:brightness-110"
+            className="mono mt-8 flex w-full items-center justify-center gap-2 rounded bg-tinta px-4 py-3.5 text-sm uppercase tracking-[0.12em] text-papel transition hover:bg-azul"
           >
-            Entrar a la plataforma
+            Entrar
+            <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" aria-hidden>
+              <path
+                d="M2 8h11M9 4l4 4-4 4"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.6"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </Link>
 
-          <div className="mt-6 rounded-lg border border-[var(--borde)] bg-[var(--fondo-panel)] p-4">
-            <p className="text-xs leading-relaxed text-[var(--texto-tenue)]">
-              <span className="font-medium text-[var(--texto)]">Acceso de demostración.</span>{" "}
-              Este login es decorativo: no valida nada y no guarda credenciales. Cualquiera
-              con el enlace puede entrar y recorrer el prototipo completo.
+          <div className="mt-6 border-l-2 border-linea pl-4">
+            <p className="text-xs leading-relaxed text-tinta-media">
+              <span className="font-medium text-tinta">Acceso de demostración.</span> Este
+              formulario es decorativo: no valida nada, no guarda credenciales y no
+              registra quién entra. Cualquiera con el enlace recorre el prototipo
+              completo.
             </p>
           </div>
         </div>
@@ -81,35 +90,13 @@ export default function LoginPage() {
   );
 }
 
-function Marca() {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="grid h-10 w-10 place-items-center rounded-lg bg-[var(--acento)] text-[#1a1200]">
-        <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" aria-hidden>
-          <path
-            d="M12 3v18M4 14l4-5 3 4 3-6 6 7"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      </div>
-      <div>
-        <p className="text-lg font-semibold leading-none tracking-tight">Kairos</p>
-        <p className="mt-1 text-xs text-[var(--texto-tenue)]">
-          Simulador digital de riesgos
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function Cifra({ valor, etiqueta }: { valor: string; etiqueta: string }) {
   return (
-    <div>
-      <dt className="text-2xl font-semibold text-[var(--acento)]">{valor}</dt>
-      <dd className="mt-1 text-xs leading-snug text-[var(--texto-tenue)]">{etiqueta}</dd>
+    <div className="bg-papel px-4 py-4">
+      <dt className="display text-3xl text-azul">{valor}</dt>
+      <dd className="mono mt-1 text-[10px] uppercase leading-snug tracking-wider text-tinta-tenue">
+        {etiqueta}
+      </dd>
     </div>
   );
 }
@@ -117,11 +104,11 @@ function Cifra({ valor, etiqueta }: { valor: string; etiqueta: string }) {
 function Campo({ etiqueta, valor }: { etiqueta: string; valor: string }) {
   return (
     <label className="block">
-      <span className="text-xs font-medium text-[var(--texto-tenue)]">{etiqueta}</span>
+      <span className="rotulo">{etiqueta}</span>
       <input
         readOnly
         defaultValue={valor}
-        className="mt-1.5 w-full rounded-lg border border-[var(--borde)] bg-[var(--fondo-panel)] px-3 py-2.5 text-sm text-[var(--texto)] outline-none focus:border-[var(--acento)]"
+        className="mono mt-1.5 w-full rounded border border-linea bg-papel px-3 py-3 text-sm text-tinta outline-none transition focus:border-azul"
       />
     </label>
   );

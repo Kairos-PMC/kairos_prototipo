@@ -1,8 +1,9 @@
 import { amenazaPorId, escenarioDemo } from "@/data/empresa-demo";
 import { calcular } from "@/domain/calculo";
 import { pesosCompactos, porcentaje } from "@/lib/formato";
+import { IconoAmenaza } from "@/components/iconos";
 import { LeyendaProcedencia, Procedencia } from "@/components/procedencia";
-import { EncabezadoPanel, Panel, TituloPagina } from "@/components/ui";
+import { CabeceraLamina, Lamina, TituloPagina } from "@/components/ui";
 import { MapaSedes } from "@/components/mapa-sedes";
 
 export default function Sedes() {
@@ -12,12 +13,13 @@ export default function Sedes() {
   return (
     <>
       <TituloPagina
+        rotulo="Lámina 02"
         titulo="Sedes y amenazas"
         bajada="El catálogo de fenómenos no es una lista fija que traemos de fábrica: se configura por sede. Esto salió de la validación en campo — un floricultor nos señaló la tormenta eléctrica, que no estaba en nuestro planteamiento original."
       />
 
-      <Panel className="mb-4">
-        <EncabezadoPanel
+      <Lamina className="mb-4">
+        <CabeceraLamina
           titulo="Dónde está tu exposición"
           descripcion="El tamaño del punto es la pérdida esperada de cada sede. Dos sedes a 20 km de distancia, con exposiciones que no se parecen."
         />
@@ -37,7 +39,7 @@ export default function Sedes() {
             })}
           />
         </div>
-      </Panel>
+      </Lamina>
 
       <div className="space-y-4">
         {escenarioDemo.sedes.map((sede) => {
@@ -47,23 +49,23 @@ export default function Sedes() {
           const valorTotal = activos.reduce((s, a) => s + a.valorReposicion, 0);
 
           return (
-            <Panel key={sede.id}>
-              <EncabezadoPanel
+            <Lamina key={sede.id}>
+              <CabeceraLamina
                 titulo={sede.nombre}
                 descripcion={`${sede.municipio}, ${sede.departamento} · ${sede.lat.toFixed(4)}, ${sede.lon.toFixed(4)}`}
                 extra={
                   <div className="text-right">
-                    <p className="text-xs uppercase tracking-wide text-[var(--texto-tenue)]">
+                    <p className="text-xs uppercase tracking-wide text-tinta-media">
                       Pérdida esperada
                     </p>
-                    <p className="text-xl font-semibold tabular-nums text-[var(--acento)]">
+                    <p className="text-xl font-semibold mono text-ocre">
                       {pesosCompactos(exposicion)}
                     </p>
                   </div>
                 }
               />
 
-              <div className="grid gap-px bg-[var(--borde)] sm:grid-cols-3">
+              <div className="grid gap-px bg-linea sm:grid-cols-3">
                 <Dato etiqueta="Activos" valor={`${activos.length}`} />
                 <Dato
                   etiqueta="Valor asegurable"
@@ -84,16 +86,16 @@ export default function Sedes() {
                     return (
                       <div
                         key={perfil.amenaza}
-                        className="rounded-lg border border-[var(--borde)] bg-[var(--fondo-panel-alto)] p-4"
+                        className="rounded-lg border border-linea bg-papel p-4"
                       >
                         <div className="flex flex-wrap items-start justify-between gap-3">
                           <div className="flex items-start gap-3">
-                            <span className="text-xl" aria-hidden>
-                              {info?.simbolo}
+                            <span className="mt-0.5 shrink-0 text-azul">
+                              <IconoAmenaza id={perfil.amenaza} className="h-6 w-6" />
                             </span>
                             <div>
                               <p className="font-medium">{info?.nombre}</p>
-                              <p className="mt-0.5 max-w-xl text-xs leading-relaxed text-[var(--texto-tenue)]">
+                              <p className="mt-0.5 max-w-xl text-xs leading-relaxed text-tinta-media">
                                 {info?.descripcion}
                               </p>
                             </div>
@@ -112,7 +114,7 @@ export default function Sedes() {
                           />
                         </div>
 
-                        <p className="mt-3 border-l-2 border-[var(--borde)] pl-3 text-xs leading-relaxed text-[var(--texto-tenue)]">
+                        <p className="mt-3 border-l-2 border-linea pl-3 text-xs leading-relaxed text-tinta-media">
                           {perfil.fuente}
                           {perfil.fuenteUrl && (
                             <>
@@ -121,7 +123,7 @@ export default function Sedes() {
                                 href={perfil.fuenteUrl}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="text-[var(--info)] hover:underline"
+                                className="text-azul hover:underline"
                               >
                                 ver fuente ↗
                               </a>
@@ -130,7 +132,7 @@ export default function Sedes() {
                           {perfil.nota && (
                             <>
                               <br />
-                              <span className="text-[var(--acento)]">{perfil.nota}</span>
+                              <span className="text-ocre">{perfil.nota}</span>
                             </>
                           )}
                         </p>
@@ -139,7 +141,7 @@ export default function Sedes() {
                   })}
                 </div>
               </div>
-            </Panel>
+            </Lamina>
           );
         })}
       </div>
@@ -161,13 +163,13 @@ function Dato({
   detalle?: string;
 }) {
   return (
-    <div className="bg-[var(--fondo-panel)] px-5 py-4">
-      <p className="text-xs uppercase tracking-wide text-[var(--texto-tenue)]">
+    <div className="bg-papel-alto px-5 py-4">
+      <p className="text-xs uppercase tracking-wide text-tinta-media">
         {etiqueta}
       </p>
-      <p className="mt-1 text-lg font-semibold tabular-nums">{valor}</p>
+      <p className="mt-1 text-lg font-semibold mono">{valor}</p>
       {detalle && (
-        <p className="mt-0.5 text-[11px] leading-snug text-[var(--texto-tenue)]">
+        <p className="mt-0.5 text-[11px] leading-snug text-tinta-media">
           {detalle}
         </p>
       )}
@@ -179,12 +181,12 @@ function Barra({ etiqueta, fraccion }: { etiqueta: string; fraccion: number }) {
   return (
     <div className="min-w-40 flex-1">
       <div className="flex items-baseline justify-between text-xs">
-        <span className="text-[var(--texto-tenue)]">{etiqueta}</span>
-        <span className="font-medium tabular-nums">{porcentaje(fraccion)}</span>
+        <span className="text-tinta-media">{etiqueta}</span>
+        <span className="font-medium mono">{porcentaje(fraccion)}</span>
       </div>
-      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[var(--fondo)]">
+      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-papel-hundido">
         <div
-          className="h-full rounded-full bg-[var(--acento)]"
+          className="h-full rounded-full bg-ocre"
           style={{ width: `${fraccion * 100}%` }}
         />
       </div>

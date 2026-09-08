@@ -91,6 +91,21 @@ export const escenarioDemo: Escenario = {
       lon: -74.3548,
       descripcion:
         "32 hectáreas de cultivo bajo invernadero, con riego por fertirriego y reservorio propio.",
+      plano: {
+        ancho: 100,
+        alto: 66,
+        cota: "Finca La Esperanza · escala aproximada · norte arriba",
+        via: "M99 51.5 L74 51.5 L74 42 L42 42",
+        zonas: [
+          { id: "z-inv-a", nombre: "Bloque A", x: 5, y: 5, ancho: 34, alto: 22, tipo: "cultivo" },
+          { id: "z-inv-b", nombre: "Bloque B", x: 5, y: 33, ancho: 34, alto: 22, tipo: "cultivo" },
+          { id: "z-subest-f", nombre: "Subestación", x: 46, y: 6, ancho: 16, alto: 12, tipo: "edificacion" },
+          { id: "z-reservorio", nombre: "Reservorio", x: 68, y: 5, ancho: 27, alto: 16, tipo: "agua" },
+          { id: "z-bombas", nombre: "Casa de bombas", x: 46, y: 26, ancho: 16, alto: 12, tipo: "edificacion" },
+          { id: "z-bodega-ins", nombre: "Bodega de insumos", x: 46, y: 46, ancho: 22, alto: 12, tipo: "edificacion" },
+          { id: "z-acceso", nombre: "Portería", x: 80, y: 46, ancho: 15, alto: 11, tipo: "patio" },
+        ],
+      },
       amenazas: [
         {
           amenaza: "granizada",
@@ -143,6 +158,20 @@ export const escenarioDemo: Escenario = {
       lon: -74.2117,
       descripcion:
         "Planta de clasificación, empaque y cadena de frío. Despacha vía aérea desde El Dorado.",
+      plano: {
+        ancho: 100,
+        alto: 66,
+        cota: "Centro de poscosecha · escala aproximada · norte arriba",
+        via: "M99 60 L34 60 L34 47",
+        zonas: [
+          { id: "z-poscosecha", nombre: "Nave de poscosecha", x: 5, y: 6, ancho: 38, alto: 26, tipo: "edificacion" },
+          { id: "z-frio", nombre: "Cuarto frío", x: 48, y: 6, ancho: 21, alto: 17, tipo: "edificacion" },
+          { id: "z-subest-p", nombre: "Subestación", x: 75, y: 6, ancho: 18, alto: 12, tipo: "edificacion" },
+          { id: "z-bodega-emp", nombre: "Bodega de empaque", x: 5, y: 40, ancho: 25, alto: 15, tipo: "edificacion" },
+          { id: "z-patio", nombre: "Patio de maniobras", x: 36, y: 38, ancho: 28, alto: 19, tipo: "patio" },
+          { id: "z-oficina", nombre: "Administración", x: 70, y: 40, ancho: 22, alto: 14, tipo: "edificacion" },
+        ],
+      },
       amenazas: [
         {
           amenaza: "inundacion",
@@ -197,7 +226,8 @@ export const escenarioDemo: Escenario = {
         sismo: 0.1,
         "tormenta-electrica": 0.05,
       },
-      plano: { x: 18, y: 26 },
+      zonaId: "z-inv-a",
+      plano: { x: 22, y: 17 },
     },
     {
       id: "inv-b",
@@ -214,7 +244,8 @@ export const escenarioDemo: Escenario = {
         sismo: 0.1,
         "tormenta-electrica": 0.05,
       },
-      plano: { x: 18, y: 62 },
+      zonaId: "z-inv-b",
+      plano: { x: 22, y: 45 },
     },
     {
       id: "riego",
@@ -230,7 +261,8 @@ export const escenarioDemo: Escenario = {
         sequia: 0.15,
         sismo: 0.1,
       },
-      plano: { x: 48, y: 44 },
+      zonaId: "z-bombas",
+      plano: { x: 54, y: 32.5 },
     },
     {
       id: "reservorio",
@@ -241,7 +273,8 @@ export const escenarioDemo: Escenario = {
       margenDiario: 0,
       diasReparacion: 60,
       vulnerabilidad: { sequia: 0.6, inundacion: 0.15, sismo: 0.1 },
-      plano: { x: 74, y: 24 },
+      zonaId: "z-reservorio",
+      plano: { x: 81.5, y: 13.5 },
     },
     {
       id: "subest-f",
@@ -256,7 +289,8 @@ export const escenarioDemo: Escenario = {
         inundacion: 0.4,
         sismo: 0.15,
       },
-      plano: { x: 74, y: 58 },
+      zonaId: "z-subest-f",
+      plano: { x: 54, y: 12.5 },
     },
     {
       id: "bodega-ins",
@@ -272,7 +306,8 @@ export const escenarioDemo: Escenario = {
         granizada: 0.1,
         "incendio-forestal": 0.5,
       },
-      plano: { x: 48, y: 78 },
+      zonaId: "z-bodega-ins",
+      plano: { x: 57, y: 52.5 },
     },
     {
       id: "via-f",
@@ -283,7 +318,8 @@ export const escenarioDemo: Escenario = {
       margenDiario: 0,
       diasReparacion: 8,
       vulnerabilidad: { inundacion: 0.5, deslizamiento: 0.55, sismo: 0.2 },
-      plano: { x: 86, y: 80 },
+      zonaId: "z-acceso",
+      plano: { x: 87.5, y: 51.5 },
     },
 
     // ── Funza ───────────────────────────────────────────────────────────────
@@ -301,7 +337,8 @@ export const escenarioDemo: Escenario = {
         granizada: 0.1,
         "tormenta-electrica": 0.1,
       },
-      plano: { x: 26, y: 40 },
+      zonaId: "z-poscosecha",
+      plano: { x: 24, y: 20 },
     },
     {
       id: "frio",
@@ -316,7 +353,8 @@ export const escenarioDemo: Escenario = {
         inundacion: 0.35,
         sismo: 0.2,
       },
-      plano: { x: 56, y: 28 },
+      zonaId: "z-frio",
+      plano: { x: 58.5, y: 15 },
     },
     {
       id: "subest-p",
@@ -331,7 +369,8 @@ export const escenarioDemo: Escenario = {
         inundacion: 0.4,
         sismo: 0.15,
       },
-      plano: { x: 82, y: 30 },
+      zonaId: "z-subest-p",
+      plano: { x: 84, y: 12.5 },
     },
     {
       id: "bodega-emp",
@@ -342,7 +381,8 @@ export const escenarioDemo: Escenario = {
       margenDiario: 2_100_000,
       diasReparacion: 25,
       vulnerabilidad: { inundacion: 0.45, sismo: 0.15 },
-      plano: { x: 26, y: 76 },
+      zonaId: "z-bodega-emp",
+      plano: { x: 17.5, y: 48 },
     },
     {
       id: "flota",
@@ -353,7 +393,8 @@ export const escenarioDemo: Escenario = {
       margenDiario: 4_500_000,
       diasReparacion: 10,
       vulnerabilidad: { inundacion: 0.2, sismo: 0.05, granizada: 0.15 },
-      plano: { x: 58, y: 74 },
+      zonaId: "z-patio",
+      plano: { x: 50, y: 48 },
     },
     {
       id: "oficina",
@@ -364,7 +405,8 @@ export const escenarioDemo: Escenario = {
       margenDiario: 900_000,
       diasReparacion: 30,
       vulnerabilidad: { inundacion: 0.3, sismo: 0.2 },
-      plano: { x: 84, y: 66 },
+      zonaId: "z-oficina",
+      plano: { x: 81, y: 47.5 },
     },
   ],
 
