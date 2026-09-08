@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+:root {
+  --fondo: #0b1220;
+  --fondo-panel: #121b2e;
+  --fondo-panel-alto: #18243c;
+  --borde: #24334f;
+  --texto: #e8edf7;
+  --texto-tenue: #93a3c0;
+  --acento: #f0a500;
+  --acento-tenue: #6b4c00;
+  --peligro: #e5484d;
+  --exito: #30a46c;
+  --info: #4c8dff;
+}
+
+@theme inline {
+  --color-fondo: var(--fondo);
+  --color-panel: var(--fondo-panel);
+  --color-panel-alto: var(--fondo-panel-alto);
+  --color-borde: var(--borde);
+  --color-texto: var(--texto);
+  --color-tenue: var(--texto-tenue);
+  --color-acento: var(--acento);
+  --color-peligro: var(--peligro);
+  --color-exito: var(--exito);
+  --color-info: var(--info);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+html,
+body {
+  background: var(--fondo);
+  color: var(--texto);
+}
+
+body {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Barras de scroll discretas, coherentes con el tema oscuro */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--fondo);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--borde);
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #33456b;
+}

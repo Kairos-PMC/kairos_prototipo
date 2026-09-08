@@ -8,32 +8,35 @@ flujo de desarrollo con subagentes, listo para usarse desde el primer commit rea
 
 ---
 
-## Flujo de desarrollo
+## Flujo de desarrollo — etapa rápida (vigente)
 
-Todo cambio que no sea trivial sigue el mismo camino:
-
-```
-crear branch → cambios/commits → REVISAR → PR → CI → merge
-                                    ▲
-                             /revisar-cambio
-```
+> 🚧 **Todo va directo a `main`. Sin ramas, sin PRs, sin revisión obligatoria.**
+>
+> Decisión consciente de esta primera etapa: el costo de coordinación no se paga
+> cuando trabaja una sola persona sobre un prototipo desechable, y lo que se
+> necesita ahora es velocidad hasta tener algo que se pueda mirar.
 
 ```bash
-git checkout main && git pull
-git checkout -b feature/nombre-descriptivo
 # ... cambios ...
-/revisar-cambio                    # ← antes de abrir el PR
-git push -u origin feature/nombre-descriptivo
-gh pr create --base main
-/revisar-pr <N>                    # ← si el cambio lo amerita
+git add -A && git commit -m "..."
+git push origin main
+```
+
+`/revisar-cambio` sigue disponible y funciona sin PR para cambios chicos
+(niveles 0-2 corren inline), pero es **opcional**. Los niveles 3-4 delegan a
+`/revisar-pr`, que sí necesita un PR — en esta etapa, o se revisa inline o se
+salta.
+
+### Cuando entre el equipo (en varias semanas)
+
+Se retoma el flujo completo, que ya está montado y no hay que reconstruir:
+
+```
+crear branch → cambios/commits → /revisar-cambio → PR → CI → merge
 ```
 
 Prefijos de branch: `feature/`, `fix/`, `docs/`, `refactor/`.
-
-### La regla en una línea
-
-> **Ante la duda, corre `/revisar-cambio`.** Decide solo qué tan profunda debe ser
-> la revisión y, si hace falta, te manda al comando correcto.
+Ante la duda, `/revisar-cambio` decide la profundidad y delega al comando correcto.
 
 ---
 
