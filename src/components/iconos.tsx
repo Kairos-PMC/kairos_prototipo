@@ -195,36 +195,57 @@ export function TrazoActivo({
   );
 }
 
+/**
+ * Logotipo.
+ *
+ * Tres fichas de dominó: la primera ya cayó, la segunda va cayendo arrastrada, y
+ * la tercera queda en pie.
+ *
+ * El color no decora — son los mismos tres roles que usa la simulación, así que
+ * la marca funciona como leyenda de la plataforma:
+ *   bermellón → recibió el golpe
+ *   ocre      → se detiene sin haber recibido daño
+ *   verde     → sigue operando porque se invirtió en protegerla
+ *
+ * Es también el único argumento del producto que ningún competidor está
+ * contando: lo que golpea el fenómeno rara vez es lo caro. En la sede de
+ * Facatativá, una subestación de $240 M arrastra $5.600 M en invernaderos.
+ */
 export function Logotipo({ className = "h-9 w-9" }: { className?: string }) {
   return (
-    <svg viewBox="0 0 36 36" className={className} aria-hidden>
+    <svg viewBox="0 0 40 40" className={className} aria-hidden>
+      <rect width="40" height="40" rx="3" fill="var(--tinta)" />
+
+      {/* Suelo */}
+      <path d="M4 32.4h32" stroke="var(--papel)" strokeWidth="0.9" opacity="0.32" />
+
+      {/* Rayas de impulso: dan el movimiento y desaparecen limpio al reducir. */}
+      <g stroke="var(--papel)" strokeWidth="0.9" strokeLinecap="round" opacity="0.4">
+        <path d="M4.5 9.5h3M3 13.5h2.4" />
+      </g>
+
+      {/* Fichas: estrechas y juntas para que se lean como dominó y no como
+          barras de un gráfico. La primera alcanza a la segunda, que es lo que
+          hace visible la causalidad. */}
       <rect
-        x="1"
-        y="1"
-        width="34"
-        height="34"
-        rx="2"
-        fill="var(--tinta)"
-        stroke="var(--tinta)"
+        x="6.6"
+        y="10"
+        width="4.6"
+        height="21"
+        rx="0.9"
+        fill="var(--bermellon)"
+        transform="rotate(34 8.9 31)"
       />
-      {/* Un plano de planta reducido a su mínima expresión: perímetro, eje y
-          un punto de falla. */}
-      <path
-        d="M8 27V13l10-6 10 6v14"
-        fill="none"
-        stroke="var(--papel)"
-        strokeWidth="1.6"
-        strokeLinejoin="round"
+      <rect
+        x="16.4"
+        y="10"
+        width="4.6"
+        height="21"
+        rx="0.9"
+        fill="var(--ocre)"
+        transform="rotate(16 18.7 31)"
       />
-      <path d="M8 27h20" stroke="var(--papel)" strokeWidth="1.6" strokeLinecap="round" />
-      <path
-        d="M18 7v20"
-        stroke="var(--papel)"
-        strokeWidth="0.9"
-        strokeDasharray="2 2"
-        opacity="0.6"
-      />
-      <circle cx="18" cy="18.5" r="3" fill="var(--bermellon)" />
+      <rect x="26.2" y="10" width="4.6" height="21" rx="0.9" fill="var(--verde-claro)" />
     </svg>
   );
 }

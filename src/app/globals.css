@@ -32,6 +32,9 @@
   --bermellon: #c4372a;
   --ocre: #a8710c;
   --verde: #2c6446;
+  /* Variante para fondos oscuros: el verde de tinta se apaga sobre el tile
+     del logotipo y deja de leerse como "en pie". */
+  --verde-claro: #3d9168;
 
   --sombra-papel: 0 1px 0 rgba(22, 25, 29, 0.04), 0 2px 8px rgba(22, 25, 29, 0.05);
 }
@@ -50,6 +53,7 @@
   --color-bermellon: var(--bermellon);
   --color-ocre: var(--ocre);
   --color-verde: var(--verde);
+  --color-verde-claro: var(--verde-claro);
 }
 
 html {
