@@ -82,6 +82,41 @@ casos aprobar con Enter no basta: pide confirmación explícita.
 Dónde quedan los reportes: `docs/revisiones/`, `docs/revisiones-pr/`,
 `evaluaciones/plan/`, `evaluaciones/ejecucion/`.
 
+### Los dos gates que no se saltan
+
+Ambos existen porque su modo de falla es **silencioso**: una revisión rota se ve
+igual que una buena. Los dos vienen del flujo original, con sus cicatrices.
+
+**1. Nunca revisar sin reglas** — `.claude/scripts/resolver-doc.sh`
+
+Las reglas de dominio se resuelven ANTES de lanzar revisores y van **embebidas
+verbatim** en el prompt, nunca como una ruta que el revisor deba abrir. Si el
+script sale con código ≠ 0, el comando **aborta** en vez de revisar sin reglas.
+
+```bash
+./.claude/scripts/resolver-doc.sh docs/estandares/guia-code-review.md --seccion Seguridad
+# exit 1 = documento ausente · exit 3 = sección ausente (lista las disponibles)
+```
+
+> La cicatriz: en el ecosistema original, hasta el 2026-08-20 los briefs hacían
+> `cat ~/.claude/skills/code-review-*/SKILL.md` de unos skills que nunca
+> existieron. El `cat` fallaba sin abortar y los revisores corrían sin reglas —
+> nadie se enteró hasta que alguien lo revisó a mano.
+
+**2. Cada revisión escribe en su propio directorio** — `.claude/scripts/artefactos-revision.sh`
+
+`sellar` deriva el directorio de artefactos de *(sesión + identidad de la
+revisión)*, y `verificar` exige que el reporte sea posterior al sello de la ronda
+y mencione su `REVISION-ID`. Si algo no cuadra, falla en vez de entregar el
+reporte de otro agente.
+
+> La cicatriz: con rutas fijas en `/tmp`, N agentes revisando a la vez escribían
+> y leían el mismo archivo. El 2026-08-25, tres agentes leyeron reportes ajenos
+> creyéndolos propios; uno vio un "APROBADO" de un PR que no era el suyo.
+
+> ⚠️ Si orquestas varios agentes, **no les dictes la ruta de salida** (`-o /tmp/...`).
+> Un agente que obedece una ruta dictada se salta el helper y el gate completo.
+
 ---
 
 ## Requisitos
@@ -132,6 +167,7 @@ interviene. No hay nada que desactivar a mano.
 
 ```
 .claude/commands/          los 5 comandos del flujo
+.claude/scripts/           resolver-doc.sh y artefactos-revision.sh (los dos gates)
 docs/estandares/           guía de code review (heredada, a podar)
 docs/revisiones/           reportes de /revisar-cambio
 docs/revisiones-pr/        reportes de /revisar-pr

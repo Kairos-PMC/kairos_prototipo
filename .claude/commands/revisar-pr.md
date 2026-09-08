@@ -1,6 +1,6 @@
 ---
 description: Revisar un PR específico de GitHub con equipo multi-agente headless. Llamado por /revisar-cambio cuando detecta un PR abierto. No invocar directo salvo que ya sepas que es ese caso.
-allowed-tools: Bash(codex:*), Bash(auggie:*), Bash(git:*), Bash(gh:*), Bash(which:*), Bash(sleep:*), Bash(cat:*), Bash(rm:*), Read, Write, Edit, Glob, Grep, Agent, TaskCreate, TaskUpdate, TaskList, TaskOutput, SendMessage
+allowed-tools: Bash(codex:*), Bash(git:*), Bash(gh:*), Bash(which:*), Bash(sleep:*), Bash(cat:*), Bash(rm:*), Read, Write, Edit, Glob, Grep, Agent, TaskCreate, TaskUpdate, TaskList, TaskOutput, TaskStop, SendMessage
 ---
 
 > **Default**: si no estás seguro de cuál comando usar, invoca `/revisar-cambio` — meta-comando que analiza el contexto y delega al hijo correcto (incluyendo este). Este comando lo usas directo solo si ya sabes que vas a revisar un PR específico.
@@ -11,11 +11,11 @@ Ejecuta una revisión de código de un PR específico de GitHub con equipo multi
 
 **Input:** URL o referencia del PR (ej: `owner/repo#123` o `https://github.com/owner/repo/pull/123`)
 **Equipo:** Básico Codex por defecto (1 Codex por dominio activo)
-**Política de cierre:** Consenso — todos los revisores deben decir APROBADO para terminar
+**Política de cierre:** Consenso — todos los revisores que respondieron dentro de su deadline deben decir APROBADO para terminar (un agente `timed_out` no cuenta ni a favor ni en contra — plan `canal-retorno-subagentes-deadline`, ver Paso 8)
 
 **Diferencia con `/revisar-cambio`:**
 - `/revisar-cambio` es el router barato: clasifica profundidad y revisa inline los cambios chicos (niveles 0-2)
-- `/revisar-pr` es el ejecutor pesado: worktree de la branch del PR, equipo por dominios, verificación de documentación
+- `/revisar-pr` es el ejecutor pesado: worktree de la branch del PR, un revisor por dominio, verificación de documentación
 
 ---
 
@@ -90,20 +90,69 @@ Archivos modificados (N):
 
 **CRÍTICO** — Este paso es la razón de existir de este comando. Sin él, los revisores leen el código en la branch activa del repo (generalmente `main`), no el código del PR.
 
-Incidente que motivó este comando (2026-04-14): En una revisión headless, los revisores (Auggie) recibieron rutas del working directory principal en `main`, pero los cambios estaban en la branch del PR (`fix/bug-dapre-pdfs`) dentro de worktrees en /tmp/. Resultado: Auggie reportó que "los cambios no existen". Codex no tuvo el problema porque en `--full-auto` hace checkout propio.
+Incidente que motivó este comando (2026-04-14): En una revisión headless, los revisores (Auggie) recibieron rutas del working directory principal en `main`, pero los cambios estaban en la branch del PR (`fix/bug-dapre-pdfs`) dentro de worktrees en /tmp/. Resultado: Auggie reportó que "los cambios no existen". Codex no tuvo el problema porque su modo headless hacía descubrimiento/checkout propio en ese momento.
+
+### 3-cero. Reservar los artefactos de ESTA revisión (OBLIGATORIO)
+
+> **Por qué existe este paso.** El clon, el worktree, las reglas de dominio y los
+> reportes de los revisores iban todos a rutas FIJAS de `/tmp`
+> (`/tmp/repo-pr-N`, `/tmp/review-pr-N`, `/tmp/reglas-{DOM}-pr-N.md`,
+> `/tmp/resultado-{dominio}-codex-pr-N.md`) y se leían de esas mismas rutas fijas.
+> El número de PR separa revisiones de PRs distintos, pero **no** separa a dos
+> agentes revisando el MISMO PR — y ahí la colisión tiene una vuelta peor que
+> leerse el reporte cruzado: el Paso 11 de un agente hace
+> `rm -rf /tmp/repo-pr-N` y le borra el clon al otro **a mitad de revisión**.
+> El 2026-08-25, con 7 subagentes revisando en el mismo host, tres agentes
+> leyeron reportes ajenos creyéndolos propios; uno vio un veredicto «APROBADO» de
+> un PR que no era el suyo (`TSK-20260825T212834-5v5s`).
+
+```bash
+ART="$(git rev-parse --show-toplevel)/.claude/scripts/artefactos-revision.sh"
+REVISION_ID="pr-PR_NUMBER@OWNER/REPO@$(gh pr view PR_NUMBER --repo OWNER/REPO --json headRefOid --jq '.headRefOid[0:7]')"
+ART_DIR="$("$ART" sellar --id "$REVISION_ID")" || exit 1
+echo "Artefactos de esta revisión: $ART_DIR"
+```
+
+- `sellar` deriva `ART_DIR` de la sesión de Claude Code **más** `REVISION_ID`, y
+  **falla** si no puede identificar la sesión — nunca cae a una ruta compartida.
+- El SHA del head entra en `REVISION_ID`: si el autor empuja commits nuevos a
+  mitad de revisión, la identidad cambia y los reportes de la revisión anterior
+  dejan de validar. Eso es lo correcto — hablaban de otro código.
+- `artefactos-revision.sh` vive en `.claude/scripts/` de este repo.
+
+> 🔴 **`REVISION_ID` y `ART_DIR` NO sobreviven entre llamadas del tool `Bash`** —
+> cada snippet corre en un shell nuevo. Anota los dos valores al reservarlos y
+> sustituyelos literalmente en los pasos siguientes, o recalcula el directorio
+> (que es determinista) con:
+>
+> ```bash
+> ART_DIR="$("$ART" dir --id "<REVISION_ID literal>")" || exit 1
+> ```
+>
+> `dir` falla si esa identidad no fue sellada, asi que nunca te devuelve una ruta
+> inventada.
 
 ### 3a. Localizar el repo local
 
-Mapear `OWNER/REPO` al path local. Repos conocidos:
+Resolver `REPO_LOCAL_PATH` sin rutas hardcodeadas:
 
-| GitHub repo | Path local |
-|-------------|-----------|
-| `Kairos-PMC/kairos_prototipo` | `~/Documents/PMC/kairos_prototipo` |
-
-Si el repo no está en la tabla, clonar en /tmp:
+1. Si el working directory actual ES el repo objetivo (su remote apunta a `OWNER/REPO`), reusar ese checkout:
 ```bash
-git clone https://github.com/OWNER/REPO.git /tmp/repo-pr-PR_NUMBER
-REPO_LOCAL_PATH=/tmp/repo-pr-PR_NUMBER
+# El slug se extrae del remote, sin hardcodear la org: si el repo se mueve de
+# cuenta u organizacion, esto lo sigue resolviendo. Un slug vacio hace caer al
+# clon del punto 2 — que funciona igual, solo mas lento.
+CWD_SLUG=$(git remote get-url origin 2>/dev/null \
+  | sed -nE 's#.*[:/]([^/]+/[^/.]+)(\.git)?/?$#\1#p')
+if [ "$CWD_SLUG" = "OWNER/REPO" ]; then
+  REPO_LOCAL_PATH=$(git rev-parse --show-toplevel)
+fi
+```
+
+2. Si no, clonar dentro del directorio de artefactos de esta revisión (fallback
+   universal, funciona para cualquier dev):
+```bash
+git clone https://github.com/OWNER/REPO.git "$ART_DIR/repo"
+REPO_LOCAL_PATH="$ART_DIR/repo"
 ```
 
 ### 3b. Fetch y crear worktree
@@ -113,14 +162,23 @@ REPO_LOCAL_PATH=/tmp/repo-pr-PR_NUMBER
 git -C REPO_LOCAL_PATH fetch origin HEAD_REF_NAME
 
 # Crear worktree temporal
-git -C REPO_LOCAL_PATH worktree add /tmp/review-pr-PR_NUMBER HEAD_REF_NAME
+# ESTE worktree se queda bajo un directorio temporal A PROPOSITO, a diferencia de
+# un worktree de trabajo de larga vida. Este es efimero por diseno: se borra al cerrar la
+# revision, asi que su volatilidad es la propiedad correcta y no un bug. No lo
+# "unifiques" con la base persistente por consistencia.
+#
+# Lo que SI cambio (2026-08-25): cuelga de $ART_DIR, propio de esta sesion, en vez
+# de /tmp/review-pr-N compartido. Con dos agentes revisando el MISMO PR, la ruta
+# fija hacia que el `worktree remove` del Paso 11 de uno le borrara el checkout al
+# otro a mitad de revision.
+git -C "$REPO_LOCAL_PATH" worktree add "$ART_DIR/review" HEAD_REF_NAME
 ```
 
-`WORKTREE_PATH = /tmp/review-pr-PR_NUMBER`
+`WORKTREE_PATH = $ART_DIR/review`
 
 Verificar que el worktree existe antes de continuar:
 ```bash
-ls /tmp/review-pr-PR_NUMBER
+ls "$ART_DIR/review"
 ```
 
 Si falla la creación del worktree, STOP e informar al usuario. No continuar con rutas incorrectas.
@@ -134,15 +192,45 @@ Desde el worktree, recopilar:
 ### 4a. Reglas del proyecto
 
 ```bash
-# CLAUDE.md del repo
-cat WORKTREE_PATH/CLAUDE.md 2>/dev/null | head -200
+# CLAUDE.md del repo. El aviso explícito evita el otro sabor del mismo fallo: con
+# solo `2>/dev/null`, un repo sin CLAUDE.md dejaba la sección "Reglas del proyecto" del
+# brief vacía y la verificación de alineación (más abajo) sin nada contra qué
+# comparar, sin que se notara. Aquí no abortamos —hay repos legítimamente sin
+# CLAUDE.md— pero el hueco queda VISIBLE en el brief.
+# (Ojo: `cat X 2>/dev/null | head -200 || echo AVISO` NO sirve — el exit code de
+# un pipeline es el del ÚLTIMO comando, y `head` sale 0 aunque `cat` falle.
+# Hay que probar el archivo explícitamente.)
+if [ -f WORKTREE_PATH/CLAUDE.md ]; then
+  head -200 WORKTREE_PATH/CLAUDE.md
+else
+  echo "[AVISO] WORKTREE_PATH/CLAUDE.md no existe — el brief va SIN reglas del proyecto"
+fi
 
-# Guía de code review — vive en el repo, en docs/estandares/
-cat docs/estandares/guia-code-review.md 2>/dev/null
+# Reglas de revisión — fuente de verdad en docs/estandares/guia-code-review.md.
+# El script las lee del repo y FALLA RUIDOSAMENTE si no consigue el documento
+# o la sección pedida.
+#
+# Una sección por dominio: Seguridad, Performance, Arquitectura, Calidad.
+for DOM in Seguridad Performance Arquitectura Calidad; do
+  "$(git rev-parse --show-toplevel)"/.claude/scripts/resolver-doc.sh \
+    docs/estandares/guia-code-review.md --seccion "$DOM" \
+    > "$ART_DIR/reglas-${DOM}.md" || exit 1
+done
 
-# ADRs (si existen en el repo)
+# ADRs (si existen dentro del subrepo)
 ls WORKTREE_PATH/docs/adr/ 2>/dev/null | head -20
 ```
+
+> **🔴 GATE — si la resolución de las reglas falla, ABORTA la revisión.**
+> Si `resolver-doc.sh` sale con código != 0 (o los `$ART_DIR/reglas-*.md`
+> quedan vacíos), **no lances ningún revisor**: informa al usuario que no pudiste
+> cargar la guía de code review y detén el comando. Este gate existe porque el
+> modo de falla anterior era silencioso: hasta el 2026-08-20 el brief mandaba
+> `cat ~/.claude/skills/code-review-{dominio}/SKILL.md`, esos skills **nunca
+> existieron** en ningún repo del ecosistema, el `cat` fallaba sin abortar, y los
+> 4 revisores corrían sin reglas de dominio sin que nadie se enterara (detectado
+> el 2026-08-18 revisando el PR #2417 de `agente-de-monitoreo`).
+> Una revisión sin reglas se ve exactamente igual que una revisión buena.
 
 ### 4b. Diff del PR
 
@@ -157,7 +245,7 @@ gh pr diff PR_NUMBER --repo OWNER/REPO
 ```
 Equipo de revisión:
 
-1. Estándar (12 agentes: 4 Claude + 4 Codex + 4 Auggie)
+1. Estándar (8 agentes: 4 Claude + 4 Codex)
 2. Intermedio (8 agentes: 4 Claude + 4 Codex)
 3. Básico Codex (4 agentes: 1 Codex por dominio) — DEFAULT
 4. Básico Claude (4 agentes: 1 Claude por dominio)
@@ -190,8 +278,8 @@ Dominios activos: Seguridad (siempre), Calidad
 ### Scope del agente de seguridad
 
 En revisiones de PR, el agente de seguridad revisa un subconjunto enfocado:
-1. **6 principios base**: errores internos, secrets, auth via token, validación de input, menor privilegio, rate limiting
-2. **Reglas de `docs/estandares/guia-code-review.md`** (sección Seguridad): IDOR, ownership, PII en responses, validación de entrada, env vars wired, no permisos wildcard
+1. **6 principios ADR-003**: errores internos, secrets, auth via token, validación de input, menor privilegio, rate limiting
+2. **Reglas de la guía de code review** (`docs/estandares/guia-code-review.md`, sección Seguridad): IDOR, ownership, PII en responses, email allowlist, env vars wired, no wildcards IAM
 3. **Items de código**: CORS, XSS, SQL injection, `str(e)` en responses, `html.escape()` en templates
 
 **NO revisa**: controles de infraestructura cloud, networking, política de datos, rotación de credenciales.
@@ -226,11 +314,17 @@ Los archivos modificados en este PR son:
 
 ## Tu dominio: [DOMINIO]
 
-Las reglas de tu dominio están en: docs/estandares/guia-code-review.md
-ANTES de revisar cualquier código, ejecuta:
-  cat docs/estandares/guia-code-review.md
-Lee la sección de tu dominio (Seguridad / Arquitectura / Calidad / Performance)
-y aplica esas reglas al código del worktree.
+## Reglas de tu dominio (verbatim)
+
+[Pegar aquí el contenido de $ART_DIR/reglas-{DOMINIO}.md, el que resolvió
+el Paso 4a. Va EMBEBIDO en el brief, no como una ruta que el revisor deba abrir:
+el revisor no tiene que resolver nada, y si el contenido faltara el comando ya
+habría abortado en el gate del Paso 4a.]
+
+Esas son las reglas de tu dominio y son la fuente de verdad de este repo
+(`docs/estandares/guia-code-review.md`).
+Si esta sección llegara vacía, responde `BLOQUEADO: brief sin reglas de dominio`
+y no revises.
 
 ## Reglas del proyecto (CLAUDE.md)
 [contenido relevante del CLAUDE.md del repo — máx. 200 líneas]
@@ -297,39 +391,44 @@ IMPORTANTE:
 ```
 Agent tool:
   subagent_type: "general-purpose"
-  run_in_background: true
+  isolation: "worktree"
   name: "claude-{dominio}-pr-PR_NUMBER"
   prompt: "[contenido completo del brief, incluyendo worktree path y rutas absolutas]"
 ```
 
+> **⚠️ `isolation: "worktree"` es OBLIGATORIO, no `run_in_background: true`** (no existe en el tool `Agent` — los `Agent` corren async por defecto). Plan `canal-retorno-subagentes-deadline`: un `Agent` con `name` sin `isolation` aterriza en `in_process_teammate`, inconsultable vía `TaskOutput`.
+
 ### Codex → cd WORKTREE_PATH + codex exec
 
 ```bash
-cd WORKTREE_PATH && codex exec --full-auto -o /tmp/resultado-{dominio}-codex-pr-PR_NUMBER.md \
-  "cat docs/estandares/guia-code-review.md && echo '---' && [instrucciones del brief]" </dev/null
+cd WORKTREE_PATH && codex exec --sandbox read-only -o "$ART_DIR/resultado-{dominio}-codex.md" \
+  "[instrucciones del brief — CON las reglas del dominio ya embebidas verbatim, ver Paso 6]
+
+Tu reporte DEBE empezar con esta línea EXACTA, sola en el primer renglón:
+REVISION-ID: $REVISION_ID" </dev/null
 ```
 
 El `cd WORKTREE_PATH` es OBLIGATORIO. Sin él, Codex usa su propia heurística de descubrimiento y puede leer el repo equivocado o la branch equivocada.
 
+**`-o "$ART_DIR/..."` es igual de obligatorio**, y la línea `REVISION-ID:` del brief no es decorativa: es lo que el Paso 8 verifica para saber que el reporte es de este PR y no del que está revisando otro agente.
+
 **`</dev/null` al final es OBLIGATORIO en background.** Cuando `codex exec` corre dentro de `run_in_background: true` (o cualquier contexto donde stdin no es un TTY pero sigue abierto), Codex detecta el stdin no-TTY y activa su modo "leer prompt adicional desde stdin hasta EOF". Como el background shell de Claude Code mantiene stdin abierto, Codex se queda bloqueado en `Reading additional input from stdin...` sin analizar nada. Síntoma: proceso vivo (`ps` lo muestra), 0% CPU, archivo de output nunca se crea. Incidente: 2026-04-23 revisión PR #308 — 4 Codex colgados 13 min sin producir resultado. Fix: agregar `</dev/null` al final del comando para cerrar stdin explícitamente. En uso interactivo (TTY) funciona sin el redirect; el bug solo se manifiesta en background.
-
-### Auggie → cd WORKTREE_PATH + auggie
-
-```bash
-cd WORKTREE_PATH && auggie -p -i "[contenido del brief]" \
-  > /tmp/resultado-{dominio}-auggie-pr-PR_NUMBER.md 2>&1
-```
 
 ### Timeouts
 
-- Default: 300000ms (5 min)
-- PRs con muchos archivos o migraciones: 600000ms (10 min)
+- **CLIs externos (Codex/Auggie, via `Bash`):** timeout real de proceso. Default: 300000ms (5 min).
+  PRs con muchos archivos o migraciones: 600000ms (10 min).
+- **Agentes Claude (via `Agent` tool):** sin timeout real de proceso — usan el mecanismo de deadline
+  del Paso 8 (`TaskOutput` acotado, perfil "revision amplia": hasta 600000ms/10min por sondeo,
+  encadenable si el trabajo real necesita más dentro del presupuesto total). Ver
+  `docs/estandares/subagentes-con-deadline.md`.
 
 ---
 
 ## Paso 8: Recolectar y consolidar resultados
 
-Cuando todos los agentes terminen:
+Cuando todos los agentes terminen — o entren en estado terminal (`idle` con resultado, `timed_out`,
+`failed`; ver "Deadline y quorum" abajo):
 
 1. Leer resultados (Read tool para archivos /tmp, texto directo para Claude agents)
 2. Presentar tabla consolidada:
@@ -341,9 +440,44 @@ Cuando todos los agentes terminen:
 |--------|---------|-----------|----------|-------|--------|----------|
 | Codex Seguridad | Seguridad | CAMBIOS NECESARIOS | 1 | 1 | 0 | 0 |
 | Codex Calidad | Calidad | APROBADO | 0 | 0 | 2 | 1 |
+| Claude Arquitectura | Arquitectura | `timed_out` (no respondio dentro del deadline) | — | — | — | — |
 
-Veredicto consolidado: CAMBIOS NECESARIOS (1 crítico, 1 alto)
+Veredicto consolidado: CAMBIOS NECESARIOS (1 crítico, 1 alto) — sobre 2 de 3 agentes;
+Claude Arquitectura quedo timed_out y no cuenta ni a favor ni en contra
 ```
+
+### Deadline y quorum (Fase 6 del plan `canal-retorno-subagentes-deadline`)
+
+Los agentes **Codex/Auggie** (CLIs externos) ya tienen timeout real de proceso vía `Bash` — si no
+responden dentro de su timeout, el propio `Bash` los corta y eso ya se maneja como "Si un agente
+falla" (fuera de esta sección). Este mecanismo aplica **solo a agentes Claude** (`Agent` tool):
+
+Si un agente Claude no noticio dentro de su deadline (perfil "revision amplia", hasta 600000ms/10min
+por sondeo — ver "Timeouts" arriba): **un** sondeo acotado —
+`TaskOutput(agent_id, block: true, timeout: <tiempo restante>)` — NO un loop. Si tampoco responde:
+`TaskStop(agent_id)` best-effort, marcar `timed_out`, y continuar sin ese agente.
+
+**Default de quorum:** "todos deben decir APROBADO" (regla 12 de "Reglas hardcodeadas") se calcula
+**sobre los agentes que respondieron dentro de su deadline** — un `timed_out` no cuenta ni a favor ni
+en contra, y NO bloquea indefinidamente el cierre de la revisión (antes de esta corrección, un solo
+agente colgado impedía cerrar el PR para siempre). Reportar cada `timed_out` explícitamente en la
+tabla y en el veredicto consolidado — nunca ocultarlo ni contarlo como aprobación silenciosa.
+
+**Verificar la pertenencia de cada reporte externo ANTES de leerlo:**
+
+```bash
+for DOM in seguridad performance arquitectura calidad; do
+  "$ART" verificar --id "$REVISION_ID" --esperado "PR_NUMBER" \
+    "resultado-${DOM}-codex.md" || echo "⚠ $DOM sin veredicto utilizable"
+done
+```
+
+`verificar` imprime la ruta si el reporte es de esta revisión; si no, sale != 0
+diciendo qué falló (no existe / vacío / sobrante de la ronda anterior / habla de
+otro PR). **Un reporte que no pasa no se lee ni se consolida, y no se sustituye
+por uno parecido de `/tmp`** — el que haya ahí es de otro agente. Ese dominio
+entra a la tabla como `sin veredicto`, igual que un `timed_out`, y **nunca** como
+aprobación silenciosa.
 
 3. Presentar hallazgos priorizados (deduplicados):
 
@@ -417,11 +551,43 @@ Si el usuario pidió re-revisión después de fixes:
 1. Crear `scratch/equipo/brief-pr-PR_NUMBER-r2.md` con lista de fixes aplicados
 2. Relanzar SOLO los agentes que reportaron hallazgos (APROBADO en ronda 1 = no re-evaluar)
 
-**Codex (resume):**
+**Re-sellar ANTES de relanzar** — `sellado_en` es la marca contra la que se mide la
+frescura del reporte. Sin re-sellar, la ronda 2 aceptaría los reportes de la ronda 1
+como si fueran nuevos:
+
 ```bash
-cd WORKTREE_PATH && codex exec resume --last --full-auto \
-  -o /tmp/resultado-{dominio}-codex-pr-PR_NUMBER-r2.md "[brief con fixes]" </dev/null
+ART_DIR="$("$ART" sellar --id "$REVISION_ID" --ronda 2)" || exit 1
 ```
+
+**Codex — sesión FRESCA por dominio, nunca `resume --last`:**
+```bash
+cd WORKTREE_PATH && codex exec --sandbox read-only \
+  -o "$ART_DIR/resultado-{dominio}-codex-r2.md" \
+  "[brief de ronda 1 del dominio + reglas del dominio + brief con fixes, concatenados, con la misma línea REVISION-ID: $REVISION_ID]" </dev/null
+```
+
+> 🔴 **`resume --last` está PROHIBIDO aquí, y el motivo es el mismo bug que este
+> comando ya arregló en las rutas de artefacto.** Este paso lanza los 4 Codex de
+> dominio **en paralelo desde el mismo `cd WORKTREE_PATH`**. `--last` resuelve a
+> «la última sesión de Codex de ese directorio», no a «la tuya»: con 4 sesiones
+> hermanas, los 4 `resume --last` apuntan al mismo sitio y el revisor de Seguridad
+> recibe el contexto del de Performance (o del que haya terminado último), sin
+> ningún error visible.
+>
+> **`verificar` NO lo atrapa, y por eso hay que cerrarlo en la escritura.** La
+> sesión equivocada escribe en *tu* `$ART_DIR`, con *tu* `REVISION-ID` (se lo pide
+> tu prompt), dentro de la ventana de frescura de *tu* sello: los cuatro chequeos
+> pasan y el reporte entra al consolidado como propio. La verificación de
+> pertenencia demuestra que el archivo es de esta revisión, no que el revisor haya
+> leído el cambio de esta revisión.
+>
+> La sesión fresca cuesta más tokens que un resume y es **determinista**, que es lo
+> que se está comprando. Si necesitás continuidad real, pasá el `<session_id>`
+> explícito del Codex de *ese* dominio (guardado en `scratch/equipo/state.json` en
+> la ronda 1) — nunca `--last`.
+
+Y al recolectar, verificar los artefactos de la ronda nueva
+(`"$ART" verificar --id "$REVISION_ID" "resultado-{dominio}-codex-r2.md"`).
 
 El `</dev/null` también aplica al `codex exec resume` — la regla es idéntica para cualquier invocación de `codex exec` en background.
 
@@ -440,15 +606,17 @@ Repetir Pasos 8-9. **Máximo 5 rondas.**
 
 ```bash
 # Si el repo es local (está en Workspace)
-git -C REPO_LOCAL_PATH worktree remove /tmp/review-pr-PR_NUMBER --force
+git -C "$REPO_LOCAL_PATH" worktree remove "$ART_DIR/review" --force
 
-# Si se clonó temporalmente en /tmp
-rm -rf /tmp/repo-pr-PR_NUMBER
+# Un solo comando barre el clon temporal, las reglas y los reportes de ESTA
+# revisión — y nada de lo de los demás agentes. Nunca uses un glob sobre el
+# directorio base: barrería los artefactos de todas las revisiones de la máquina.
+"$ART" limpiar --id "$REVISION_ID"
 ```
 
 Confirmar:
 ```bash
-ls /tmp/review-pr-PR_NUMBER 2>/dev/null \
+ls "$ART_DIR/review" 2>/dev/null \
   && echo "ADVERTENCIA: worktree aun existe" \
   || echo "OK: worktree eliminado"
 ```
@@ -486,22 +654,23 @@ Contenido:
 
 ## Reglas hardcodeadas
 
-1. **Worktree SIEMPRE** — los agentes leen desde `/tmp/review-pr-PR_NUMBER`, nunca desde el working directory principal
+1. **Worktree SIEMPRE** — los agentes leen desde `$ART_DIR/review`, nunca desde el working directory principal
 2. **Fetch antes de worktree** — garantiza que la branch está al día con origin
 3. **Verificar que el worktree existe** antes de construir cualquier brief
 4. **Limpiar worktree al terminar** — siempre, aunque la revisión falle o el usuario cancele
-5. **cd WORKTREE_PATH obligatorio** para Codex y Auggie — los CLIs externos ignoran rutas del prompt
+5. **cd WORKTREE_PATH obligatorio** para Codex — los CLIs externos ignoran rutas del prompt
 6. **Seguridad SIEMPRE activa** — no se puede desactivar
 7. **Rutas absolutas al worktree** en todos los prompts de agentes externos
 8. **Lanzar todos los agentes en paralelo** — un solo mensaje con múltiples tool calls
-9. **Codex exec, no codex directo** — SIEMPRE `codex exec --full-auto`
+9. **Codex exec, no codex directo** — SIEMPRE `codex exec --sandbox read-only`
 9b. **`</dev/null` obligatorio al final de todo `codex exec` en background** — sin él, Codex se cuelga leyendo stdin indefinidamente (incidente 2026-04-23 PR #308)
 10. **Verificar mergeable_state** antes de pushear fixes o aprobar el PR
-11. **NO buscar API keys** — codex, auggie ya están autenticados; si fallan, avisar al usuario
-12. **Consenso para APROBADO** — todos deben decir APROBADO; si uno dice CAMBIOS NECESARIOS, iterar
+11. **NO buscar API keys** — codex ya está autenticado; si falla, avisar al usuario
+12. **Consenso para APROBADO** — todos los agentes que respondieron dentro de su deadline deben decir APROBADO; si uno dice CAMBIOS NECESARIOS, iterar. Un `timed_out` no cuenta ni a favor ni en contra, y NO bloquea el cierre indefinidamente (ver "Deadline y quorum", Paso 8)
 13. **NO aplicar fixes sin confirmación** del usuario
 14. **Guardar reporte siempre** — incluso si el PR está limpio
 15. **Inconsistencias de documentación** — incluirlas en el reporte y en el comentario al autor del PR
+16. **Agentes Claude SIEMPRE con `isolation: "worktree"`, NUNCA `run_in_background: true`** (no existe en el tool `Agent`) — plan `canal-retorno-subagentes-deadline`
 
 ---
 
