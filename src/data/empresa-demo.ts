@@ -95,7 +95,7 @@ export const escenarioDemo: Escenario = {
         {
           amenaza: "granizada",
           probabilidadAnual: 0.55,
-          severidad: 0.6,
+          severidad: 0.2,
           procedencia: "ilustrativo",
           fuente: "Valor de demostración. La Sabana de Bogotá registra granizadas con alta frecuencia entre marzo y mayo.",
           nota: "Reemplazable por la serie histórica de estaciones del IDEAM en la zona.",
@@ -103,7 +103,7 @@ export const escenarioDemo: Escenario = {
         {
           amenaza: "tormenta-electrica",
           probabilidadAnual: 0.7,
-          severidad: 0.35,
+          severidad: 0.12,
           procedencia: "ilustrativo",
           fuente: "Valor de demostración, calibrado sobre lo reportado en la entrevista de validación.",
           nota: "Amenaza descubierta en campo: no estaba en el catálogo inicial del proyecto.",
@@ -111,7 +111,7 @@ export const escenarioDemo: Escenario = {
         {
           amenaza: "inundacion",
           probabilidadAnual: 0.25,
-          severidad: 0.5,
+          severidad: 0.25,
           procedencia: "ilustrativo",
           fuente: "Valor de demostración. El río Botello atraviesa el municipio y tiene historial de desbordamiento.",
           fuenteUrl: "http://www.ideam.gov.co/web/pronosticos-y-alertas",
@@ -119,7 +119,7 @@ export const escenarioDemo: Escenario = {
         {
           amenaza: "sequia",
           probabilidadAnual: 0.3,
-          severidad: 0.45,
+          severidad: 0.2,
           procedencia: "ilustrativo",
           fuente: "Valor de demostración, asociado a la recurrencia de El Niño.",
         },
@@ -147,7 +147,7 @@ export const escenarioDemo: Escenario = {
         {
           amenaza: "inundacion",
           probabilidadAnual: 0.35,
-          severidad: 0.55,
+          severidad: 0.28,
           procedencia: "ilustrativo",
           fuente: "Valor de demostración. Funza está en la llanura de inundación del río Bogotá.",
           fuenteUrl: "http://www.ideam.gov.co/web/pronosticos-y-alertas",
@@ -155,7 +155,7 @@ export const escenarioDemo: Escenario = {
         {
           amenaza: "tormenta-electrica",
           probabilidadAnual: 0.65,
-          severidad: 0.4,
+          severidad: 0.14,
           procedencia: "ilustrativo",
           fuente: "Valor de demostración.",
           nota: "El daño relevante aquí no es el rayo sino la sobretensión sobre los compresores del cuarto frío.",
@@ -172,7 +172,7 @@ export const escenarioDemo: Escenario = {
         {
           amenaza: "granizada",
           probabilidadAnual: 0.4,
-          severidad: 0.3,
+          severidad: 0.12,
           procedencia: "ilustrativo",
           fuente: "Valor de demostración.",
         },
@@ -191,7 +191,7 @@ export const escenarioDemo: Escenario = {
       margenDiario: 9_500_000,
       diasReparacion: 45,
       vulnerabilidad: {
-        granizada: 0.45,
+        granizada: 0.3,
         inundacion: 0.3,
         sequia: 0.25,
         sismo: 0.1,
@@ -208,7 +208,7 @@ export const escenarioDemo: Escenario = {
       margenDiario: 7_200_000,
       diasReparacion: 45,
       vulnerabilidad: {
-        granizada: 0.45,
+        granizada: 0.3,
         inundacion: 0.35,
         sequia: 0.25,
         sismo: 0.1,

@@ -36,6 +36,8 @@ export interface ResultadoActivo {
   perdidaEsperada: number;
   danioFisico: number;
   lucroCesante: number;
+  /** Parte del lucro cesante que sufren OTROS activos por depender de este. */
+  lucroCesantePropagado: number;
   /** Activos que dejan de operar por depender de este. */
   arrastra: string[];
   porAmenaza: AporteAmenaza[];
@@ -51,8 +53,14 @@ export interface Resultado {
   porSede: { sedeId: string; nombre: string; perdidaEsperada: number }[];
 }
 
-/** Umbral por debajo del cual un activo no se cuenta como comprometido. */
-const UMBRAL_COMPROMETIDO = 1_000_000;
+/**
+ * Qué fracción de la pérdida define el grupo de "activos comprometidos".
+ *
+ * Se cuenta cuántos activos, de mayor a menor, hacen falta para acumular este
+ * porcentaje de la pérdida total. Un umbral en pesos fijo no sirve: con
+ * cualquier valor bajo entran los 13 y la métrica deja de distinguir nada.
+ */
+const CONCENTRACION_COMPROMETIDOS = 0.8;
 
 /**
  * Activos que quedan fuera de servicio, directa o indirectamente, si cae `raiz`.
@@ -186,6 +194,7 @@ export function calcular(escenario: Escenario): Resultado {
       perdidaEsperada: danioFisico + lucroCesante,
       danioFisico,
       lucroCesante,
+      lucroCesantePropagado: suma(porAmenaza.map((a) => a.lucroCesantePropagado)),
       arrastra: arrastraEnSede,
       porAmenaza: porAmenaza.sort((a, b) => b.perdidaEsperada - a.perdidaEsperada),
     });
@@ -211,13 +220,21 @@ export function calcular(escenario: Escenario): Resultado {
     );
   }
 
+  const perdidaTotal = suma(porActivo.map((r) => r.perdidaEsperada));
+
+  let acumulado = 0;
+  let comprometidos = 0;
+  for (const r of porActivo) {
+    if (acumulado >= perdidaTotal * CONCENTRACION_COMPROMETIDOS) break;
+    acumulado += r.perdidaEsperada;
+    comprometidos += 1;
+  }
+
   return {
-    perdidaEsperadaAnual: suma(porActivo.map((r) => r.perdidaEsperada)),
+    perdidaEsperadaAnual: perdidaTotal,
     danioFisicoTotal: suma(porActivo.map((r) => r.danioFisico)),
     lucroCesanteTotal: suma(porActivo.map((r) => r.lucroCesante)),
-    activosComprometidos: porActivo.filter(
-      (r) => r.perdidaEsperada >= UMBRAL_COMPROMETIDO,
-    ).length,
+    activosComprometidos: comprometidos,
     porActivo,
     porAmenaza: [...acumuladoAmenaza.entries()]
       .map(([amenaza, perdidaEsperada]) => ({ amenaza, perdidaEsperada }))
