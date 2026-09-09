@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { amenazaPorId, escenarioDemo } from "@/data/empresa-demo";
 import { calcular, simularCaida } from "@/domain/calculo";
 import { descendientes } from "@/domain/calculo";
@@ -15,6 +15,41 @@ export default function Simulacion() {
   const [sedeId, setSedeId] = useState(escenarioDemo.sedes[0].id);
   const [caidos, setCaidos] = useState<string[]>([]);
   const [sobre, setSobre] = useState<string | null>(null);
+
+  // Escenario por enlace: ?caidos=subest-f,frio abre la pantalla con esas
+  // instalaciones ya marcadas. Sirve para llevar un caso concreto a una
+  // reunión sin tener que armarlo en vivo delante de nadie.
+  //
+  // Se lee de `window.location` en un efecto y no con `useSearchParams` a
+  // propósito: ese hook obliga a envolver la página en Suspense y la saca del
+  // prerender estático, que es mucho precio por un parámetro opcional.
+  useEffect(() => {
+    const pedidos = new URLSearchParams(window.location.search)
+      .get("caidos")
+      ?.split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (!pedidos?.length) return;
+
+    const validos = pedidos.filter((id) =>
+      escenarioDemo.activos.some((a) => a.id === id),
+    );
+    if (!validos.length) return;
+
+    // Todas las instalaciones marcadas deben verse en el plano, así que manda
+    // la sede de la primera.
+    const sedeDeLaPrimera = escenarioDemo.activos.find(
+      (a) => a.id === validos[0],
+    )!.sedeId;
+    setSedeId(sedeDeLaPrimera);
+    setCaidos(
+      validos.filter(
+        (id) =>
+          escenarioDemo.activos.find((a) => a.id === id)?.sedeId ===
+          sedeDeLaPrimera,
+      ),
+    );
+  }, []);
 
   const sede = escenarioDemo.sedes.find((s) => s.id === sedeId)!;
   const activosSede = escenarioDemo.activos.filter((a) => a.sedeId === sedeId);
