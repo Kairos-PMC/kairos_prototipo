@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "preferences": {
+    "destination": {
+      "value": "deck",
+      "confirmed_in": [
+        "kairos-simulacion"
+      ],
+      "updated_at": "2026-09-15T22:54:45.523Z"
+    },
+    "aspect": {
+      "value": "1920x1080",
+      "confirmed_in": [
+        "kairos-simulacion"
+      ],
+      "updated_at": "2026-09-15T22:54:45.556Z"
+    },
+    "language": {
+      "value": "es",
+      "confirmed_in": [
+        "kairos-simulacion"
+      ],
+      "updated_at": "2026-09-15T22:54:45.584Z"
+    },
+    "style_preset.product-launch-video": {
+      "value": "cobalt-grid",
+      "confirmed_in": [
+        "kairos-simulacion"
+      ],
+      "updated_at": "2026-09-15T23:02:40.758Z"
+    }
+  },
+  "sightings": {}
+}

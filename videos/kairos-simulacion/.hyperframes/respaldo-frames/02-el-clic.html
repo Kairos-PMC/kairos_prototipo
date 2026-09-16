@@ -1,0 +1,638 @@
+<template>
+  <style>
+    /* ── Kairos · frame 02 "El clic" ───────────────────────────────────────
+       Cobalt Grid at frame scale. Two inks (papel + tinta) plus the plan's
+       own state code: azul = opera · bermellón = golpe directo. No ocre in
+       this frame — the cascade is frame 03.
+       Fonts: the project ships no .woff2, so each family declared in
+       frame.md is bound with src: local() and backed by a stack the
+       renderer auto-resolves. No network @import. */
+
+    @font-face {
+      font-family: "IBM Plex Serif";
+      src: local("IBM Plex Serif"), local("IBMPlexSerif-Regular"), local("IBMPlexSerif");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "IBM Plex Sans";
+      src: local("IBM Plex Sans"), local("IBMPlexSans-Regular"), local("IBMPlexSans");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "IBM Plex Sans";
+      src: local("IBM Plex Sans SemiBold"), local("IBMPlexSans-SemiBold");
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: "IBM Plex Mono";
+      src: local("IBM Plex Mono"), local("IBMPlexMono-Regular"), local("IBMPlexMono");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    #root {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      isolation: isolate;
+      container-type: size;
+      --papel: #f0ece1;
+      --papel-alto: #faf8f3;
+      --tinta: #16191d;
+      --tinta-media: #55606d;
+      --tinta-tenue: #8b95a1;
+      --linea: rgba(205, 198, 181, 0.55);
+      --serif: "IBM Plex Serif", Georgia, "Times New Roman", serif;
+      --sans: "IBM Plex Sans", Inter, "Helvetica Neue", sans-serif;
+      --mono: "IBM Plex Mono", monospace;
+      font-family: var(--sans);
+      color: var(--tinta);
+    }
+
+    #root *,
+    #root *::before,
+    #root *::after {
+      box-sizing: border-box;
+    }
+
+    /* ── ground: papel + retícula milimetrada (permanente) ───────────────── */
+    .clic-ground {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background-color: var(--papel);
+      background-image:
+        linear-gradient(to right, var(--linea) 0 1px, transparent 1px 100%),
+        linear-gradient(to bottom, var(--linea) 0 1px, transparent 1px 100%);
+      background-size: 38.4px 38.4px;
+      background-position: 0 0;
+    }
+
+    /* ── el plano: base (antes) + la región revelada (caído) ─────────────── */
+    .clic-plano {
+      position: absolute;
+      left: 520px;
+      top: 190px;
+      width: 880px;
+      height: 751.86px;
+      z-index: 10;
+    }
+
+    .clic-plate {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 880px;
+      height: 751.86px;
+      display: block;
+    }
+
+    /* Recorte sobre la subestación. Fuera de ese rectángulo los dos plates
+       son idénticos pixel a pixel, así que el borde del clip es invisible:
+       lo único que cambia es la instalación golpeada. */
+    .clic-reveal {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 880px;
+      height: 751.86px;
+      clip-path: inset(143.28px 408.22px 608.58px 471.78px);
+      will-change: transform, clip-path;
+    }
+
+    /* ── fila de KPIs ─────────────────────────────────────────────────────── */
+    .clic-kpis {
+      position: absolute;
+      left: 76.8px;
+      top: 82px;
+      width: 1766.4px;
+      height: 98px;
+      z-index: 40;
+    }
+
+    .clic-kpi-rule {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 1766.4px;
+      height: 2.3px;
+      background: var(--tinta);
+      transform-origin: 0% 50%;
+    }
+
+    .clic-kpi {
+      position: absolute;
+      top: 2.3px;
+      width: 441.6px;
+      height: 95.7px;
+      padding: 12px 18px 0 18px;
+    }
+
+    .clic-kpi-1 { left: 0; }
+    .clic-kpi-2 { left: 441.6px; }
+    .clic-kpi-3 { left: 883.2px; }
+    .clic-kpi-4 { left: 1324.8px; }
+
+    .clic-kpi-ink {
+      background: var(--tinta);
+      color: var(--papel);
+    }
+
+    .clic-div {
+      position: absolute;
+      top: 14px;
+      width: 1px;
+      height: 70px;
+      background: rgba(139, 149, 161, 0.55);
+    }
+
+    .clic-div-a { left: 441.6px; }
+    .clic-div-b { left: 883.2px; }
+
+    .clic-kpi-label {
+      font-family: var(--sans);
+      font-weight: 600;
+      font-size: 15px;
+      line-height: 1.2;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--tinta-media);
+      white-space: nowrap;
+    }
+
+    .clic-kpi-ink .clic-kpi-label {
+      color: rgba(240, 236, 225, 0.72);
+    }
+
+    .clic-kpi-figure {
+      display: flex;
+      align-items: baseline;
+      gap: 26px;
+      margin-top: 4px;
+    }
+
+    .clic-num {
+      display: flex;
+      align-items: baseline;
+      min-width: 168px;
+      font-family: var(--serif);
+      font-weight: 400;
+      font-size: 52px;
+      line-height: 1;
+      letter-spacing: -0.015em;
+      font-variant-numeric: tabular-nums;
+      font-feature-settings: "tnum" 1;
+      color: var(--tinta);
+      white-space: nowrap;
+      transform-origin: 0% 58%;
+    }
+
+    .clic-kpi-ink .clic-num {
+      color: var(--papel);
+    }
+
+    .clic-affix {
+      font-size: 0.6em;
+      letter-spacing: 0;
+      color: var(--tinta-media);
+    }
+
+    .clic-kpi-ink .clic-affix {
+      color: rgba(240, 236, 225, 0.72);
+    }
+
+    .clic-pre { margin-right: 0.34em; }
+    .clic-suf { margin-left: 0.34em; }
+
+    .clic-kpi-sub {
+      font-family: var(--mono);
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 1;
+      letter-spacing: 0.05em;
+      color: var(--tinta-tenue);
+      white-space: nowrap;
+    }
+
+    .clic-kpi-mark {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 441.6px;
+      height: 2.3px;
+      background: var(--tinta);
+      transform-origin: 0% 50%;
+    }
+
+    /* ── banda inferior: la tesis ─────────────────────────────────────────── */
+    .clic-banda {
+      position: absolute;
+      left: 0;
+      top: 780px;
+      width: 1920px;
+      height: 300px;
+      z-index: 30;
+      background-color: var(--papel);
+      background-image:
+        linear-gradient(to right, var(--linea) 0 1px, transparent 1px 100%),
+        linear-gradient(to bottom, var(--linea) 0 1px, transparent 1px 100%);
+      background-size: 38.4px 38.4px;
+      background-position: 0 -12px;
+    }
+
+    .clic-banda-rule {
+      position: absolute;
+      left: 76.8px;
+      top: 0;
+      width: 1766.4px;
+      height: 2.3px;
+      background: var(--tinta);
+      transform-origin: 0% 50%;
+    }
+
+    .clic-tesis {
+      position: absolute;
+      left: 76.8px;
+      top: 14px;
+      width: 1766.4px;
+      text-align: center;
+      font-family: var(--serif);
+      font-weight: 400;
+      font-size: 90px;
+      line-height: 1;
+      letter-spacing: -0.005em;
+      color: var(--tinta);
+      white-space: nowrap;
+    }
+
+    .clic-word {
+      display: inline-block;
+    }
+
+    /* ── filetes cobalto permanentes ──────────────────────────────────────── */
+    .clic-hair {
+      position: absolute;
+      left: 76.8px;
+      width: 1766.4px;
+      height: 2.3px;
+      background: var(--tinta);
+      z-index: 50;
+    }
+
+    .clic-hair-top { top: 58px; }
+    .clic-hair-bottom { top: 1022px; }
+
+    /* ── el clic: onda expansiva cuadrada (cero radios en el sistema) ─────── */
+    .clic-onda {
+      position: absolute;
+      left: 992px;
+      top: 333.28px;
+      width: 110px;
+      height: 110px;
+      margin-left: -55px;
+      margin-top: -55px;
+      border: 2.3px solid var(--tinta);
+      opacity: 0;
+      z-index: 60;
+      pointer-events: none;
+    }
+
+    /* ── el cursor sobredimensionado ──────────────────────────────────────── */
+    .clic-cursor {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100px;
+      height: 100px;
+      z-index: 70;
+      pointer-events: none;
+      will-change: transform;
+    }
+
+    .clic-cursor svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      fill: var(--tinta);
+      stroke: var(--papel);
+      stroke-width: 1.4;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+  </style>
+
+  <div id="root" data-composition-id="02-el-clic" data-duration="7">
+    <!-- ground: papel + retícula, a fondo completo -->
+    <div
+      class="clip clic-ground"
+      data-start="0"
+      data-duration="7"
+      data-track-index="0"
+    ></div>
+
+    <!-- el plano: handoff_in / handoff_out — encuadre completo, escala 1, quieto -->
+    <div class="clip clic-plano" data-start="0" data-duration="7" data-track-index="1">
+      <img class="clic-plate" src="assets/plates/plano-antes@2x.png" alt="" />
+      <div class="clic-reveal" id="clic-reveal">
+        <img class="clic-plate" src="assets/plates/plano-caido@2x.png" alt="" />
+      </div>
+    </div>
+
+    <!-- la tesis, sobre la banda inferior -->
+    <div class="clip clic-banda" id="clic-banda" data-start="0" data-duration="7" data-track-index="2">
+      <div class="clic-banda-rule" id="clic-banda-rule"></div>
+      <div class="clic-tesis"><span class="clic-word">El</span> <span class="clic-word">daño</span> <span class="clic-word">físico</span> <span class="clic-word">es</span> <span class="clic-word">la</span> <span class="clic-word">parte</span> <span class="clic-word">barata.</span></div>
+    </div>
+
+    <!-- la fila de KPIs -->
+    <div class="clip clic-kpis" data-start="0" data-duration="7" data-track-index="3">
+      <div class="clic-kpi-rule" id="clic-kpi-rule"></div>
+      <div class="clic-div clic-div-a" id="clic-div-a"></div>
+      <div class="clic-div clic-div-b" id="clic-div-b"></div>
+
+      <div class="clic-kpi clic-kpi-1" id="clic-kpi-1">
+        <div class="clic-kpi-label">FUERA DE SERVICIO</div>
+        <div class="clic-kpi-figure">
+          <div class="clic-num" id="clic-num-1"><span id="clic-val-fuera">0</span></div>
+          <div class="clic-kpi-sub">de 13 activos</div>
+        </div>
+      </div>
+
+      <div class="clic-kpi clic-kpi-2" id="clic-kpi-2">
+        <div class="clic-kpi-label">OPERACIÓN DETENIDA</div>
+        <div class="clic-kpi-figure">
+          <div class="clic-num"><span>0</span><span class="clic-affix clic-suf">%</span></div>
+          <div class="clic-kpi-sub">del margen diario</div>
+        </div>
+      </div>
+
+      <div class="clic-kpi clic-kpi-3" id="clic-kpi-3">
+        <div class="clic-kpi-label">REPOSICIÓN</div>
+        <div class="clic-kpi-figure">
+          <div class="clic-num" id="clic-num-3"><span class="clic-affix clic-pre">$</span><span id="clic-val-repo">0</span><span class="clic-affix clic-suf" id="clic-suf-repo">M</span></div>
+          <div class="clic-kpi-sub">daño físico</div>
+        </div>
+      </div>
+
+      <div class="clic-kpi clic-kpi-4 clic-kpi-ink" id="clic-kpi-4">
+        <div class="clic-kpi-label">COSTO DEL EVENTO</div>
+        <div class="clic-kpi-figure">
+          <div class="clic-num"><span class="clic-affix clic-pre">$</span><span>0</span></div>
+        </div>
+      </div>
+
+      <div class="clic-kpi-mark" id="clic-mark-1" style="left: 0"></div>
+      <div class="clic-kpi-mark" id="clic-mark-3" style="left: 883.2px"></div>
+    </div>
+
+    <!-- filetes cobalto: mobiliario permanente del sistema -->
+    <div class="clip clic-hair clic-hair-top" data-start="0" data-duration="7" data-track-index="4"></div>
+    <div class="clip clic-hair clic-hair-bottom" data-start="0" data-duration="7" data-track-index="4"></div>
+
+    <!-- el clic -->
+    <div class="clip clic-onda" id="clic-onda-1" data-start="0" data-duration="7" data-track-index="5"></div>
+    <div class="clip clic-onda" id="clic-onda-2" data-start="0" data-duration="7" data-track-index="5"></div>
+
+    <div class="clip clic-cursor" id="clic-cursor" data-start="0" data-duration="7" data-track-index="6" aria-hidden="true">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M5 3 L5 19 L9 15 L12 22 L15 20.5 L11.5 14 L18 14 Z" />
+      </svg>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+  <script>
+    (function () {
+      "use strict";
+
+      var tl = gsap.timeline({ paused: true });
+
+      /* ─────────────────────────────────────────────────────────────────────
+         Geometría medida sobre los plates (1772x1514 @2x, alineados pixel a
+         pixel). El plano se dibuja a 880 x 751.86 con origen (520, 190).
+         Región de la subestación en px del plate: x 800–1100, y 128–390.5.
+         Centroide visual del recuadro (el punto del clic): plate (950, 288.5).
+         ──────────────────────────────────────────────────────────────────── */
+      var PW = 880,
+        PH = 751.86;
+      var SUB_L = 397.29,
+        SUB_R = 546.28,
+        SUB_T = 63.56,
+        SUB_B = 193.91;
+      var CX = 471.78,
+        CY = 143.28;
+      var CLICK_X = 520 + CX; // 991.78
+      var CLICK_Y = 190 + CY; // 333.28
+
+      var reveal = document.getElementById("clic-reveal");
+      var cursor = document.getElementById("clic-cursor");
+
+      // El recorte va de un rectángulo de área cero en el punto del clic al
+      // rectángulo exacto de la subestación. Se interpola como propiedad de
+      // estilo (nunca por onUpdate: seek() suprime los callbacks y el revelado
+      // no se pintaría al renderizar fotograma a fotograma).
+      function insetAt(p) {
+        var top = CY + (SUB_T - CY) * p;
+        var left = CX + (SUB_L - CX) * p;
+        var right = PW - CX + (PW - SUB_R - (PW - CX)) * p;
+        var bottom = PH - CY + (PH - SUB_B - (PH - CY)) * p;
+        return (
+          "inset(" +
+          top.toFixed(2) +
+          "px " +
+          right.toFixed(2) +
+          "px " +
+          bottom.toFixed(2) +
+          "px " +
+          left.toFixed(2) +
+          "px)"
+        );
+      }
+      var CLIP_CERRADO = insetAt(0);
+      var CLIP_ABIERTO = insetAt(1);
+
+      // El recorte y la compresión del recuadro pivotan sobre el MISMO punto
+      // (el del clic), así que el contenido nunca se sale del recorte.
+      gsap.set(reveal, { transformOrigin: CX + "px " + CY + "px", scale: 1 });
+      reveal.style.clipPath = CLIP_CERRADO;
+
+      // Tip-targeting: la punta de la flecha vive en (21%, 14%) de su caja;
+      // se ancla una sola vez para que todo x/y posterior coloque la PUNTA.
+      gsap.set(cursor, { xPercent: -21, yPercent: -14, transformOrigin: "21% 14%" });
+
+      /* ── Scene 1 · 0.0–1.6s — la fila de KPIs baja, toda en ceros ──────── */
+      tl.fromTo(
+        "#clic-kpi-rule",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.78, ease: "power3.out" },
+        0.05
+      );
+
+      var tarjetas = ["#clic-kpi-1", "#clic-kpi-2", "#clic-kpi-3", "#clic-kpi-4"];
+      tarjetas.forEach(function (sel, i) {
+        tl.fromTo(
+          sel,
+          { opacity: 0, y: -30 },
+          { opacity: 1, y: 0, duration: 0.66, ease: "power3.out" },
+          0.14 + i * 0.14
+        );
+      });
+
+      tl.fromTo(
+        ["#clic-div-a", "#clic-div-b"],
+        { opacity: 0 },
+        { opacity: 1, duration: 0.5, ease: "power2.out" },
+        0.86
+      );
+
+      // Los subrayados de "reaccionó" nacen apagados; se dibujan en Scene 4.
+      tl.set(["#clic-mark-1", "#clic-mark-3"], { scaleX: 0 }, 0);
+
+      // El sufijo "M" no existe mientras la cifra es $ 0.
+      tl.set("#clic-suf-repo", { opacity: 0 }, 0);
+
+      // La banda de la tesis espera fuera de cuadro, abajo.
+      tl.set("#clic-banda", { y: 300 }, 0);
+      tl.set("#clic-banda-rule", { scaleX: 0 }, 0);
+      tl.set(".clic-word", { opacity: 0, y: 24 }, 0);
+
+      /* ── Scene 2 · 1.6–3.0s — el cursor entra por la derecha ───────────── */
+      // Una sola vectorial continua; x e y con eases distintos = curva larga.
+      // APPROACH_DUR 1.40s, y termina exactamente cuando empieza la presión.
+      tl.fromTo(
+        cursor,
+        { x: 2080 },
+        { x: CLICK_X, duration: 1.4, ease: "power1.inOut" },
+        1.6
+      );
+      tl.fromTo(
+        cursor,
+        { y: 690 },
+        { y: CLICK_Y, duration: 1.4, ease: "power3.inOut" },
+        1.6
+      );
+
+      /* ── Scene 3 · 3.0–4.0s — EL MOVIMIENTO FIRMA: el clic ─────────────── */
+      var CLICK_AT = 3.0;
+      var PRESS_DOWN = 0.12;
+      var IGNITE_AT = CLICK_AT + PRESS_DOWN; // 3.12
+
+      // Depresión sincronizada: mismo instante, misma duración. El cursor es
+      // el actor y se comprime más; el recuadro es el receptor.
+      tl.to(cursor, { scale: 0.86, duration: PRESS_DOWN, ease: "power2.in" }, CLICK_AT);
+      tl.to(reveal, { scale: 0.955, duration: PRESS_DOWN, ease: "power2.in" }, CLICK_AT);
+
+      // La ignición: en el mismo fotograma del fondo de la presión, la región
+      // de la subestación se revela desde el plate caído — azul → bermellón,
+      // con su rayado y su X — radiando desde el punto del clic.
+      tl.set(reveal, { clipPath: CLIP_CERRADO }, 0);
+      tl.to(
+        reveal,
+        { clipPath: CLIP_ABIERTO, duration: 0.26, ease: "power3.out" },
+        IGNITE_AT
+      );
+
+      // Liberación: cursor y recuadro vuelven juntos, con sobrepaso corto.
+      tl.to(cursor, { scale: 1, duration: 0.5, ease: "back.out(1.7)" }, IGNITE_AT);
+      tl.to(reveal, { scale: 1, duration: 0.5, ease: "back.out(1.7)" }, IGNITE_AT);
+
+      // Onda expansiva desde el punto del clic. Cuadrada: el sistema no tiene
+      // un solo elemento circular, y el filete es tinta (el bermellón sólo
+      // puede usarlo una instalación).
+      tl.set(["#clic-onda-1", "#clic-onda-2"], { scale: 1, opacity: 0 }, 0);
+      tl.fromTo(
+        ["#clic-onda-1", "#clic-onda-2"],
+        { scale: 1, opacity: 0.5 },
+        {
+          scale: 2.6,
+          opacity: 0,
+          duration: 0.66,
+          ease: "power2.out",
+          stagger: 0.09,
+          immediateRender: false,
+        },
+        IGNITE_AT
+      );
+
+      // El cursor se aparta y se retira de cuadro: no se queda estorbando.
+      tl.to(cursor, { x: CLICK_X + 96, y: CLICK_Y + 68, duration: 0.4, ease: "power2.out" }, 3.42);
+      tl.to(cursor, { x: 2120, y: 860, duration: 0.58, ease: "power2.in" }, 3.9);
+
+      /* ── Scene 4 · 4.0–5.2s — dos KPIs reaccionan, dos no ──────────────── */
+      // count-up determinista: cada entero se precalcula por fotograma a 30fps
+      // y se escribe con tl.set, así cualquier seek muestra el mismo valor.
+      var FPS = 30;
+      var countEase = gsap.parseEase("sine.inOut");
+
+      function contador(valorSel, lockupSel, desde, hasta, inicio, dur) {
+        var last = Math.max(1, Math.round(dur * FPS));
+        for (var f = 0; f <= last; f += 1) {
+          var v = Math.round(desde + (hasta - desde) * countEase(f / last));
+          tl.set(valorSel, { textContent: String(v) }, inicio + dur * (f / last));
+        }
+        // Un solo pulso contenido al aterrizar en el entero exacto.
+        tl.to(lockupSel, { scale: 1.07, duration: 0.16, ease: "power3.out" }, inicio + dur);
+        tl.to(lockupSel, { scale: 1, duration: 0.16, ease: "power2.out" }, inicio + dur + 0.16);
+      }
+
+      // FUERA DE SERVICIO · 0 → 1 (de 13 activos)
+      contador("#clic-val-fuera", "#clic-num-1", 0, 1, 4.1, 0.42);
+      tl.fromTo(
+        "#clic-mark-1",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.58, ease: "power3.out" },
+        4.14
+      );
+
+      // REPOSICIÓN · $ 0 → $ 240 M (daño físico)
+      contador("#clic-val-repo", "#clic-num-3", 0, 240, 4.24, 0.76);
+      tl.fromTo(
+        "#clic-suf-repo",
+        { opacity: 0 },
+        { opacity: 1, duration: 0.3, ease: "power2.out" },
+        4.32
+      );
+      tl.fromTo(
+        "#clic-mark-3",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.58, ease: "power3.out" },
+        4.34
+      );
+      // OPERACIÓN DETENIDA y COSTO DEL EVENTO siguen en cero, quietos: eso es
+      // parte del argumento. Todavía no hay cascada.
+
+      /* ── Scene 5 · 5.2–7.0s — la tesis, sola ───────────────────────────── */
+      tl.fromTo(
+        "#clic-banda",
+        { y: 300 },
+        { y: 0, duration: 0.7, ease: "power3.out" },
+        5.16
+      );
+      tl.fromTo(
+        "#clic-banda-rule",
+        { scaleX: 0 },
+        { scaleX: 1, duration: 0.72, ease: "power3.out" },
+        5.32
+      );
+      tl.fromTo(
+        ".clic-word",
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.52, ease: "power3.out", stagger: 0.078 },
+        5.46
+      );
+      // …y después quieto. Es una afirmación sin probar; los frames 3 y 4 son
+      // la prueba. Sin salida: el corte a frame 03 es la salida.
+
+      tl.seek(0);
+      window.__timelines = window.__timelines || {};
+      window.__timelines["02-el-clic"] = tl;
+    })();
+  </script>
+</template>

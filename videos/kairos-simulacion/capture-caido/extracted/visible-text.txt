@@ -1,0 +1,145 @@
+[span] Prototipo académico
+[span] Cifras de la empresa ilustrativas · acceso decorativo · los datos marcados
+[em] en vivo
+[span] sí vienen de APIs públicas reales
+[span] Kairos
+[span] Simulador de riesgos
+[p] Camila Restrepo
+[p] Jefe de Operaciones
+[span] Centro de datos
+[span] Sedes y amenazas
+[span] Simulación
+[span] Priorizador
+[p] Lámina 03
+[h1] Simulación sobre planta
+[p] Este es el plano de la sede. Haz clic sobre cualquier instalación para darla por caída: el dibujo marca en rojo lo que recibió el golpe y en ocre lo que deja de operar sin haberlo recibido. Las cifras de arriba se recalculan en el momento.
+[button] FACATATIVÁ
+[button] FUNZA
+[p] Fuera de servicio
+[p] de 13 activos
+[p] 3 sin recibir daño
+[p] Operación detenida
+[p] 37 %
+[p] del margen diario
+[p] $ 17 M por día
+[p] Reposición
+[p] $ 240 M
+[p] daño físico
+[p] 12 días de reparación
+[p] Costo del evento
+[p] $ 440 M
+[p] reposición + lucro cesante
+[p] $ 440.400.000
+[h2] Finca La Esperanza
+[p] Facatativá
+[p] Cundinamarca
+[button] Restablecer
+[text] BLOQUE A
+[text] BLOQUE B
+[text] SUBESTACIÓN
+[text] RESERVORIO
+[text] CASA DE BOMBAS
+[text] BODEGA DE INSUMOS
+[text] PORTERÍA
+[title] El fertirriego no opera sin energía en la finca.
+[title] Sin agua almacenada no hay qué bombear.
+[title] El cultivo bajo cubierta depende por completo del riego.
+[title] El cultivo bajo cubierta depende por completo del riego.
+[title] Sin vía no entran insumos ni salen despachos.
+[text] ~100 m
+[text] PROYECTO
+[text] Kairos
+[text] LÁMINA
+[text] 03-A
+[text] REV.
+[text] CLIENTE
+[text] Flores del Oriente S.A.S.
+[text] ESCALA
+[text] s/e
+[text] FECHA
+[text] 08-09-2026
+[text] FINCA LA ESPERANZA · ESCALA APROXIMADA · NORTE ARRIBA
+[span] En operación
+[span] Caído — recibió el golpe
+[span] Arrastrado — sin daño, sin operar
+[p] Qué hay en la sede
+[span] Invernaderos bloque A
+[span] $ 2,8 mil M
+[span] Invernaderos bloque B
+[span] $ 2,1 mil M
+[span] Sistema de fertirriego
+[span] $ 680 M
+[span] Reservorio
+[span] $ 320 M
+[span] Subestación eléctrica
+[span] $ 240 M
+[span] Bodega de insumos
+[span] $ 450 M
+[span] Vía interna de acceso
+[span] $ 180 M
+[p] Efecto en cadena
+[p] instalaciones
+[p] sin un rasguño
+[p] quedaron
+[p] fuera de operación. Ninguna póliza sobre el activo caído las cubre.
+[span] Sistema de fertirriego
+[span] $ 0
+[span] /día
+[span] Invernaderos bloque A
+[span] $ 10 M
+[span] /día
+[span] Invernaderos bloque B
+[span] $ 7 M
+[span] /día
+[p] Lámina 03 · continuación
+[h1] Exposición anual
+[p] El plano de arriba responde qué pasa si algo cae hoy. Esto responde cuánto cuesta, en promedio, un año de operación con estas amenazas.
+[p] Pérdida esperada al año
+[p] $ 1,1 mil M
+[p] $ 1.099.303.890
+[span] 76 %
+[span] daño físico
+[span] 24 %
+[span] lucro cesante
+[p] activos concentran el 80 % de esa pérdida.
+[span] Ilustrativo
+[p] Dónde se concentra
+[p] Por fenómeno
+[span] Inundación
+[span] $ 471 M
+[span] Granizada
+[span] $ 219 M
+[span] Tormenta eléctrica
+[span] $ 181 M
+[span] Sequía
+[span] $ 141 M
+[span] Sismo
+[span] $ 88 M
+[p] Por activo — los cinco primeros
+[span] Invernaderos bloque A
+[span] $ 239 M
+[span] Planta de poscosecha
+[span] $ 235 M
+[span] Invernaderos bloque B
+[span] $ 187 M
+[span] Cuarto frío
+[span] $ 139 M
+[span] Reservorio
+[span] $ 64 M
+[p] El detalle completo, con el desglose por fenómeno de cada activo, está en el reporte.
+[p] Kairos informa decisiones; no las garantiza. No pronostica si un evento va a ocurrir ni cuándo — estima el costo de no estar preparado, bajo supuestos que quedan a la vista y se pueden cambiar.
+[p] Las cifras de la empresa demo son ilustrativas. Para un uso real habría que calibrarlas contra los registros de la UNGRD, DesInventar y las estaciones del IDEAM más cercanas a cada sede.
+[a] Servicio Geológico Colombiano
+[a] DesInventar
+[a] USGS Earthquake Catalog
+[a] Open-Meteo
+[p] Ficha del proyecto
+[dd] ISIS 2007 · Diseño de Productos e Innovación con TI
+[dt] Institución
+[dd] Universidad de los Andes
+[dd] M. A. Rodríguez · S. Montoya · A. Muñoz · J. C. Solano · R. Ruiz
+[dt] Revisión
+[dd] B · 08-09-2026
+[p] Kairos · Prototipo académico · Rev.
+[p] Rev. B — plano de planta interactivo y simulación de caída en cadena.
+[p] Sin cuentas · sin cookies · sin datos de quien lo visita

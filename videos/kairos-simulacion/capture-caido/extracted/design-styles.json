@@ -1,0 +1,173 @@
+{
+  "typography": [
+    {
+      "role": "display",
+      "fontFamily": "IBM Plex Serif",
+      "fontSize": "30px",
+      "fontWeight": "500",
+      "lineHeight": "37.5px",
+      "letterSpacing": "-0.45px",
+      "color": "#16191D",
+      "sampleText": "Simulación sobre planta"
+    },
+    {
+      "role": "body",
+      "fontFamily": "IBM Plex Serif",
+      "fontSize": "24px",
+      "fontWeight": "500",
+      "lineHeight": "32px",
+      "letterSpacing": "-0.36px",
+      "color": "#C4372A",
+      "sampleText": "4"
+    },
+    {
+      "role": "heading",
+      "fontFamily": "IBM Plex Serif",
+      "fontSize": "18px",
+      "fontWeight": "500",
+      "lineHeight": "28px",
+      "letterSpacing": "-0.27px",
+      "color": "#16191D",
+      "sampleText": "Finca La Esperanza"
+    },
+    {
+      "role": "link",
+      "fontFamily": "IBM Plex Sans",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "lineHeight": "24px",
+      "letterSpacing": "normal",
+      "color": "#16191D",
+      "sampleText": "KairosSimulador de riesgos"
+    },
+    {
+      "role": "code",
+      "fontFamily": "-apple-system",
+      "fontSize": "16px",
+      "fontWeight": "400",
+      "lineHeight": "24px",
+      "letterSpacing": "normal",
+      "color": "#000000",
+      "sampleText": "Kairos — Simulador digital de riesgos@font-face{font-family:"
+    }
+  ],
+  "spacing": {
+    "observed": [
+      1,
+      2,
+      4,
+      6,
+      8,
+      10,
+      12,
+      16,
+      20,
+      24,
+      32,
+      40
+    ],
+    "baseUnit": 4
+  },
+  "radius": [],
+  "shadows": [
+    {
+      "value": "rgba(22, 25, 29, 0.04) 0px 1px 0px 0px, rgba(22, 25, 29, 0.05) 0px 2px 8px 0px",
+      "count": 5
+    }
+  ],
+  "buttons": [
+    {
+      "label": "FACATATIVÁ",
+      "background": "#16191D",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#F0ECE1",
+      "padding": "8px 12px",
+      "borderRadius": "0px",
+      "border": "0px solid rgb(240, 236, 225)",
+      "boxShadow": "none",
+      "fontSize": "12px",
+      "fontWeight": "400",
+      "height": "32px"
+    },
+    {
+      "label": "FUNZA",
+      "background": "#FAF8F3",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#55606D",
+      "padding": "8px 12px",
+      "borderRadius": "0px",
+      "border": "0px solid rgb(85, 96, 109)",
+      "boxShadow": "none",
+      "fontSize": "12px",
+      "fontWeight": "400",
+      "height": "32px"
+    },
+    {
+      "label": "Restablecer",
+      "background": "transparent",
+      "backgroundImage": "",
+      "backdropFilter": "",
+      "color": "#55606D",
+      "padding": "4px 10px",
+      "borderRadius": "4px",
+      "border": "1px solid rgb(205, 198, 181)",
+      "boxShadow": "none",
+      "fontSize": "11px",
+      "fontWeight": "400",
+      "height": "26.5px"
+    }
+  ],
+  "cards": [],
+  "nav": {
+    "label": "navigation",
+    "background": "color(srgb 0.941176 0.92549 0.882353 / 0.92)",
+    "backgroundImage": "",
+    "backdropFilter": "blur(8px)",
+    "color": "#16191D",
+    "padding": "0px",
+    "borderRadius": "0px",
+    "border": "",
+    "boxShadow": "none",
+    "fontSize": "16px",
+    "fontWeight": "400",
+    "height": "107px"
+  },
+  "chips": [
+    {
+      "label": "CR",
+      "background": "#FAF8F3",
+      "color": "#55606D",
+      "padding": "0px",
+      "borderRadius": "3.35544e+07px",
+      "border": "1px solid rgb(205, 198, 181)",
+      "boxShadow": "none",
+      "fontSize": "12px",
+      "fontWeight": "400",
+      "height": "36px"
+    }
+  ],
+  "statCells": [],
+  "tabs": [],
+  "backgrounds": [
+    {
+      "value": "linear-gradient(rgb(222, 216, 202) 1px, rgba(0, 0, 0, 0) 1px), linear-gradient(90deg, rgb(222, 216, 202) 1px, rgba(0, 0, 0, 0) 1px)",
+      "area": 4614240
+    },
+    {
+      "value": "linear-gradient(225deg, rgb(240, 236, 225) 0px, rgb(240, 236, 225) 50%, rgb(205, 198, 181) 50%, rgb(205, 198, 181) calc(50% + 1px), rgb(250, 248, 243) calc(50% + 1px))",
+      "area": 816354
+    }
+  ],
+  "glass": [
+    {
+      "backdropFilter": "blur(8px)",
+      "background": "color(srgb 0.941176 0.92549 0.882353 / 0.92)",
+      "border": "",
+      "borderRadius": "0px",
+      "boxShadow": "",
+      "area": 205440
+    }
+  ]
+}

@@ -1,0 +1,638 @@
+<template>
+  <div id="root" data-composition-id="04-las-dos-cifras" data-duration="7" data-fps="30" data-width="1920" data-height="1080">
+    <style>
+      /* === IBM Plex — declaracion compartida por los 4 frames === */
+      @font-face{font-family:"IBM Plex Serif";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexSerif-400.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Serif";font-style:normal;font-weight:500;font-display:block;src:url("assets/fonts/IBMPlexSerif-500.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Serif";font-style:normal;font-weight:600;font-display:block;src:url("assets/fonts/IBMPlexSerif-600.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexSans-400.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:500;font-display:block;src:url("assets/fonts/IBMPlexSans-500.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:600;font-display:block;src:url("assets/fonts/IBMPlexSans-600.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexMono-400.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:block;src:url("assets/fonts/IBMPlexMono-500.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:600;font-display:block;src:url("assets/fonts/IBMPlexMono-600.woff2") format("woff2");}
+
+      #root {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        container-type: size;
+        isolation: isolate;
+
+        --papel: #f0ece1;
+        --papel-alto: #faf8f3;
+        --tinta: #16191d;
+        --tinta-media: #55606d;
+        --linea: rgba(205, 198, 181, 0.55);
+        --linea-fina: rgba(205, 198, 181, 0.3);
+        --tinta-tenue: rgba(139, 149, 161, 0.55);
+        --ocre: #a8710c;
+      }
+
+      #f04-scene,
+      #f04-scene *,
+      #f04-scene *::before,
+      #f04-scene *::after {
+        box-sizing: border-box;
+      }
+
+      /* Full-bleed ground rides on the clip layer, never on #root. */
+      #f04-scene {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background-color: var(--papel);
+      }
+
+      /* — capa 1 · el plano, hundido a marca de agua — */
+      #f04-plate {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 50% 26%;
+        transform-origin: 50% 46%;
+        will-change: opacity, transform;
+      }
+
+      /* — capa 2 · la retícula milimetrada, permanente — */
+      .f04-grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(to right, var(--linea) 0 1px, transparent 1px 100%),
+          linear-gradient(to bottom, var(--linea) 0 1px, transparent 1px 100%),
+          linear-gradient(to right, var(--linea-fina) 0 1px, transparent 1px 100%),
+          linear-gradient(to bottom, var(--linea-fina) 0 1px, transparent 1px 100%);
+        background-size:
+          2cqw 2cqw,
+          2cqw 2cqw,
+          0.4cqw 0.4cqw,
+          0.4cqw 0.4cqw;
+      }
+
+      /* — capa 3 · mobiliario permanente: los dos filetes — */
+      .f04-hairline {
+        position: absolute;
+        left: 4cqw;
+        right: 4cqw;
+        height: 0.11cqw;
+        background: var(--tinta);
+      }
+      .f04-hairline-top {
+        top: 5.37%;
+      }
+      .f04-hairline-bot {
+        top: 82.04%;
+      }
+
+      .f04-qr {
+        position: absolute;
+        left: 4%;
+        top: 73.15%;
+        display: grid;
+        width: 3.75cqw;
+        height: 3.75cqw;
+        grid-template-columns: repeat(8, 1fr);
+        grid-template-rows: repeat(8, 1fr);
+        box-shadow: 0 0 0 0.12cqw var(--papel);
+      }
+      .f04-qr span {
+        background: var(--linea);
+      }
+      .f04-qr span.on {
+        background: var(--tinta);
+      }
+
+      .f04-divider {
+        position: absolute;
+        left: 50%;
+        top: 23.1%;
+        width: 0.08cqw;
+        height: 25%;
+        margin-left: -0.04cqw;
+        background: var(--tinta-tenue);
+        transform-origin: 50% 0%;
+      }
+
+      /* — capa 4 · las dos columnas — */
+      .f04-col {
+        position: absolute;
+        top: 0;
+        height: 100%;
+      }
+      .f04-col-l {
+        left: 4%;
+        width: 42%;
+      }
+      .f04-col-r {
+        left: 54%;
+        width: 42%;
+      }
+
+      .f04-rotulo {
+        position: absolute;
+        top: 18.9%;
+        left: 0;
+        right: 0;
+        color: var(--tinta-media);
+        font-family: "IBM Plex Sans", system-ui, sans-serif;
+        font-size: 1.56cqw;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        line-height: 1.2;
+        text-align: center;
+        text-transform: uppercase;
+      }
+
+      .f04-fig {
+        position: absolute;
+        top: 26.1%;
+        left: 0;
+        right: 0;
+      }
+      .f04-jitter {
+        display: block;
+        width: 100%;
+      }
+      .f04-stage {
+        display: flex;
+        width: 100%;
+        align-items: baseline;
+        justify-content: center;
+        color: var(--tinta);
+        font-family: "IBM Plex Serif", Georgia, serif;
+        font-size: 12.5cqw;
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum" 1;
+        font-weight: 400;
+        letter-spacing: -0.015em;
+        line-height: 0.9;
+        transform-origin: 50% 58%;
+        white-space: nowrap;
+        will-change: transform, opacity;
+      }
+      .f04-affix {
+        position: relative;
+        flex: 0 0 auto;
+        color: var(--tinta-media);
+        font-size: 0.55em;
+        letter-spacing: -0.005em;
+      }
+      /* Optical trim: a lone currency glyph hugs the baseline at 0.55em. */
+      .f04-pre {
+        top: -0.31em;
+        margin-right: 0.14em;
+      }
+      .f04-suf {
+        margin-left: 0.14em;
+      }
+      .f04-val {
+        display: inline-block;
+        min-width: 1ch;
+      }
+
+      .f04-bajada {
+        position: absolute;
+        top: 48.9%;
+        left: 0;
+        right: 0;
+        color: var(--tinta-media);
+        font-family: "IBM Plex Sans", system-ui, sans-serif;
+        font-size: 1.46cqw;
+        font-weight: 400;
+        letter-spacing: 0.01em;
+        line-height: 1.3;
+        text-align: center;
+      }
+
+      /* — capa 5 · el filete de cota en ocre (la distancia ES el argumento) — */
+      .f04-dim {
+        position: absolute;
+        left: 25%;
+        right: 25%;
+        top: 55.93%;
+        height: 0;
+      }
+      .f04-dim-rule {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 0.085cqw;
+        background: var(--ocre);
+        transform-origin: 50% 50%;
+      }
+      .f04-dim-tick {
+        position: absolute;
+        top: -0.83cqw;
+        width: 0.085cqw;
+        height: 0.83cqw;
+        background: var(--ocre);
+        transform-origin: 50% 100%;
+      }
+      .f04-tick-l {
+        left: 0;
+      }
+      .f04-tick-r {
+        right: 0;
+      }
+      .f04-dim-label {
+        position: absolute;
+        top: 0.85cqw;
+        left: 0;
+        right: 0;
+        color: var(--ocre);
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 1.46cqw;
+        font-weight: 400;
+        letter-spacing: 0.06em;
+        line-height: 1.3;
+        text-align: center;
+      }
+
+      /* — capa 6 · el scale-swap del cierre — */
+      .f04-swap {
+        position: absolute;
+        left: 8%;
+        right: 8%;
+        top: 63.33%;
+        height: 16.5%;
+      }
+      .f04-swap-face {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        transform-origin: 50% 50%;
+      }
+      .f04-closing {
+        z-index: 1;
+        color: var(--tinta);
+        font-family: "IBM Plex Serif", Georgia, serif;
+        font-size: 3.25cqw;
+        font-weight: 400;
+        letter-spacing: -0.005em;
+        line-height: 1.14;
+        text-align: center;
+        text-wrap: balance;
+      }
+      .f04-lockup {
+        z-index: 2;
+      }
+      .f04-mark {
+        color: var(--tinta);
+        font-family: "IBM Plex Serif", Georgia, serif;
+        font-size: 3.15cqw;
+        font-weight: 400;
+        letter-spacing: -0.008em;
+        line-height: 1;
+        text-align: center;
+      }
+      .f04-mark-sub {
+        margin-top: 0.62cqw;
+        color: var(--tinta);
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 1.25cqw;
+        font-weight: 400;
+        letter-spacing: 0.18em;
+        line-height: 1;
+        text-align: center;
+        text-transform: uppercase;
+      }
+    </style>
+
+    <div
+      id="f04-scene"
+      class="clip"
+      data-start="0"
+      data-duration="7"
+      data-track-index="0"
+    >
+      <img id="f04-plate" src="assets/plates/plano-caido@2x.png" alt="" />
+
+      <div class="f04-grid"></div>
+
+      <div class="f04-hairline f04-hairline-top"></div>
+      <div class="f04-hairline f04-hairline-bot"></div>
+      <div class="f04-qr" id="f04-qr"></div>
+      <div class="f04-divider" id="f04-divider"></div>
+
+      <div class="f04-col f04-col-l">
+        <div class="f04-rotulo" id="f04-rotulo-l" data-layout-allow-overlap>Reposición</div>
+        <div class="f04-fig">
+          <div class="f04-jitter" id="f04-jitter-l">
+            <div class="f04-stage" id="f04-stage-l">
+              <span class="f04-affix f04-pre">$</span
+              ><span class="f04-val" id="f04-val-l" data-layout-allow-overlap>0</span
+              ><span class="f04-affix f04-suf" id="f04-suf-l">M</span>
+            </div>
+          </div>
+        </div>
+        <div class="f04-bajada" id="f04-bajada-l" data-layout-allow-overlap>daño físico</div>
+      </div>
+
+      <div class="f04-col f04-col-r">
+        <div class="f04-rotulo" id="f04-rotulo-r" data-layout-allow-overlap>Costo del evento</div>
+        <div class="f04-fig">
+          <div class="f04-jitter" id="f04-jitter-r">
+            <div class="f04-stage" id="f04-stage-r">
+              <span class="f04-affix f04-pre">$</span
+              ><span class="f04-val" id="f04-val-r" data-layout-allow-overlap>0</span
+              ><span class="f04-affix f04-suf" id="f04-suf-r">M</span>
+            </div>
+          </div>
+        </div>
+        <div class="f04-bajada" id="f04-bajada-r" data-layout-allow-overlap>reposición + lucro cesante</div>
+      </div>
+
+      <div class="f04-dim">
+        <div class="f04-dim-rule" id="f04-dim-rule"></div>
+        <div class="f04-dim-tick f04-tick-l" id="f04-tick-l"></div>
+        <div class="f04-dim-tick f04-tick-r" id="f04-tick-r"></div>
+        <div class="f04-dim-label" id="f04-dim-label">
+          12 DÍAS DE REPARACIÓN · $ 17 M POR DÍA
+        </div>
+      </div>
+
+      <div class="f04-swap">
+        <div class="f04-swap-face f04-closing" id="f04-closing">
+          Ninguna póliza sobre el activo caído las cubre.
+        </div>
+        <div class="f04-swap-face f04-lockup" id="f04-lockup">
+          <div>
+            <div class="f04-mark">Kairos</div>
+            <div class="f04-mark-sub" id="f04-mark-sub">Simulador de riesgos</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        var root = document.getElementById("root");
+        var q = function (sel) {
+          return root.querySelector(sel);
+        };
+
+        /* — QR mosaic: patrón fijo, autoría manual, cero aleatoriedad — */
+        var QR_ROWS = [
+          "11101011",
+          "10100110",
+          "11101101",
+          "00001010",
+          "11010111",
+          "01101001",
+          "10110110",
+          "01011101",
+        ];
+        var qr = q("#f04-qr");
+        for (var r = 0; r < QR_ROWS.length; r += 1) {
+          for (var c = 0; c < 8; c += 1) {
+            var cell = document.createElement("span");
+            if (QR_ROWS[r].charAt(c) === "1") cell.className = "on";
+            qr.appendChild(cell);
+          }
+        }
+
+        var plate = q("#f04-plate");
+        var divider = q("#f04-divider");
+        var rotuloL = q("#f04-rotulo-l");
+        var rotuloR = q("#f04-rotulo-r");
+        var jitterL = q("#f04-jitter-l");
+        var jitterR = q("#f04-jitter-r");
+        var stageL = q("#f04-stage-l");
+        var stageR = q("#f04-stage-r");
+        var valL = q("#f04-val-l");
+        var valR = q("#f04-val-r");
+        var sufL = q("#f04-suf-l");
+        var sufR = q("#f04-suf-r");
+        var bajadaL = q("#f04-bajada-l");
+        var bajadaR = q("#f04-bajada-r");
+        var dimRule = q("#f04-dim-rule");
+        var tickL = q("#f04-tick-l");
+        var tickR = q("#f04-tick-r");
+        var dimLabel = q("#f04-dim-label");
+        var closing = q("#f04-closing");
+        var lockup = q("#f04-lockup");
+        var markSub = q("#f04-mark-sub");
+
+        var tl = gsap.timeline({ paused: true });
+
+        /* ============================================================
+           MOVIMIENTO FIRMA — count-up (counting-dynamic-scale).
+           Cada entero visible se precalcula para una posición fija del
+           timeline y se escribe con tl.set(): sin onUpdate, sin reloj de
+           render; un seek hacia atrás muestra exactamente el mismo valor.
+           ============================================================ */
+        var FPS = 30;
+        var countEase = gsap.parseEase("sine.inOut");
+
+        function mountCount(el, from, to, at, dur) {
+          var last = Math.max(1, Math.round(dur * FPS));
+          el.textContent = String(Math.round(from));
+          for (var i = 0; i <= last; i += 1) {
+            var p = i / last;
+            var v = String(Math.round(from + (to - from) * countEase(p)));
+            tl.set(el, { textContent: v }, at + dur * p);
+          }
+        }
+
+        /* Estados iniciales que no nacen de un fromTo (evita transform en CSS). */
+        gsap.set(lockup, { opacity: 0, scale: 0.72 });
+
+        /* ---------- Escena 1 (0.0–1.2s) · el plano se hunde ---------- */
+        tl.fromTo(
+          plate,
+          { opacity: 0.58 },
+          { opacity: 0.12, duration: 1.05, ease: "power2.out" },
+          0,
+        );
+        tl.fromTo(
+          plate,
+          { scale: 1.06 },
+          { scale: 1, duration: 1.3, ease: "power2.out" },
+          0,
+        );
+        tl.fromTo(
+          rotuloL,
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+          0.3,
+        );
+        tl.fromTo(
+          rotuloR,
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power3.out" },
+          0.42,
+        );
+        tl.fromTo(
+          divider,
+          { scaleY: 0 },
+          { scaleY: 1, duration: 0.52, ease: "power3.out" },
+          0.62,
+        );
+        tl.fromTo(
+          qr,
+          { opacity: 0 },
+          { opacity: 1, duration: 0.5, ease: "power2.out" },
+          0.95,
+        );
+
+        /* ---------- Escena 2 (1.2–3.2s) · arrancan JUNTAS, a distinta velocidad ----------
+           Mismo t de arranque (1.20). La izquierda tarda 1.40s, la derecha 2.80s.
+           El desfase está en la VELOCIDAD, nunca en el arranque. */
+        var START_AT = 1.2;
+        var DUR_L = 1.4; // aterriza en 2.60
+        var DUR_R = 2.8; // aterriza en 4.00 — 1.4s después
+        var LAND_L = START_AT + DUR_L;
+        var LAND_R = START_AT + DUR_R;
+        var START_SCALE = 0.62;
+        var PULSE = 0.165;
+
+        tl.fromTo(
+          stageL,
+          { opacity: 0, y: 26 },
+          { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" },
+          START_AT,
+        );
+        tl.fromTo(
+          stageR,
+          { opacity: 0, y: 26 },
+          { opacity: 1, y: 0, duration: 0.38, ease: "power3.out" },
+          START_AT,
+        );
+        tl.fromTo(
+          stageL,
+          { scale: START_SCALE },
+          { scale: 1, duration: DUR_L, ease: "sine.inOut" },
+          START_AT,
+        );
+        tl.fromTo(
+          stageR,
+          { scale: START_SCALE },
+          { scale: 1, duration: DUR_R, ease: "sine.inOut" },
+          START_AT,
+        );
+        mountCount(valL, 0, 240, START_AT, DUR_L);
+        mountCount(valR, 0, 440, START_AT, DUR_R);
+
+        /* La izquierda aterriza y suelta su pulso contenido. */
+        tl.to(stageL, { scale: 1.07, duration: PULSE, ease: "power3.out" }, LAND_L);
+        tl.to(stageL, { scale: 1, duration: PULSE, ease: "power2.out" }, LAND_L + PULSE);
+        tl.fromTo(
+          sufL,
+          { opacity: 0, y: 22 },
+          { opacity: 1, y: 0, duration: 0.34, ease: "back.out(1.6)" },
+          LAND_L,
+        );
+        tl.fromTo(
+          bajadaL,
+          { opacity: 0, y: 14 },
+          { opacity: 1, y: 0, duration: 0.46, ease: "power3.out" },
+          LAND_L + 0.2,
+        );
+
+        /* ---------- Escena 3 (3.2–4.6s) · la derecha sigue trepando y aterriza ---------- */
+        tl.to(stageR, { scale: 1.07, duration: PULSE, ease: "power3.out" }, LAND_R);
+        tl.to(stageR, { scale: 1, duration: PULSE, ease: "power2.out" }, LAND_R + PULSE);
+        tl.fromTo(
+          sufR,
+          { opacity: 0, y: 22 },
+          { opacity: 1, y: 0, duration: 0.34, ease: "back.out(1.6)" },
+          LAND_R,
+        );
+        tl.fromTo(
+          bajadaR,
+          { opacity: 0, y: 14 },
+          { opacity: 1, y: 0, duration: 0.46, ease: "power3.out" },
+          LAND_R + 0.16,
+        );
+
+        /* El filete de cota: mide la distancia entre las dos cifras. */
+        tl.fromTo(
+          dimRule,
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.56, ease: "power3.out" },
+          4.2,
+        );
+        tl.fromTo(
+          tickL,
+          { scaleY: 0 },
+          { scaleY: 1, duration: 0.26, ease: "power2.out" },
+          4.56,
+        );
+        tl.fromTo(
+          tickR,
+          { scaleY: 0 },
+          { scaleY: 1, duration: 0.26, ease: "power2.out" },
+          4.62,
+        );
+        tl.fromTo(
+          dimLabel,
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.42, ease: "power3.out" },
+          4.6,
+        );
+
+        /* ---------- Escena 4 (4.6–6.2s) · frame sostenido ----------
+           Sólo entra la línea de cierre. Las cifras se quedan quietas: jitter
+           de baja amplitud (sine-wave-loop, extremo bajo del rango; dos
+           elementos → amplitud por elemento reducida y períodos escalonados),
+           sobre wrappers propios para no pisar el transform del pulso. */
+        tl.fromTo(
+          closing,
+          { opacity: 0, y: 22 },
+          { opacity: 1, y: 0, duration: 0.62, ease: "power3.out" },
+          4.8,
+        );
+        tl.to(
+          jitterL,
+          { y: -1.8, duration: 0.85, ease: "sine.inOut", yoyo: true, repeat: 1 },
+          4.55,
+        );
+        tl.to(
+          jitterR,
+          { y: -2.1, duration: 0.78, ease: "sine.inOut", yoyo: true, repeat: 1 },
+          4.68,
+        );
+
+        /* ---------- Escena 5 (6.2–7.0s) · scale-swap-transition ----------
+           La línea de cierre se retira (power2.in) y el logotipo llega con peso
+           (back.out), solapados 0.15s, mismo footprint y mismo origen. Es el
+           último frame del video: éste es su único exit real. */
+        var TRIGGER = 6.32;
+        var EXIT_DUR = 0.32;
+        var ENTER_DUR = 0.45;
+        var OVERLAP = 0.12;
+
+        tl.to(
+          closing,
+          { scale: 0.72, opacity: 0, duration: EXIT_DUR, ease: "power2.in" },
+          TRIGGER,
+        );
+        tl.to(
+          lockup,
+          { scale: 1, opacity: 1, duration: ENTER_DUR, ease: "back.out(1.5)" },
+          TRIGGER + EXIT_DUR - OVERLAP,
+        );
+        tl.fromTo(
+          markSub,
+          { opacity: 0, y: 12 },
+          { opacity: 1, y: 0, duration: 0.2, ease: "power3.out" },
+          TRIGGER + EXIT_DUR + 0.16,
+        );
+
+        tl.seek(0);
+        window.__timelines = window.__timelines || {};
+        window.__timelines["04-las-dos-cifras"] = tl;
+      })();
+    </script>
+  </div>
+</template>

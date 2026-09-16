@@ -1,0 +1,798 @@
+<template>
+  <div
+    id="root"
+    data-composition-id="03-la-cascada"
+    data-duration="9.5"
+    data-width="1920"
+    data-height="1080"
+  >
+    <style>
+      /* === IBM Plex — declaracion compartida por los 4 frames === */
+      @font-face{font-family:"IBM Plex Serif";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexSerif-400.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Serif";font-style:normal;font-weight:500;font-display:block;src:url("assets/fonts/IBMPlexSerif-500.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Serif";font-style:normal;font-weight:600;font-display:block;src:url("assets/fonts/IBMPlexSerif-600.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexSans-400.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:500;font-display:block;src:url("assets/fonts/IBMPlexSans-500.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:600;font-display:block;src:url("assets/fonts/IBMPlexSans-600.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexMono-400.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:500;font-display:block;src:url("assets/fonts/IBMPlexMono-500.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:600;font-display:block;src:url("assets/fonts/IBMPlexMono-600.woff2") format("woff2");}
+
+      /* ── 03-la-cascada · Cobalt Grid frame layer ────────────────────────
+         Paleta, rampa y moldura salen de frame.md verbatim.
+         Los colores de estado son el código de lectura de la app, no adorno:
+         azul #1B4A7A = opera · bermellón #C4372A = recibió el golpe ·
+         ocre #A8710C = dejó de operar sin recibirlo.
+         Tipografía: IBM Plex Serif / Sans / Mono, declaradas arriba con
+         @font-face contra los .woff2 reales de assets/fonts; cada pila lleva
+         además su genérica de CSS como respaldo.
+         Seek-safety: nada se escribe desde onUpdate. El render busca cuadro a
+         cuadro con seek(), que suprime los callbacks de GSAP; toda la cámara
+         y los contadores son escrituras de propiedad.
+      ------------------------------------------------------------------- */
+      #root {
+        position: absolute;
+        inset: 0;
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        isolation: isolate;
+        color: #16191d;
+      }
+
+      #root *,
+      #root *::before,
+      #root *::after {
+        box-sizing: border-box;
+      }
+
+      #root .clip {
+        position: absolute;
+        inset: 0;
+      }
+
+      /* ── ground · papel + retícula milimetrada (permanente) ───────────── */
+      .c03-la-cascada-ground {
+        background-color: #f0ece1;
+        background-image:
+          linear-gradient(to right, rgba(205, 198, 181, 0.55) 1px, transparent 1px),
+          linear-gradient(to bottom, rgba(205, 198, 181, 0.55) 1px, transparent 1px);
+        background-size: 38.4px 38.4px;
+        background-position: 0 0;
+        container-type: size;
+      }
+
+      /* ── hairlines · la moldura de todo frame ─────────────────────────── */
+      .c03-la-cascada-rule-top,
+      .c03-la-cascada-rule-bot {
+        position: absolute;
+        left: 77px;
+        width: 1766px;
+        height: 1.5px;
+        background: #16191d;
+      }
+      .c03-la-cascada-rule-top {
+        top: 58px;
+      }
+      .c03-la-cascada-rule-bot {
+        top: 1022px;
+      }
+
+      /* ── mono chrome ──────────────────────────────────────────────────── */
+      .c03-la-cascada-mono {
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 13px;
+        font-weight: 400;
+        letter-spacing: 0.06em;
+        color: #55606d;
+      }
+
+      .c03-la-cascada-plate-tag {
+        position: absolute;
+        left: 77px;
+        top: 96px;
+        width: 1000px;
+      }
+
+      /* ── el plano · el mundo que recorre la cámara ────────────────────── */
+      .c03-la-cascada-stage {
+        position: absolute;
+        left: 77px;
+        top: 128px;
+        width: 1000px;
+        height: 632px;
+        overflow: hidden;
+      }
+
+      .c03-la-cascada-world {
+        position: absolute;
+        inset: 0;
+        transform-origin: 50% 50%;
+        will-change: transform;
+      }
+
+      .c03-la-cascada-plate {
+        display: block;
+        width: 1000px;
+        height: 632px;
+      }
+
+      /* Las tres líneas rojas se revelan del propio plano: la máscara las
+         traza según su longitud medida (svg-stroke-trace / svg-path-draw). */
+      .c03-la-cascada-mline {
+        fill: none;
+        stroke: #ffffff;
+        stroke-width: 18;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      .c03-la-cascada-plate-rule {
+        position: absolute;
+        left: 77px;
+        top: 778px;
+        width: 1000px;
+        height: 1.5px;
+        background: #16191d;
+        transform-origin: 0% 50%;
+      }
+
+      /* ── fichas del código de color ───────────────────────────────────── */
+      .c03-la-cascada-chip {
+        position: absolute;
+        left: 77px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        width: 700px;
+        height: 22px;
+      }
+      .c03-la-cascada-chip-1 {
+        top: 802px;
+      }
+      .c03-la-cascada-chip-2 {
+        top: 842px;
+      }
+      .c03-la-cascada-swatch {
+        width: 18px;
+        height: 18px;
+        flex: 0 0 auto;
+      }
+      .c03-la-cascada-chip-label {
+        font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #16191d;
+        white-space: nowrap;
+      }
+
+      /* ── columna derecha · 60/40 asimétrico ───────────────────────────── */
+      .c03-la-cascada-col {
+        position: absolute;
+        left: 1139px;
+        top: 0;
+        width: 704px;
+        height: 1080px;
+      }
+
+      .c03-la-cascada-meta {
+        position: absolute;
+        left: 0;
+        top: 130px;
+        width: 704px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .c03-la-cascada-topbar {
+        position: absolute;
+        left: 0;
+        top: 154px;
+        width: 704px;
+        height: 1.5px;
+        background: #16191d;
+        transform-origin: 0% 50%;
+      }
+
+      .c03-la-cascada-callout {
+        position: absolute;
+        left: 0;
+        top: 184px;
+        width: 704px;
+        height: 72px;
+      }
+      .c03-la-cascada-callout-bar {
+        position: absolute;
+        left: 0;
+        top: 9px;
+        width: 40px;
+        height: 3px;
+        background: #a8710c;
+        transform-origin: 0% 50%;
+      }
+      .c03-la-cascada-callout-head {
+        position: absolute;
+        left: 58px;
+        top: 0;
+        font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+        font-size: 20px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #a8710c;
+      }
+      .c03-la-cascada-callout-sub {
+        position: absolute;
+        left: 58px;
+        top: 36px;
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 17px;
+        letter-spacing: 0.04em;
+        color: #55606d;
+      }
+
+      .c03-la-cascada-div {
+        position: absolute;
+        left: 0;
+        width: 704px;
+        height: 1px;
+        background: rgba(139, 149, 161, 0.55);
+        transform-origin: 0% 50%;
+      }
+
+      .c03-la-cascada-kpi-label {
+        position: absolute;
+        left: 0;
+        width: 704px;
+        font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: #55606d;
+      }
+
+      .c03-la-cascada-num {
+        position: absolute;
+        left: 0;
+        font-family: "IBM Plex Serif", Georgia, serif;
+        font-size: 132px;
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.015em;
+        color: #16191d;
+        font-variant-numeric: tabular-nums;
+        font-feature-settings: "tnum" 1;
+        white-space: nowrap;
+      }
+      .c03-la-cascada-num-suffix {
+        font-size: 0.55em;
+        letter-spacing: -0.01em;
+      }
+
+      .c03-la-cascada-sub {
+        position: absolute;
+        left: 302px;
+        width: 402px;
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 20px;
+        letter-spacing: 0.04em;
+        color: #55606d;
+      }
+      .c03-la-cascada-sub-ocre {
+        position: absolute;
+        left: 302px;
+        width: 402px;
+        font-family: "IBM Plex Mono", ui-monospace, monospace;
+        font-size: 26px;
+        font-weight: 500;
+        letter-spacing: 0.03em;
+        color: #a8710c;
+      }
+
+      /* ── la frase del panel de efecto en cadena (verbatim) ────────────── */
+      .c03-la-cascada-sent {
+        position: absolute;
+        left: 0;
+        width: 704px;
+        font-family: "IBM Plex Serif", Georgia, serif;
+        font-size: 42px;
+        font-weight: 400;
+        line-height: 1.2;
+        letter-spacing: -0.005em;
+        color: #16191d;
+        white-space: nowrap;
+      }
+      .c03-la-cascada-sent-1 {
+        top: 728px;
+      }
+      .c03-la-cascada-sent-2 {
+        top: 780px;
+      }
+
+      .c03-la-cascada-mark {
+        position: relative;
+        display: inline-block;
+      }
+      .c03-la-cascada-mark-t {
+        position: relative;
+        z-index: 1;
+      }
+      .c03-la-cascada-mark-svg {
+        position: absolute;
+        left: -5px;
+        bottom: -3px;
+        width: calc(100% + 10px);
+        height: 15px;
+        z-index: 0;
+        overflow: visible;
+      }
+    </style>
+
+    <!-- ── ground: full-bleed sobre su propia capa clip, nunca en #root ── -->
+    <div
+      class="c03-la-cascada-ground clip"
+      data-start="0"
+      data-duration="9.5"
+      data-track-index="0"
+    ></div>
+
+    <div class="c03-la-cascada-scene clip" data-start="0" data-duration="9.5" data-track-index="1">
+      <div class="c03-la-cascada-rule-top"></div>
+      <div class="c03-la-cascada-rule-bot"></div>
+
+      <div class="c03-la-cascada-plate-tag c03-la-cascada-mono" id="c03-la-cascada-plateTag">
+        FINCA LA ESPERANZA · LÁMINA 03-A · EFECTO EN CADENA
+      </div>
+
+      <!-- ── el mundo: un solo plano, una sola cámara ─────────────────── -->
+      <div class="c03-la-cascada-stage">
+        <div class="c03-la-cascada-world" id="c03-la-cascada-world" data-layout-allow-overflow>
+          <svg
+            class="c03-la-cascada-plate"
+            viewBox="0 75 1772 1120"
+            preserveAspectRatio="xMidYMid meet"
+            aria-hidden="true"
+          >
+            <defs>
+              <mask
+                id="c03-la-cascada-mask"
+                maskUnits="userSpaceOnUse"
+                x="0"
+                y="0"
+                width="1772"
+                height="1514"
+              >
+                <!-- regiones: cada instalación se revela en orden de cascada.
+                     Medidas sobre la lámina real (1772×1514), no estimadas. -->
+                <rect
+                  id="c03-la-cascada-mSub"
+                  x="804"
+                  y="124"
+                  width="292"
+                  height="266"
+                  fill="#fff"
+                />
+                <rect
+                  id="c03-la-cascada-mCb"
+                  x="804"
+                  y="456"
+                  width="344"
+                  height="270"
+                  fill="#fff"
+                />
+                <rect id="c03-la-cascada-mA" x="146" y="122" width="579" height="426" fill="#fff" />
+                <rect id="c03-la-cascada-mB" x="146" y="572" width="579" height="426" fill="#fff" />
+                <!-- líneas de dependencia: polilíneas calcadas del trazo real -->
+                <path id="c03-la-cascada-mL1" class="c03-la-cascada-mline" d="M 950 386 L 950 560" />
+                <path
+                  id="c03-la-cascada-mLA"
+                  class="c03-la-cascada-mline"
+                  d="M 890 580 L 870 568 L 846 553 L 822 539 L 798 525 L 774 512 L 750 499 L 726 487 L 702 474 L 678 463 L 654 452 L 630 441 L 606 431 L 582 421 L 558 412 L 534 402 L 510 396 L 494 391"
+                />
+                <path
+                  id="c03-la-cascada-mLB"
+                  class="c03-la-cascada-mline"
+                  d="M 892 632 L 870 638 L 846 644 L 822 651 L 798 658 L 774 666 L 750 674 L 726 682 L 702 692 L 678 701 L 654 711 L 630 721 L 606 732 L 582 743 L 558 754 L 534 766 L 510 779 L 494 788"
+                />
+              </mask>
+            </defs>
+            <image href="assets/plates/plano-antes@2x.png" x="0" y="0" width="1772" height="1514" />
+            <image
+              href="assets/plates/plano-caido@2x.png"
+              x="0"
+              y="0"
+              width="1772"
+              height="1514"
+              mask="url(#c03-la-cascada-mask)"
+            />
+          </svg>
+        </div>
+      </div>
+
+      <div class="c03-la-cascada-plate-rule" id="c03-la-cascada-plateRule"></div>
+
+      <!-- ── el código de color, explícito ────────────────────────────── -->
+      <div class="c03-la-cascada-chip c03-la-cascada-chip-1" id="c03-la-cascada-chip1">
+        <span class="c03-la-cascada-swatch" style="background: #c4372a"></span>
+        <span class="c03-la-cascada-chip-label">Recibió el golpe</span>
+      </div>
+      <div class="c03-la-cascada-chip c03-la-cascada-chip-2" id="c03-la-cascada-chip2">
+        <span class="c03-la-cascada-swatch" style="background: #a8710c"></span>
+        <span class="c03-la-cascada-chip-label">Dejó de operar sin recibirlo</span>
+      </div>
+
+      <!-- ── columna derecha ──────────────────────────────────────────── -->
+      <div class="c03-la-cascada-col">
+        <div class="c03-la-cascada-meta c03-la-cascada-mono" id="c03-la-cascada-meta">
+          <span>SIMULACIÓN · SUBESTACIÓN ELÉCTRICA</span>
+          <span>03 / 04</span>
+        </div>
+        <div class="c03-la-cascada-topbar" id="c03-la-cascada-topbar"></div>
+
+        <div class="c03-la-cascada-callout" id="c03-la-cascada-callout">
+          <span class="c03-la-cascada-callout-bar" id="c03-la-cascada-calloutBar"></span>
+          <div class="c03-la-cascada-callout-head">Fertirriego</div>
+          <div class="c03-la-cascada-callout-sub">· sin energía no opera</div>
+        </div>
+
+        <div class="c03-la-cascada-div" id="c03-la-cascada-div1" style="top: 282px"></div>
+
+        <div class="c03-la-cascada-kpi-label" id="c03-la-cascada-k1label" data-layout-allow-overlap style="top: 306px">
+          Fuera de servicio
+        </div>
+        <div class="c03-la-cascada-num" id="c03-la-cascada-k1num" style="top: 332px">
+          <span id="c03-la-cascada-k1val" data-layout-allow-overlap>1</span>
+        </div>
+        <div class="c03-la-cascada-sub" id="c03-la-cascada-k1sub" style="top: 366px">
+          de 13 activos
+        </div>
+        <div class="c03-la-cascada-sub-ocre" id="c03-la-cascada-k1ocre" style="top: 406px">
+          3 sin recibir daño
+        </div>
+
+        <div class="c03-la-cascada-div" id="c03-la-cascada-div2" style="top: 496px"></div>
+
+        <div class="c03-la-cascada-kpi-label" id="c03-la-cascada-k2label" data-layout-allow-overlap style="top: 520px">
+          Operación detenida
+        </div>
+        <div class="c03-la-cascada-num" id="c03-la-cascada-k2num" style="top: 546px">
+          <span id="c03-la-cascada-k2val" data-layout-allow-overlap>0</span
+          ><span class="c03-la-cascada-num-suffix">&nbsp;%</span>
+        </div>
+        <div class="c03-la-cascada-sub" id="c03-la-cascada-k2sub" style="top: 600px">
+          $ 17 M por día
+        </div>
+
+        <div class="c03-la-cascada-div" id="c03-la-cascada-div3" style="top: 688px"></div>
+
+        <div class="c03-la-cascada-sent c03-la-cascada-sent-1" id="c03-la-cascada-sent1">
+          3 instalaciones
+          <span class="c03-la-cascada-mark"
+            ><span class="c03-la-cascada-mark-t">sin un rasguño</span
+            ><svg
+              class="c03-la-cascada-mark-svg"
+              viewBox="0 0 500 24"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+            >
+              <path
+                id="c03-la-cascada-scribble"
+                d="M0,12 Q31,2 62,12 Q93,22 125,12 Q156,2 187,12 Q218,22 250,12 Q281,2 312,12 Q343,22 375,12 Q406,2 437,12 Q468,22 500,12"
+                fill="none"
+                stroke="#A8710C"
+                stroke-width="3.2"
+                stroke-linecap="round"
+              /></svg
+          ></span>
+        </div>
+        <div class="c03-la-cascada-sent c03-la-cascada-sent-2" id="c03-la-cascada-sent2">
+          quedaron fuera de operación.
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        var ROOT = document.querySelector('[data-composition-id="03-la-cascada"]');
+        function el(id) {
+          return ROOT.querySelector("#" + id);
+        }
+
+        var D = 9.5; // data-duration — fijo aguas arriba, no se toca
+        var FPS = 30;
+
+        /* ── geometría medida de la lámina (1772×1514) ───────────────────
+              stage 1000×632 · viewBox "0 75 1772 1120" → s = 1000/1772     */
+        var S = 1000 / 1772;
+        var CX = 500; // centro del stage, x
+        var CY = 316; // centro del stage, y
+        // viewport-change, forma de un solo wrapper: T = -offset × escala.
+        // La lámina mide exactamente el stage, así que cada pierna se recorta
+        // al desborde disponible (CX·(S−1), CY·(S−1)): si la cámara pide más,
+        // asomaría el borde del papel y el viaje se vería como un error.
+        function aim(platex, platey, scale) {
+          var mx = CX * (scale - 1);
+          var my = CY * (scale - 1);
+          var tx = -(platex * S - CX) * scale;
+          var ty = -((platey - 75) * S - CY) * scale;
+          return {
+            x: Math.max(-mx, Math.min(mx, tx)),
+            y: Math.max(-my, Math.min(my, ty)),
+            scale: scale,
+          };
+        }
+        var SUBES = aim(950, 289, 1.09); // subestación bermellón (queda alta: tope de recorte)
+        var BOMBAS = aim(949.5, 618.5, 1.09); // casa de bombas, centrada
+
+        var world = el("c03-la-cascada-world");
+        gsap.set(world, { transformOrigin: "50% 50%", x: 0, y: 0, scale: 1 });
+
+        /* ── longitudes medidas de las líneas de dependencia ─────────────
+              getTotalLength() sobre la geometría real; la polilínea sirve de
+              respaldo aritmético si el path vive en <defs> sin caja.        */
+        function polyLength(d) {
+          var n = d.match(/-?\d+(?:\.\d+)?/g).map(Number);
+          var t = 0;
+          for (var i = 2; i < n.length; i += 2) {
+            t += Math.hypot(n[i] - n[i - 2], n[i + 1] - n[i - 1]);
+          }
+          return t;
+        }
+        function armStroke(node, fallback) {
+          var len = 0;
+          if (typeof node.getTotalLength === "function") {
+            try {
+              len = node.getTotalLength();
+            } catch (e) {
+              len = 0;
+            }
+          }
+          if (!len || !isFinite(len)) len = fallback;
+          // dash + hueco mayor que el trazo: en reposo no asoma ni el remate
+          node.style.strokeDasharray = len + " " + (len + 64);
+          node.style.strokeDashoffset = String(len + 32);
+          return len;
+        }
+
+        var mL1 = el("c03-la-cascada-mL1");
+        var mLA = el("c03-la-cascada-mLA");
+        var mLB = el("c03-la-cascada-mLB");
+        armStroke(mL1, polyLength(mL1.getAttribute("d")));
+        armStroke(mLA, polyLength(mLA.getAttribute("d")));
+        armStroke(mLB, polyLength(mLB.getAttribute("d")));
+
+        /* ── las regiones que se llenan de ocre, cada una desde su ícono ── */
+        var mCb = el("c03-la-cascada-mCb");
+        var mA = el("c03-la-cascada-mA");
+        var mB = el("c03-la-cascada-mB");
+        gsap.set(mCb, { svgOrigin: "949.5 618.5" });
+        gsap.set(mA, { svgOrigin: "434.5 369" });
+        gsap.set(mB, { svgOrigin: "434.5 820" });
+
+        var scribble = el("c03-la-cascada-scribble");
+        armStroke(scribble, 520);
+
+        var tl = gsap.timeline({ paused: true });
+
+        /* ═══ chrome de apertura ════════════════════════════════════════ */
+        tl.fromTo(
+          el("c03-la-cascada-plateTag"),
+          { opacity: 0 },
+          { opacity: 1, duration: 0.45, ease: "power1.out" },
+          0.1,
+        );
+        tl.fromTo(
+          el("c03-la-cascada-meta"),
+          { opacity: 0 },
+          { opacity: 1, duration: 0.45, ease: "power1.out" },
+          0.18,
+        );
+        tl.fromTo(
+          el("c03-la-cascada-topbar"),
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.7, ease: "power2.out" },
+          0.22,
+        );
+        tl.fromTo(
+          el("c03-la-cascada-plateRule"),
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.8, ease: "power2.out" },
+          0.3,
+        );
+
+        /* ═══ SCENE 1 (0.0–2.4s) · la primera pierna del viaje ══════════
+           El viaje de la cámara ES la relación causa-efecto: LEG 1a se clava
+           en la subestación bermellón (coordinate-target-zoom sobre la misma
+           cámara única), LEG 1b acompaña el trazo hacia abajo sin cambiar de
+           escala (viewport-change).                                        */
+        tl.fromTo(
+          world,
+          { x: 0, y: 0, scale: 1 },
+          { x: SUBES.x, y: SUBES.y, scale: SUBES.scale, duration: 0.7, ease: "power3.out" },
+          0.3,
+        );
+
+        // El trazo baja de la subestación a la casa de bombas.
+        tl.to(mL1, { strokeDashoffset: 0, duration: 1.25, ease: "power2.out" }, 0.5);
+
+        // LEG 1b — la cámara sigue el trazo, misma escala.
+        tl.to(world, { x: BOMBAS.x, y: BOMBAS.y, duration: 1.3, ease: "power2.inOut" }, 1.0);
+
+        // La casa de bombas se llena de ocre desde su propio ícono.
+        tl.fromTo(
+          mCb,
+          { scale: 0.42, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.36, ease: "power4.out" },
+          1.74,
+        );
+
+        // Rótulo mono al costado: el fertirriego no opera sin energía.
+        tl.fromTo(
+          el("c03-la-cascada-calloutBar"),
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.35, ease: "power2.out" },
+          1.62,
+        );
+        tl.fromTo(
+          el("c03-la-cascada-callout"),
+          { opacity: 0, x: -18 },
+          { opacity: 1, x: 0, duration: 0.5, ease: "power2.out" },
+          1.66,
+        );
+
+        /* ═══ SCENE 2 (2.4–3.4s) · el código se hace explícito ══════════
+           Sin las fichas el ocre es sólo un color bonito. Entran apenas
+           aparece el ocre y se quedan el resto del frame.                  */
+        tl.fromTo(
+          el("c03-la-cascada-chip1"),
+          { opacity: 0, x: -20 },
+          { opacity: 1, x: 0, duration: 0.42, ease: "power2.out" },
+          2.3,
+        );
+        tl.fromTo(
+          el("c03-la-cascada-chip2"),
+          { opacity: 0, x: -20 },
+          { opacity: 1, x: 0, duration: 0.42, ease: "power2.out" },
+          2.48,
+        );
+        // multi-phase-camera, modo empuje sostenido: la espera nunca muere.
+        tl.to(world, { scale: 1.11, duration: 0.95, ease: "power1.inOut" }, 2.35);
+
+        /* ═══ SCENE 3 (3.4–5.8s) · las dos líneas restantes ═════════════
+           LEG 2 — la cámara retrocede lo justo para que los dos invernaderos
+           entren completos (multi-phase-camera, fase de pull).             */
+        tl.to(world, { x: 34, y: 18, scale: 1.03, duration: 1.6, ease: "power2.inOut" }, 3.3);
+
+        tl.to(mLA, { strokeDashoffset: 0, duration: 1.1, ease: "power2.out" }, 3.45);
+        tl.to(mLB, { strokeDashoffset: 0, duration: 1.2, ease: "power2.out" }, 3.65);
+
+        tl.fromTo(
+          mA,
+          { scale: 0.42, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.36, ease: "power4.out" },
+          4.5,
+        );
+        tl.fromTo(
+          mB,
+          { scale: 0.42, opacity: 0 },
+          { scale: 1, opacity: 1, duration: 0.36, ease: "power4.out" },
+          4.84,
+        );
+
+        /* ═══ SCENE 4 (5.8–7.4s) · los KPIs terminan de moverse ═════════
+           LEG 3 — la cámara vuelve al encuadre completo y queda quieta.
+           handoff_out: escala 1.0, opacidad 1, centrado, quieto al corte.  */
+        tl.to(world, { x: 0, y: 0, scale: 1, duration: 1.4, ease: "power2.inOut" }, 5.6);
+
+        // count-up: filas de cuadro precalculadas (el mismo mecanismo del
+        // componente del registro). Una escritura por cuadro, cero callbacks
+        // → cualquier seek reproduce el mismo entero.
+        var countEase = gsap.parseEase("sine.inOut");
+        function countUp(valNode, boxNode, from, to, at, dur) {
+          var last = Math.max(1, Math.round(dur * FPS));
+          for (var f = 0; f <= last; f += 1) {
+            var v = Math.round(from + (to - from) * countEase(f / last));
+            tl.set(valNode, { textContent: String(v) }, at + dur * (f / last));
+          }
+          gsap.set(boxNode, { transformOrigin: "0% 74%" });
+          tl.to(boxNode, { scale: 1.045, duration: 0.15, ease: "power3.out" }, at + dur);
+          tl.to(boxNode, { scale: 1, duration: 0.28, ease: "power2.out" }, at + dur + 0.15);
+        }
+
+        tl.fromTo(
+          el("c03-la-cascada-div1"),
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.5, ease: "power2.out" },
+          5.7,
+        );
+        tl.fromTo(
+          el("c03-la-cascada-k1label"),
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.36, ease: "power2.out" },
+          5.8,
+        );
+        tl.fromTo(
+          el("c03-la-cascada-k1num"),
+          { opacity: 0 },
+          { opacity: 1, duration: 0.3, ease: "power1.out" },
+          5.85,
+        );
+        countUp(el("c03-la-cascada-k1val"), el("c03-la-cascada-k1num"), 1, 4, 5.9, 0.85);
+        tl.fromTo(
+          el("c03-la-cascada-k1sub"),
+          { opacity: 0, x: 14 },
+          { opacity: 1, x: 0, duration: 0.36, ease: "power2.out" },
+          6.05,
+        );
+        // la línea que importa: 3 de los 4 no recibieron daño
+        tl.fromTo(
+          el("c03-la-cascada-k1ocre"),
+          { opacity: 0, x: 14 },
+          { opacity: 1, x: 0, duration: 0.42, ease: "power2.out" },
+          6.4,
+        );
+
+        tl.fromTo(
+          el("c03-la-cascada-div2"),
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.5, ease: "power2.out" },
+          6.1,
+        );
+        tl.fromTo(
+          el("c03-la-cascada-k2label"),
+          { opacity: 0, y: 10 },
+          { opacity: 1, y: 0, duration: 0.36, ease: "power2.out" },
+          6.2,
+        );
+        tl.fromTo(
+          el("c03-la-cascada-k2num"),
+          { opacity: 0 },
+          { opacity: 1, duration: 0.3, ease: "power1.out" },
+          6.25,
+        );
+        countUp(el("c03-la-cascada-k2val"), el("c03-la-cascada-k2num"), 0, 37, 6.3, 0.9);
+        tl.fromTo(
+          el("c03-la-cascada-k2sub"),
+          { opacity: 0, x: 14 },
+          { opacity: 1, x: 0, duration: 0.36, ease: "power2.out" },
+          6.62,
+        );
+
+        /* ═══ SCENE 5 (7.4–9.0s) · la frase del panel, literal ══════════ */
+        tl.fromTo(
+          el("c03-la-cascada-div3"),
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.5, ease: "power2.out" },
+          7.2,
+        );
+        tl.fromTo(
+          el("c03-la-cascada-sent1"),
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+          7.35,
+        );
+        tl.fromTo(
+          el("c03-la-cascada-sent2"),
+          { opacity: 0, y: 16 },
+          { opacity: 1, y: 0, duration: 0.5, ease: "power2.out" },
+          7.52,
+        );
+        // subrayado dibujado a mano, en ocre (css-marker-patterns · scribble)
+        tl.to(scribble, { strokeDashoffset: 0, duration: 0.65, ease: "power1.inOut" }, 7.95);
+
+        // El frame cierra quieto: la marca final lleva la línea de tiempo al
+        // largo exacto del clip sin animar nada (handoff_out: quieto al corte).
+        tl.set({}, {}, D);
+
+        tl.seek(0);
+        window.__timelines = window.__timelines || {};
+        window.__timelines["03-la-cascada"] = tl;
+      })();
+    </script>
+  </div>
+</template>

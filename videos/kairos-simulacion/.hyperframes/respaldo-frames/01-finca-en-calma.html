@@ -1,0 +1,543 @@
+<template>
+  <div id="root" data-composition-id="01-finca-en-calma" data-duration="7">
+    <style>
+      #root {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        container-type: size;
+        isolation: isolate;
+        pointer-events: none;
+
+        /* Cobalt Grid — frame.md tokens (verbatim) */
+        --papel: #f0ece1;
+        --papel-alto: #faf8f3;
+        --tinta: #16191d;
+        --linea: rgba(205, 198, 181, 0.55);
+        --azul: #1b4a7a; /* state-color `opera` — the plan's reading code */
+        --gris-traza: #bdc2c6;
+
+        /* Only fonts that ship as real files may be named; this project ships
+           none (capture/assets/fonts is empty), so the ramp rides the generic
+           families the render machine always resolves. */
+        --font-mono: monospace;
+        --font-serif: serif;
+      }
+
+      #root *,
+      #root *::before,
+      #root *::after {
+        box-sizing: border-box;
+      }
+
+      /* ── ground: full-bleed paper + the permanent graph-paper grid ──────── */
+      /* Pitch + phase are locked to the plate's own baked grid (1772/22 px at
+         native, 15.5px vertical phase) so sheet and table read as one plane. */
+      #f1-ground {
+        position: absolute;
+        inset: 0;
+        background-color: var(--papel);
+        background-image:
+          linear-gradient(to right, var(--linea) 0 1.2px, transparent 1.2px),
+          linear-gradient(to bottom, var(--linea) 0 1.2px, transparent 1.2px);
+        background-size: 47.7273px 47.7273px;
+        background-position: 5.455px 5.17px;
+      }
+
+      /* ── stage / world: the single camera wrapper ───────────────────────── */
+      #f1-stage {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+      }
+
+      #f1-world {
+        position: absolute;
+        inset: 0;
+        transform-origin: 50% 50%;
+      }
+
+      /* the lámina: the drawing sheet, at its final framing, inside the world */
+      #f1-lamina,
+      #f1-lamina-grid,
+      #f1-plate {
+        position: absolute;
+        left: 435px;
+        top: 91.44px;
+        width: 1050px;
+        height: 897.12px;
+      }
+
+      #f1-lamina {
+        background: var(--papel-alto);
+      }
+
+      #f1-lamina-grid {
+        background-image:
+          linear-gradient(to right, var(--linea) 0 1.2px, transparent 1.2px),
+          linear-gradient(to bottom, var(--linea) 0 1.2px, transparent 1.2px);
+        background-size: 47.7273px 47.7273px;
+        background-position: 0px 9.185px;
+      }
+
+      #f1-plate {
+        display: block;
+        opacity: 0;
+      }
+
+      /* the SUBESTACIÓN recuadro, redrawn as vector and registered pixel-for-
+         pixel over the plate's own box, so the close framing never has to
+         magnify the raster past 1:1. */
+      #f1-detail {
+        position: absolute;
+        left: 920.3px;
+        top: 203.43px;
+        width: 155.84px;
+        height: 117.92px;
+      }
+
+      #f1-detail-inner {
+        position: absolute;
+        inset: 0;
+      }
+
+      #f1-detail svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      /* ── frame furniture: the two persistent hairlines ──────────────────── */
+      #f1-chrome {
+        position: absolute;
+        inset: 0;
+      }
+
+      .f1-hairline {
+        position: absolute;
+        left: 76.8px;
+        right: 76.8px;
+        height: 2px;
+        background: var(--tinta);
+      }
+
+      .f1-hairline-top {
+        top: 57.6px;
+      }
+
+      .f1-hairline-bottom {
+        top: 1020.4px;
+      }
+
+      /* ── the rótulo: travels anchored to the recuadro, shrinks with it ──── */
+      #f1-annlayer {
+        position: absolute;
+        inset: 0;
+      }
+
+      #f1-ann {
+        position: absolute;
+        left: 0;
+        top: 0;
+        display: inline-flex;
+        align-items: center;
+        white-space: nowrap;
+        transform-origin: 0 0;
+        font-size: 25.625px; /* the writer owns this */
+        color: var(--azul);
+      }
+
+      #f1-ann > * {
+        flex: 0 0 auto;
+      }
+
+      #f1-ann-rule {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 50%;
+        height: 0.11em;
+        margin-top: -0.055em;
+        background: var(--azul);
+        transform-origin: 100% 50%;
+        z-index: 0;
+      }
+
+      .f1-ann-block {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        height: 3.2em;
+      }
+
+      .f1-ann-bg {
+        position: absolute;
+        inset: 0;
+        background: var(--papel-alto);
+        box-shadow: 0 0 0 0.18em var(--papel-alto); /* paper anti-shadow, not elevation */
+        transform-origin: 100% 50%;
+      }
+
+      #f1-ann-name-block {
+        padding: 0 0.85em 0 0.72em;
+      }
+
+      #f1-ann-tab {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 0.16em;
+        background: var(--azul);
+      }
+
+      .f1-ann-name {
+        position: relative;
+        font-family: var(--font-mono);
+        font-size: 1em;
+        letter-spacing: 0.05em;
+        line-height: 1.35;
+      }
+
+      .f1-w,
+      .f1-w > span {
+        display: inline-block;
+      }
+
+      #f1-ann-fig-block {
+        padding: 0 0.85em 0 0;
+        gap: 0.8em;
+      }
+
+      #f1-ann-sep {
+        position: relative;
+        width: 0.1em;
+        height: 1.95em;
+        background: var(--azul);
+        opacity: 0.42;
+        transform-origin: 50% 50%;
+      }
+
+      #f1-ann-fig {
+        position: relative;
+        font-family: var(--font-serif);
+        font-size: 2.5em;
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+      }
+
+      .f1-ann-lead {
+        width: 1.45em;
+        height: 1px;
+      }
+    </style>
+
+    <div id="f1-ground" class="clip" data-start="0" data-duration="7" data-track-index="0"></div>
+
+    <div id="f1-stage" class="clip" data-start="0" data-duration="7" data-track-index="1">
+      <div id="f1-world">
+        <div id="f1-lamina"></div>
+        <div id="f1-lamina-grid"></div>
+        <img id="f1-plate" src="assets/plates/plano-antes@2x.png" alt="" />
+        <div id="f1-detail">
+          <div id="f1-detail-inner">
+            <svg viewBox="0 0 263 199" aria-hidden="true">
+              <rect
+                x="2.5"
+                y="2.5"
+                width="258"
+                height="194"
+                fill="#FAF8F3"
+                stroke="#1B4A7A"
+                stroke-width="5"
+              />
+              <line
+                x1="131.7"
+                y1="182"
+                x2="131.7"
+                y2="195"
+                stroke="#BDC2C6"
+                stroke-width="3.5"
+              />
+              <rect
+                x="73.1"
+                y="50.5"
+                width="116.4"
+                height="115.5"
+                rx="10"
+                fill="none"
+                stroke="#1B4A7A"
+                stroke-width="7"
+              />
+              <path
+                d="M109.3 137.7 L109.3 88.3 L131.7 72.7 L154.3 88.3 L154.3 137.7"
+                fill="none"
+                stroke="#1B4A7A"
+                stroke-width="5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+              <line
+                x1="101"
+                y1="139.8"
+                x2="162.7"
+                y2="139.8"
+                stroke="#1B4A7A"
+                stroke-width="5"
+                stroke-linecap="round"
+              />
+              <path
+                d="M136 95 L122.7 113.7 L136 114.3 L129 131.7"
+                fill="none"
+                stroke="#1B4A7A"
+                stroke-width="4.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="f1-chrome" class="clip" data-start="0" data-duration="7" data-track-index="2">
+      <div class="f1-hairline f1-hairline-top"></div>
+      <div class="f1-hairline f1-hairline-bottom"></div>
+    </div>
+
+    <div id="f1-annlayer" class="clip" data-start="0" data-duration="7" data-track-index="3">
+      <div id="f1-ann">
+        <div id="f1-ann-rule"></div>
+        <div class="f1-ann-block" id="f1-ann-name-block">
+          <div class="f1-ann-bg" id="f1-ann-name-bg"></div>
+          <div id="f1-ann-tab"></div>
+          <div class="f1-ann-name">
+            <span class="f1-w"><span>SUBESTACIÓN</span></span>
+            <span class="f1-w"><span>ELÉCTRICA</span></span>
+          </div>
+        </div>
+        <div class="f1-ann-block" id="f1-ann-fig-block">
+          <div class="f1-ann-bg" id="f1-ann-fig-bg"></div>
+          <div id="f1-ann-sep"></div>
+          <div id="f1-ann-fig">$ 240 M</div>
+        </div>
+        <div class="f1-ann-lead"></div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        var FRAME_ID = "01-finca-en-calma";
+        var DUR = 7;
+
+        var root = document.getElementById("root");
+        var q = function (sel) {
+          return root.querySelector(sel);
+        };
+
+        var world = q("#f1-world");
+        var plate = q("#f1-plate");
+        var lamGrid = q("#f1-lamina-grid");
+        var detail = q("#f1-detail");
+        var detailInner = q("#f1-detail-inner");
+        var ann = q("#f1-ann");
+        var annRule = q("#f1-ann-rule");
+        var nameBg = q("#f1-ann-name-bg");
+        var tab = q("#f1-ann-tab");
+        var figBg = q("#f1-ann-fig-bg");
+        var sep = q("#f1-ann-sep");
+        var fig = q("#f1-ann-fig");
+        var wordEls = [].slice.call(root.querySelectorAll(".f1-w > span"));
+
+        /* ─────────────────────────────────────────────────────────────────
+           GEOMETRY — all numbers measured off assets/plates/plano-antes@2x.png
+           Plate 1772x1514 native, laid into the world at 1050x897.12 centred
+           (K = 1050/1772 = 0.59255). The SUBESTACIÓN recuadro sits at native
+           x 819..1082, y 189..388 → world 920.30,203.43 155.84x117.92.
+           ───────────────────────────────────────────────────────────────── */
+        var CX = 960;
+        var CY = 540;
+        var BOX_CX = 998.22;
+        var BOX_CY = 262.39;
+        var BOX_W = 155.84;
+
+        /* Camera. One outward move only — no zoom-in anywhere, locked after.
+           S_NATIVE is where the plate renders exactly 1:1 against its own
+           source pixels (1772 / 1050). Above it the raster is never shown, so
+           nothing is ever magnified past the plate's native resolution. */
+        var S_OPEN = 4.0;
+        var S_CREEP = 3.72;
+        var S_NATIVE = 1.68762;
+        var S_SHARP = 1.22;
+
+        var PX0 = 1150,
+          PY0 = 520; /* where the recuadro sits on screen at the open */
+        var PX1 = 1136,
+          PY1 = 498; /* after the imperceptible pre-reveal creep */
+
+        var T_CREEP = 2.2; /* Scene 2 — the retreat starts, still unreadable */
+        var T_PULL = 3.6; /* Scene 3 — the signature pull-back */
+        var T_LOCK = 6.2; /* Scene 4 — frame locks, camera never moves again */
+        var PULL_DUR = T_LOCK - T_PULL;
+
+        var ANN_U_END = 12.5; /* rótulo base unit at the wide, in px */
+        var ANN_K = 0.35; /* u = ANN_U_END * (1 + (s - 1) * ANN_K) */
+
+        var EASE_CREEP = gsap.parseEase("power1.in");
+        var EASE_PULL = gsap.parseEase("power4.out");
+
+        function clamp01(v) {
+          return v < 0 ? 0 : v > 1 ? 1 : v;
+        }
+
+        /* THE single writer. Everything camera-borne is derived from one clock,
+           so the frame is order-independent and exact at any seek: at t = DUR
+           the pull ease returns 1 and the world lands on scale 1 / translate 0. */
+        function render(t) {
+          var s, px, py, p;
+
+          if (t <= T_CREEP) {
+            s = S_OPEN;
+            px = PX0;
+            py = PY0;
+          } else if (t <= T_PULL) {
+            p = EASE_CREEP((t - T_CREEP) / (T_PULL - T_CREEP));
+            s = S_OPEN + (S_CREEP - S_OPEN) * p;
+            px = PX0 + (PX1 - PX0) * p;
+            py = PY0 + (PY1 - PY0) * p;
+          } else {
+            p = EASE_PULL(clamp01((t - T_PULL) / PULL_DUR));
+            s = S_CREEP + (1 - S_CREEP) * p;
+            px = PX1 + (BOX_CX - PX1) * p;
+            py = PY1 + (BOX_CY - PY1) * p;
+          }
+
+          var tx = px - CX - (BOX_CX - CX) * s;
+          var ty = py - CY - (BOX_CY - CY) * s;
+          world.style.transform =
+            "translate(" + tx.toFixed(3) + "px," + ty.toFixed(3) + "px) scale(" + s.toFixed(5) + ")";
+
+          /* focus resolve: the drawing hands off from vector to plate exactly
+             as the camera crosses below 1:1, so the raster is only ever seen
+             at or under its own resolution. */
+          var r = clamp01((S_NATIVE - s) / (S_NATIVE - S_SHARP));
+          plate.style.opacity = r;
+          plate.style.filter = r > 0 ? "blur(" + ((1 - r) * 2.2).toFixed(3) + "px)" : "none";
+          detail.style.opacity = 1 - r;
+          lamGrid.style.opacity = 1 - r;
+
+          /* Scene 4 — bounded jitter on the rótulo only (element motion; the
+             camera is locked). sin(0) = 0 at the lock and the envelope reaches
+             0 at the cut, so the frame hands off dead still. */
+          var jp = t <= T_LOCK ? 0 : (Math.min(DUR, t) - T_LOCK) / (DUR - T_LOCK) * Math.PI;
+          var env = 1 - jp / Math.PI;
+          var jx = Math.sin(jp) * 1.5 * env;
+          var jy = Math.sin(jp * 1.3) * 1.0 * env;
+
+          var a = 1 + (s - 1) * ANN_K;
+          ann.style.fontSize = (ANN_U_END * a).toFixed(3) + "px";
+          ann.style.transform =
+            "translate(" +
+            (px - (BOX_W / 2) * s + jx).toFixed(3) +
+            "px," +
+            (py + jy).toFixed(3) +
+            "px) translate(-100%,-50%)";
+        }
+
+        var tl = gsap.timeline({ paused: true });
+
+        /* ── Scene 1 (0.0–2.2) — only the recuadro, then the mono rótulo ──── */
+        tl.fromTo(
+          detailInner,
+          { opacity: 0.55, filter: "blur(1.1px)" },
+          { opacity: 1, filter: "blur(0px)", duration: 0.55, ease: "power2.out" },
+          0,
+        );
+        tl.fromTo(
+          annRule,
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.3, ease: "power2.out", force3D: false },
+          0.18,
+        );
+        tl.fromTo(
+          nameBg,
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.38, ease: "power3.out", force3D: false },
+          0.3,
+        );
+
+        /* per-word staggered reveal — dynamic-content-sequencing: the start of
+           every token is reduced ONCE at build time out of its own length, no
+           hand-written per-word offsets. */
+        var WORD_BASE = 0.26;
+        var SEC_PER_CHAR = 0.018;
+        var LABEL_START = 0.46;
+        var TOKENS = [
+          { text: "SUBESTACIÓN", hold: 0.1 },
+          { text: "ELÉCTRICA", hold: 0.14 },
+        ];
+        var cumulative = LABEL_START;
+        var LABEL_SEQ = TOKENS.map(function (token, i) {
+          var dur = WORD_BASE + token.text.length * SEC_PER_CHAR + token.hold;
+          var start = cumulative;
+          cumulative += dur;
+          return { el: wordEls[i], start: start, end: cumulative };
+        });
+        LABEL_SEQ.forEach(function (entry) {
+          tl.fromTo(
+            entry.el,
+            { opacity: 0, yPercent: 55 },
+            { opacity: 1, yPercent: 0, duration: 0.42, ease: "power3.out", force3D: false },
+            entry.start,
+          );
+        });
+
+        tl.fromTo(tab, { opacity: 0 }, { opacity: 1, duration: 0.22, ease: "power1.out" }, 0.62);
+
+        /* ── Scene 2 (2.2–3.6) — the figure lands on its own time ─────────── */
+        tl.fromTo(
+          figBg,
+          { scaleX: 0 },
+          { scaleX: 1, duration: 0.36, ease: "power3.out", force3D: false },
+          2.2,
+        );
+        tl.fromTo(
+          fig,
+          { opacity: 0, yPercent: 34 },
+          { opacity: 1, yPercent: 0, duration: 0.42, ease: "power3.out", force3D: false },
+          2.34,
+        );
+        tl.fromTo(
+          sep,
+          { scaleY: 0 },
+          { scaleY: 1, duration: 0.22, ease: "power2.out", force3D: false },
+          2.52,
+        );
+
+        /* ── the camera clock — one driver, written through a setter so the
+           writer runs on every render, suppressed events or not ───────────── */
+        var driver = {
+          _t: 0,
+          get t() {
+            return this._t;
+          },
+          set t(v) {
+            this._t = v;
+            render(v);
+          },
+        };
+        tl.to(driver, { t: DUR, duration: DUR, ease: "none" }, 0);
+
+        render(0);
+        tl.seek(0);
+
+        window.__timelines = window.__timelines || {};
+        window.__timelines[FRAME_ID] = tl;
+      })();
+    </script>
+  </div>
+</template>
