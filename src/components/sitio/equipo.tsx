@@ -3,13 +3,15 @@
  *
  * Esta sección se mantiene como Server Component a propósito.
  *
- * Los retratos todavía no existen: `public/equipo/` está creado y vacío, y cada
- * integrante ya trae el nombre del archivo que le corresponde. La idea es que
- * cuando alguien deje el `.jpg` ahí la foto aparezca sin tocar código. El
- * problema es que `next/image` protesta en consola cuando el archivo no está,
- * así que hay que saber si está antes de renderizar la imagen. Al correr en el
- * servidor podemos simplemente mirar el disco con `existsSync`, que es la
- * respuesta real y no una suposición.
+ * Los cinco retratos están en `public/equipo/`, recortados a 4 a 5 y con la
+ * cara a la misma escala en todos, que es lo que hace que la fila se lea como
+ * una rejilla y no como cinco fotos sueltas.
+ *
+ * Aun así la tarjeta no da por hecho que el archivo esté. `next/image` protesta
+ * en consola cuando falta, así que hay que saberlo antes de renderizar la
+ * imagen. Al correr en el servidor podemos mirar el disco con `existsSync`, que
+ * es la respuesta real y no una suposición. Si alguien cambia una foto y se
+ * equivoca en el nombre, la tarjeta vuelve a las iniciales en vez de romperse.
  *
  * El encuadre del retrato es el mismo con foto y sin foto (4 a 5), así que la
  * rejilla no salta cuando las fotos vayan llegando una por una.
@@ -105,8 +107,9 @@ function Tarjeta({ integrante }: { integrante: Integrante }) {
             alt={integrante.nombre}
             fill
             sizes="(min-width: 1024px) 15vw, (min-width: 640px) 30vw, 45vw"
-            // El encuadre va en línea y no como utilidad porque es un dato de
-            // cada persona, no una decisión de estilo repetible.
+            // Con los archivos ya recortados a 4 a 5 esto no mueve nada, pero
+            // sostiene el caso de una foto sin recortar. Va en línea porque es
+            // un dato de cada persona, no una decisión de estilo repetible.
             style={{ objectPosition: integrante.encuadre ?? "50% 35%" }}
             className="object-cover saturate-[0.65] contrast-[1.02]"
           />

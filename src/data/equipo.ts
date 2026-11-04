@@ -25,11 +25,12 @@ export interface Integrante {
   /**
    * Dónde queda la cara dentro del recorte 4 a 5 de la tarjeta.
    *
-   * Existe porque las fotos del grupo no son retratos de estudio: hay una de
-   * cuerpo entero contra un atardecer, otra en un puerto y una de cámara web.
-   * Con el centro por defecto la cara de las de cuerpo entero cae en mitad de
-   * la tarjeta o más abajo. El valor es un `object-position` de CSS, primero
-   * horizontal y después vertical.
+   * Hoy ninguno lo usa: los cinco archivos de `public/equipo/` ya vienen
+   * recortados a 4 a 5, y cuando la imagen y el marco tienen la misma
+   * proporción `object-position` no mueve nada. Queda para el día en que
+   * alguien deje una foto sin recortar y la cara caiga fuera de sitio. El
+   * valor es un `object-position` de CSS, primero horizontal y después
+   * vertical.
    */
   encuadre?: string;
 }
@@ -43,8 +44,6 @@ export const equipo: Integrante[] = [
     programa: "Ingeniería de Sistemas",
     semestre: "7.º semestre",
     foto: "maria-alejandra-rodriguez.jpg",
-    // Cuerpo entero en un puerto, la cara queda algo abajo del centro.
-    encuadre: "52% 50%",
   },
   {
     nombre: "Juan Camilo Solano",
@@ -52,8 +51,6 @@ export const equipo: Integrante[] = [
     programa: "Ingeniería de Sistemas y Matemáticas",
     semestre: "7.º semestre",
     foto: "juan-camilo-solano.jpg",
-    // Vertical y de cerca, la cara va alta.
-    encuadre: "58% 20%",
   },
   {
     nombre: "Samuel Montoya",
@@ -61,8 +58,6 @@ export const equipo: Integrante[] = [
     programa: "Ingeniería de Sistemas y Matemáticas",
     semestre: "7.º semestre",
     foto: "samuel-montoya.jpg",
-    // Cámara web apaisada, la cara queda centrada y un poco arriba.
-    encuadre: "52% 34%",
   },
   {
     nombre: "Antonio Muñoz",
@@ -70,8 +65,6 @@ export const equipo: Integrante[] = [
     programa: "Ingeniería de Sistemas",
     semestre: "7.º semestre",
     foto: "antonio-munoz.jpg",
-    // Cuerpo entero contra el atardecer, hay que subir mucho el recorte.
-    encuadre: "42% 30%",
   },
   {
     nombre: "Raúl Ruiz",
@@ -80,7 +73,5 @@ export const equipo: Integrante[] = [
     semestre: "7.º semestre",
     nota: "Experiencia en startups",
     foto: "raul-ruiz.jpg",
-    // Medio cuerpo sobre fondo liso, la cara va en el tercio de arriba.
-    encuadre: "50% 24%",
   },
 ];
