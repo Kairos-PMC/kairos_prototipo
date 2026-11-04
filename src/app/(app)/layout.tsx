@@ -17,7 +17,7 @@ export default function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="flex min-h-dvh flex-col">
+    <div className="papel-tecnico flex min-h-dvh flex-col">
       {/* Cintillo de estado */}
       <div className="border-b border-linea bg-tinta">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1 px-6 py-1.5">
@@ -37,7 +37,9 @@ export default function AppLayout({
       <header className="sticky top-0 z-30 border-b border-linea bg-[color-mix(in_srgb,var(--papel)_92%,transparent)] backdrop-blur">
         <div className="mx-auto max-w-7xl px-6">
           <div className="flex items-center gap-6 py-3">
-            <Link href="/datos" className="flex shrink-0 items-center gap-3">
+            {/* Vuelve al sitio público, no al primer módulo: el logotipo de una
+                cabecera es la salida, y la navegación de abajo ya cubre los módulos. */}
+            <Link href="/" className="flex shrink-0 items-center gap-3">
               <Logotipo className="h-9 w-9" />
               <span>
                 <span className="display block text-lg leading-none">Kairos</span>

@@ -27,9 +27,41 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Kairos — Simulador digital de riesgos",
+  // El título lleva plantilla porque las pantallas internas se nombran solas y
+  // el sitio público no debería repetir "Kairos" dos veces en la pestaña.
+  title: {
+    default: "Kairos — Simulador digital de riesgos",
+    template: "%s — Kairos",
+  },
   description:
-    "Centro de datos públicos sobre amenazas naturales en Colombia y simulador de riesgo para la infraestructura física de las empresas.",
+    "Kairos simula fenómenos naturales sobre las sedes de una empresa y le pone precio al efecto en cadena. Lo que golpea el fenómeno rara vez es lo caro, lo caro es lo que ese golpe arrastra.",
+  applicationName: "Kairos",
+  authors: [{ name: "Grupo 1 · ISIS 2007 · Universidad de los Andes" }],
+  keywords: [
+    "riesgo",
+    "fenómenos naturales",
+    "continuidad del negocio",
+    "Colombia",
+    "simulación",
+    "IDEAM",
+    "Servicio Geológico Colombiano",
+  ],
+  openGraph: {
+    type: "website",
+    locale: "es_CO",
+    siteName: "Kairos",
+    title: "Kairos — Simulador digital de riesgos",
+    description:
+      "Lo que golpea el fenómeno rara vez es lo caro. Lo caro es lo que ese golpe arrastra.",
+    images: [{ url: "/simulacion-poster.png", width: 1280, height: 760 }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Kairos — Simulador digital de riesgos",
+    description:
+      "Lo que golpea el fenómeno rara vez es lo caro. Lo caro es lo que ese golpe arrastra.",
+    images: ["/simulacion-poster.png"],
+  },
 };
 
 export default function RootLayout({
@@ -37,7 +69,16 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es" className={`${sans.variable} ${serif.variable} ${mono.variable}`}>
-      <body>{children}</body>
+      <body>
+        {/* El revelado al entrar en pantalla lo enciende JavaScript. Si no corre,
+            el contenido se quedaría en su estado inicial, que es invisible. Esto
+            lo devuelve a la vista. Importa en una demostración pública, donde no
+            se controla ni el equipo ni la red. */}
+        <noscript>
+          <style>{".revelar { opacity: 1 !important; transform: none !important; }"}</style>
+        </noscript>
+        {children}
+      </body>
     </html>
   );
 }

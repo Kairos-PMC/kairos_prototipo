@@ -65,8 +65,28 @@ body {
   font-family: var(--fuente-sans), ui-sans-serif, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 
-  /* Retícula de papel milimetrado: se ve al mirarla de cerca, no compite. */
+  /* Papel liso y templado. La retícula de milimetrado vive ahora solo dentro
+     de la aplicación (.papel-tecnico), donde el producto es de verdad un plano.
+     En el sitio público leía como hoja de cálculo y enfriaba la primera
+     impresión, que es lo único que hay en una feria. */
   background-color: var(--papel);
+  background-image:
+    radial-gradient(
+      62rem 38rem at 12% -8%,
+      color-mix(in srgb, var(--papel-alto) 92%, white),
+      transparent 62%
+    ),
+    radial-gradient(
+      48rem 32rem at 92% 0%,
+      color-mix(in srgb, var(--ocre) 5%, transparent),
+      transparent 66%
+    );
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+}
+
+/* La retícula de milimetrado, ahora como superficie que se pide a propósito. */
+.papel-tecnico {
   background-image:
     linear-gradient(var(--linea-fina) 1px, transparent 1px),
     linear-gradient(90deg, var(--linea-fina) 1px, transparent 1px);
@@ -159,4 +179,69 @@ a {
       transform: translateY(6px);
     }
   }
+}
+
+/* ── Sitio público ───────────────────────────────────────────────────────────
+ *
+ * El landing navega por anclas, así que cada sección deja aire bajo el
+ * encabezado fijo. Sin esto el titular queda tapado al saltar.
+ */
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+.ancla {
+  scroll-margin-top: 4.5rem;
+}
+
+/* Aparición al entrar en pantalla. El estado inicial solo se aplica cuando hay
+   permiso para animar: si no, el contenido nunca nace oculto. */
+.revelar {
+  transition:
+    opacity 0.6s cubic-bezier(0.2, 0.7, 0.3, 1),
+    transform 0.6s cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .revelar:not(.revelar-visible) {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+/* Procedencia al pie de una cifra. Comparte la mono y el tamaño del rótulo,
+   pero va en caja normal porque es una frase y no una etiqueta de campo.
+   Por eso no se construye sobre .rotulo: esa clase declara su color, su caja y
+   su interletraje fuera de las capas de Tailwind, así que le gana a cualquier
+   utilidad que se le ponga al lado y no se puede corregir desde el JSX. */
+.procedencia {
+  font-family: var(--fuente-mono), ui-monospace, monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+  color: var(--tinta-tenue);
+}
+
+/* Profundidad para fondos oscuros. Era la retícula invertida y ahora es luz:
+   dos halos tibios que levantan el bloque del fondo plano sin cuadricularlo. */
+.reticula-oscura {
+  background-image:
+    radial-gradient(
+      55rem 30rem at 18% 0%,
+      color-mix(in srgb, var(--papel) 9%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      40rem 28rem at 88% 100%,
+      color-mix(in srgb, var(--bermellon) 12%, transparent),
+      transparent 62%
+    );
+  background-repeat: no-repeat;
 }
