@@ -9,11 +9,16 @@
  * problema es que `next/image` protesta en consola cuando el archivo no está,
  * así que hay que saber si está antes de renderizar la imagen. Al correr en el
  * servidor podemos simplemente mirar el disco con `existsSync`, que es la
- * respuesta real y no una suposición. Si el archivo falta, la tarjeta dibuja las
- * iniciales sobre papel hundido: un estado válido, no un hueco de error.
+ * respuesta real y no una suposición.
  *
  * El encuadre del retrato es el mismo con foto y sin foto (4 a 5), así que la
  * rejilla no salta cuando las fotos vayan llegando una por una.
+ *
+ * Sobre el monograma: mañana el sitio se presenta con iniciales en las cinco
+ * tarjetas, así que las iniciales no pueden verse como el hueco que dejó una
+ * foto que falta. Van grandes, en la serif del display y sobre una superficie
+ * hundida con luz propia, de modo que el estado sin foto se lea como una ficha
+ * de archivo y no como una imagen rota. Es el estado normal, no el de error.
  */
 
 import { existsSync } from "node:fs";
@@ -54,17 +59,23 @@ export function Equipo() {
 
       {/*
         La universidad es la misma para los cinco, así que se nombra una vez
-        aquí y no se repite en cada tarjeta.
+        aquí y no se repite en cada tarjeta. Van como píldoras y no como un
+        rótulo suelto entre líneas: a tres metros una insignia se ve y un rótulo
+        de 10px se pierde.
       */}
       <Revelar retraso={80}>
-        <p className="rotulo mt-12 flex items-center gap-3">
-          <span className="whitespace-nowrap">{universidad}</span>
-          <span className="h-px flex-1 bg-linea-fina" />
-          <span className="whitespace-nowrap">Grupo 1</span>
-        </p>
+        <div className="mt-10 flex flex-wrap items-center gap-2.5">
+          <span className="pildora pildora-papel">{universidad}</span>
+          <span className="pildora pildora-papel">Grupo 1</span>
+        </div>
       </Revelar>
 
-      <ul className="mt-6 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5 lg:gap-4">
+      {/*
+        `h-full` encadenado hasta la tarjeta es lo que mantiene parejas las
+        cinco alturas: la rejilla estira la fila, el `li` y el `Revelar` pasan
+        ese alto hacia abajo y la tarjeta lo ocupa completo.
+      */}
+      <ul className="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 sm:gap-6 lg:grid-cols-5 lg:gap-5">
         {equipo.map((integrante, i) => (
           <li key={integrante.nombre} className="h-full">
             <Revelar retraso={i * 70} className="h-full">
@@ -81,8 +92,13 @@ function Tarjeta({ integrante }: { integrante: Integrante }) {
   const retrato = retratoDisponible(integrante.foto);
 
   return (
-    <article className="lamina flex h-full flex-col rounded">
-      <div className="relative aspect-[4/5] w-full overflow-hidden border-b border-linea bg-papel-hundido">
+    <article className="lamina lamina-viva flex h-full flex-col overflow-hidden rounded-lg">
+      {/*
+        La superficie del retrato queda hundida respecto del papel de la
+        tarjeta. Esa diferencia de plano es la que separa la imagen del texto,
+        por eso aquí no hace falta una línea divisoria.
+      */}
+      <div className="relative aspect-[4/5] w-full overflow-hidden bg-papel-hundido shadow-[inset_0_-1px_0_color-mix(in_srgb,var(--tinta)_9%,transparent)]">
         {retrato ? (
           <Image
             src={retrato}
@@ -92,23 +108,41 @@ function Tarjeta({ integrante }: { integrante: Integrante }) {
             className="object-cover saturate-[0.65] contrast-[1.02]"
           />
         ) : (
-          <span className="display absolute inset-0 grid place-items-center text-[2.25rem] leading-none text-tinta-tenue">
-            {integrante.iniciales}
-          </span>
+          <>
+            {/* Luz que entra por arriba a la izquierda, la misma dirección que
+                la del papel del sitio. Sin esto el panel es un gris plano. */}
+            <div className="absolute inset-0 bg-[radial-gradient(135%_100%_at_28%_0%,var(--papel-alto),var(--papel-hundido)_64%)]" />
+            <span
+              className="display absolute inset-0 grid place-items-center text-[3.3rem] leading-none tracking-[0.02em] text-[color-mix(in_srgb,var(--tinta)_34%,transparent)] sm:text-[3.6rem]"
+              aria-hidden
+            >
+              {integrante.iniciales}
+            </span>
+          </>
         )}
       </div>
 
-      <div className="flex flex-1 flex-col p-4">
-        <h3 className="display text-[17px] leading-tight">{integrante.nombre}</h3>
-        <p className="mt-2 text-[13px] leading-relaxed text-tinta-media">
+      <div className="flex flex-1 flex-col p-4 sm:p-5">
+        <h3 className="display text-[18px] leading-tight sm:text-[19px]">
+          {integrante.nombre}
+        </h3>
+        <p className="mt-2.5 text-[13.5px] leading-relaxed text-tinta-media">
           {integrante.programa}
         </p>
-        <p className="rotulo mt-auto pt-3">{integrante.semestre}</p>
+
+        {/* La nota va pegada al programa y no al final, para que la insignia
+            del semestre quede a la misma altura en las cinco tarjetas. */}
         {integrante.nota && (
-          <p className="mt-3 border-t border-linea-fina pt-3 text-[12px] leading-relaxed text-tinta-media">
+          <p className="mt-2 text-[12.5px] leading-relaxed text-tinta-tenue">
             {integrante.nota}
           </p>
         )}
+
+        {/* El semestre es un dato de una sola línea, así que va como insignia
+            y se apoya en el fondo de la tarjeta en vez de flotar en gris. */}
+        <div className="mt-auto pt-5">
+          <span className="pildora pildora-papel">{integrante.semestre}</span>
+        </div>
       </div>
     </article>
   );

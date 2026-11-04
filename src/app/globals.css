@@ -245,3 +245,172 @@ html {
     );
   background-repeat: no-repeat;
 }
+
+/* ── Profundidad ─────────────────────────────────────────────────────────────
+ *
+ * Hasta aquí el sitio se sostenía solo con líneas de 1px, que es el vocabulario
+ * de un wireframe: correcto en pantalla cercana, pero a tres metros en una
+ * feria lee como un borrador sin terminar. Lo que sigue le da cuerpo al papel
+ * sin romper la dirección, que sigue siendo documento técnico.
+ */
+
+:root {
+  /* Noche: más profunda y más fría que --tinta, para que el producto encendido
+     tenga de dónde despegarse. --tinta se queda para texto y botones. */
+  --noche: #0d1117;
+  --noche-alto: #161d26;
+
+  --sombra-baja: 0 1px 2px rgba(13, 17, 23, 0.05), 0 2px 6px rgba(13, 17, 23, 0.05);
+  --sombra-media:
+    0 1px 2px rgba(13, 17, 23, 0.05),
+    0 4px 10px rgba(13, 17, 23, 0.06),
+    0 12px 28px rgba(13, 17, 23, 0.07);
+  --sombra-alta:
+    0 2px 4px rgba(13, 17, 23, 0.06),
+    0 10px 24px rgba(13, 17, 23, 0.1),
+    0 30px 60px rgba(13, 17, 23, 0.14);
+  /* La pantalla del producto flota sobre el fondo oscuro, así que su sombra es
+     negra de verdad y además lleva un filo claro arriba que simula el canto. */
+  --sombra-pantalla:
+    0 0 0 1px rgba(240, 236, 225, 0.08),
+    0 1px 0 rgba(240, 236, 225, 0.14) inset,
+    0 18px 40px rgba(0, 0, 0, 0.45),
+    0 50px 100px rgba(0, 0, 0, 0.55);
+}
+
+@theme inline {
+  --color-noche: var(--noche);
+  --color-noche-alto: var(--noche-alto);
+}
+
+/* Lámina elevada. Misma superficie de papel, ahora con peso. */
+.lamina {
+  box-shadow: var(--sombra-media);
+}
+
+/* Tarjeta que reacciona. Se usa donde hay varias en fila y el ojo tiene que
+   poder recorrerlas una por una. */
+.lamina-viva {
+  transition:
+    box-shadow 0.25s ease,
+    transform 0.25s ease,
+    border-color 0.25s ease;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .lamina-viva:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--sombra-alta);
+    border-color: var(--tinta-tenue);
+  }
+}
+
+/* ── El producto en pantalla ─────────────────────────────────────────────────
+ *
+ * El marco existe para que el prototipo se lea como software y no como una
+ * imagen pegada. La barra superior con los tres puntos es la convención más
+ * barata que hay para decir "esto es una aplicación de verdad".
+ */
+.pantalla {
+  border-radius: 12px;
+  background: var(--noche-alto);
+  box-shadow: var(--sombra-pantalla);
+  overflow: hidden;
+}
+
+.pantalla-barra {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 11px 14px;
+  background: linear-gradient(var(--noche-alto), var(--noche));
+  border-bottom: 1px solid rgba(240, 236, 225, 0.07);
+}
+
+.pantalla-punto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: rgba(240, 236, 225, 0.18);
+}
+
+/* ── Luz ─────────────────────────────────────────────────────────────────────
+ *
+ * Dos ambientes. `noche-viva` es el fondo del hero y del cierre: negro con
+ * calor, no negro plano. `aurora` es el halo que se pone detrás de la pantalla
+ * para que el producto parezca encendido.
+ */
+.noche-viva {
+  background-color: var(--noche);
+  background-image:
+    radial-gradient(60rem 36rem at 15% -10%, color-mix(in srgb, var(--azul-claro) 22%, transparent), transparent 62%),
+    radial-gradient(48rem 34rem at 88% 8%, color-mix(in srgb, var(--bermellon) 20%, transparent), transparent 60%),
+    radial-gradient(52rem 30rem at 60% 108%, color-mix(in srgb, var(--ocre) 14%, transparent), transparent 62%);
+  background-repeat: no-repeat;
+}
+
+.aurora::before {
+  content: "";
+  position: absolute;
+  inset: -14% -8% -18% -8%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(46% 46% at 32% 42%, color-mix(in srgb, var(--ocre) 62%, transparent), transparent 72%),
+    radial-gradient(44% 44% at 72% 58%, color-mix(in srgb, var(--bermellon) 48%, transparent), transparent 72%);
+  filter: blur(62px);
+  opacity: 0.55;
+}
+
+/* Filete de acento. Reemplaza al borde de 1px cuando un bloque necesita peso
+   sin convertirse en una caja más. */
+.filete {
+  border-left: 3px solid var(--bermellon);
+}
+
+/* Píldora de estado. Donde antes había un rótulo suelto en mono, ahora hay un
+   objeto con forma, que es lo que hace que un dato se lea como insignia. */
+.pildora {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px 5px 9px;
+  border-radius: 999px;
+  font-family: var(--fuente-mono), ui-monospace, monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.pildora-clara {
+  background: rgba(240, 236, 225, 0.08);
+  border: 1px solid rgba(240, 236, 225, 0.16);
+  color: color-mix(in srgb, var(--papel) 82%, transparent);
+}
+
+.pildora-papel {
+  background: var(--papel-alto);
+  border: 1px solid var(--linea);
+  color: var(--tinta-media);
+  box-shadow: var(--sombra-baja);
+}
+
+/* Punto que late. Solo se usa sobre datos que de verdad vienen de un API en
+   vivo: si late sobre un dato quieto, el sitio miente. */
+.latido {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--verde-claro);
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--verde-claro) 70%, transparent);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .latido {
+    animation: latido 2.4s ease-out infinite;
+  }
+  @keyframes latido {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--verde-claro) 60%, transparent); }
+    70% { box-shadow: 0 0 0 7px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+}

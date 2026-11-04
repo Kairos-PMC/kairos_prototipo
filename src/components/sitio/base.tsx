@@ -21,12 +21,15 @@ export function Seccion({
   children: ReactNode;
   className?: string;
   /** `alto` para alternar el fondo y separar bloques sin dibujar una línea. */
-  tono?: "papel" | "alto" | "tinta";
+  tono?: "papel" | "alto" | "tinta" | "noche";
 }) {
   const fondo = {
     papel: "",
     alto: "bg-papel-alto border-y border-linea",
     tinta: "bg-tinta text-papel",
+    // `noche` es el mismo ambiente del hero. Se reserva para los dos momentos
+    // que tienen que pegar fuerte, no para alternar fondos.
+    noche: "noche-viva text-papel",
   }[tono];
 
   return (
@@ -84,9 +87,14 @@ export function TituloSeccion({
 }) {
   return (
     <div className={`mt-5 max-w-3xl ${className}`}>
-      <h2 className="display text-[2rem] leading-[1.12] sm:text-[2.6rem]">{children}</h2>
+      <h2 className="display text-[2.15rem] leading-[1.08] sm:text-[3rem] lg:text-[3.3rem]">
+        {children}
+      </h2>
+      {/* El color de la bajada va declarado y no heredado: las secciones
+          oscuras envuelven su texto en un span propio, así que este
+          `text-tinta-media` solo manda donde el fondo es papel. */}
       {bajada && (
-        <p className="mt-5 max-w-2xl text-[16px] leading-relaxed text-tinta-media">
+        <p className="mt-5 max-w-2xl text-[16.5px] leading-relaxed text-tinta-media sm:text-[17.5px]">
           {bajada}
         </p>
       )}
@@ -104,17 +112,21 @@ export function Boton({
 }: {
   href: string;
   children: ReactNode;
-  variante?: "principal" | "secundario" | "claro";
+  variante?: "principal" | "secundario" | "claro" | "contorno-claro";
   externo?: boolean;
   className?: string;
 }) {
   const estilo = {
     principal:
-      "bg-tinta text-papel hover:bg-azul border border-transparent",
+      "bg-tinta text-papel border border-transparent shadow-[var(--sombra-media)] hover:bg-azul hover:shadow-[var(--sombra-alta)]",
     secundario:
-      "border border-linea bg-papel-alto text-tinta hover:border-tinta hover:bg-papel",
+      "border border-linea bg-papel-alto text-tinta shadow-[var(--sombra-baja)] hover:border-tinta hover:bg-papel hover:shadow-[var(--sombra-media)]",
     claro:
-      "bg-papel text-tinta hover:bg-papel-alto border border-transparent",
+      "bg-papel text-tinta border border-transparent shadow-[var(--sombra-alta)] hover:bg-papel-alto",
+    // Para fondos oscuros: el contorno es la única forma de poner un botón
+    // secundario sobre noche sin abrir un agujero de papel en el fondo.
+    "contorno-claro":
+      "border border-[color-mix(in_srgb,var(--papel)_28%,transparent)] bg-[color-mix(in_srgb,var(--papel)_7%,transparent)] text-papel hover:border-papel hover:bg-[color-mix(in_srgb,var(--papel)_14%,transparent)]",
   }[variante];
 
   const Etiqueta = externo ? "a" : "a";
@@ -168,8 +180,8 @@ export function Cifra({
   }[tono];
 
   return (
-    <div className="lamina lamina-esquina rounded p-6">
-      <p className={`display flex items-baseline gap-1.5 text-[2.75rem] leading-none ${color}`}>
+    <div className="lamina lamina-viva rounded-lg p-6">
+      <p className={`display flex items-baseline gap-1.5 text-[3.1rem] leading-none ${color}`}>
         {valor}
         {unidad && <span className="text-xl">{unidad}</span>}
       </p>

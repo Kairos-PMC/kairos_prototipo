@@ -10,5 +10,5 @@ export const DOCUMENTO = {
   fechaEmision: "08-09-2026",
   /** Qué cambió en esta revisión, para el pie de página. */
   notaRevision:
-    "Rev. B — plano de planta interactivo y simulación de caída en cadena.",
+    "Rev. B. Plano de planta interactivo y simulación de caída en cadena.",
 } as const;

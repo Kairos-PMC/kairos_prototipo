@@ -3,14 +3,24 @@ import { RotuloSeccion, Seccion, TituloSeccion } from "@/components/sitio/base";
 import { Revelar } from "@/components/sitio/revelar";
 
 /**
- * Validación con clientes.
+ * Sección 05. Validación con clientes.
  *
  * La sección está construida alrededor de una decisión: decir de frente lo que
  * todavía no sabemos. Una entrevista no es una muestra, y un evaluador que
  * pregunte por la disposición a pagar tiene que encontrar la respuesta escrita
- * en vez de un silencio. De ahí la estructura en dos columnas enfrentadas: lo
- * confirmado y lo pendiente ocupan el mismo ancho y el mismo peso visual,
- * porque pesan lo mismo.
+ * en vez de un silencio. De ahí las dos tarjetas enfrentadas: lo confirmado y
+ * lo pendiente ocupan el mismo ancho y el mismo peso visual, porque pesan lo
+ * mismo.
+ *
+ * Antes el balance vivía dentro de una sola lámina partida por una línea fina,
+ * y la procedencia de la cita era un pie en minúscula. Las dos cosas hacían que
+ * la evidencia de campo se leyera como un anexo. Ahora cada mitad es una pieza
+ * con elevación propia y la procedencia es una insignia, que es como se ve algo
+ * verificado.
+ *
+ * Sobre el color: acá verde marca lo que ya quedó firme y ocre lo que sigue
+ * abierto. Es la misma pendiente de riesgo que los dos colores llevan en el
+ * resto del sitio, y en ningún caso están puestos para adornar.
  */
 
 /** Lo que la entrevista dejó firme. */
@@ -44,6 +54,9 @@ const interlocutores = [
   },
 ];
 
+/** La procedencia de la cita, partida en insignias para que se lea de un golpe. */
+const procedencia = ["Entrevista de validación", "Sector floricultor", "Ago 2026"];
+
 export function Validacion() {
   return (
     <Seccion id="validacion" tono="papel">
@@ -61,25 +74,38 @@ export function Validacion() {
         </TituloSeccion>
       </Revelar>
 
-      {/* La cita va antes de las columnas porque es la causa de todo lo que
-          viene después: sin ella, el catálogo de fenómenos seguiría fijo. */}
+      {/* La cita va antes del balance porque es la causa de todo lo que viene
+          después: sin ella, el catálogo de fenómenos seguiría fijo. El filete
+          bermellón es correcto acá, porque lo que la cita describe es la falla
+          que el producto va a atacar. */}
       <Revelar retraso={120}>
-        <figure className="mt-14 max-w-3xl border-l-2 border-bermellon pl-6 sm:pl-8">
-          <blockquote className="display text-[1.4rem] leading-[1.45] sm:text-[1.6rem]">
+        {/* La sombra va en `style` porque `.lamina` declara su `box-shadow` en
+            globals.css fuera de las capas y le gana a `shadow-*`, que vive en
+            `@layer utilities`. El filete sí funciona como clase, porque nace en
+            la misma capa que `.lamina` y se declara después. */}
+        <figure
+          className="lamina filete mt-14 max-w-4xl rounded-lg p-8 sm:p-11"
+          style={{ boxShadow: "var(--sombra-alta)" }}
+        >
+          <blockquote className="display text-[1.55rem] leading-[1.32] sm:text-[2rem] sm:leading-[1.3]">
             La empresa ya maneja análisis detallados de fenómenos naturales. El problema
             es que son generales y no aplican a las regiones donde opera.
           </blockquote>
-          <figcaption className="rotulo mt-5">
-            Entrevista de validación · sector floricultor · ago 2026
+          <figcaption className="mt-8 flex flex-wrap gap-2.5 border-t border-linea-fina pt-7">
+            {procedencia.map((dato) => (
+              <span key={dato} className="pildora pildora-papel">
+                {dato}
+              </span>
+            ))}
           </figcaption>
         </figure>
       </Revelar>
 
-      {/* Dos columnas enfrentadas dentro de una sola lámina: la línea del medio
-          es lo que hace legible que se trata de un balance y no de dos listas
-          sueltas. En móvil la línea pasa a ser horizontal. */}
+      {/* El balance. Dos tarjetas del mismo tamaño y con la misma elevación:
+          es lo que hace legible que se trata de un balance y no de una lista
+          buena con una advertencia al final. */}
       <Revelar retraso={200}>
-        <div className="lamina mt-14 grid rounded md:grid-cols-2">
+        <div className="mt-16 grid gap-6 md:grid-cols-2">
           <Columna
             sello="Confirmado"
             tono="verde"
@@ -91,7 +117,6 @@ export function Validacion() {
             tono="ocre"
             titulo="Lo que todavía no alcanza"
             items={pendiente}
-            className="border-t border-linea md:border-l md:border-t-0"
           />
         </div>
       </Revelar>
@@ -99,32 +124,34 @@ export function Validacion() {
       {/* Hallazgo fino de la investigación, y la razón de que el producto tenga
           que hablarle a dos personas distintas con argumentos distintos. */}
       <Revelar retraso={280}>
-        <div className="mt-14 max-w-3xl">
+        <div className="mt-20">
           <p className="rotulo">A quién hay que convencer</p>
-          <h3 className="display mt-3 text-[1.35rem] leading-snug">
+          <h3 className="display mt-4 max-w-2xl text-[1.7rem] leading-snug sm:text-[2.1rem]">
             Quien sufre el problema no es quien firma.
           </h3>
 
-          <dl className="lamina mt-6 rounded">
-            {interlocutores.map((fila, i) => (
+          <dl className="mt-8 grid gap-6 md:grid-cols-2">
+            {interlocutores.map((fila) => (
               <div
                 key={fila.rotulo}
-                className={`grid gap-1 p-5 sm:grid-cols-[13rem_1fr] sm:gap-6 sm:p-6 ${
-                  i > 0 ? "border-t border-linea-fina" : ""
-                }`}
+                className="lamina lamina-viva rounded-lg p-7 sm:p-8"
               >
-                <dt className="rotulo flex items-center gap-2.5 pt-0.5">
-                  <span
-                    aria-hidden
-                    className={`inline-block h-2.5 w-2.5 shrink-0 rounded-full ${
-                      fila.tono === "bermellon" ? "bg-bermellon" : "bg-ocre"
-                    }`}
-                  />
-                  {fila.rotulo}
+                <dt>
+                  <span className="pildora pildora-papel">
+                    <span
+                      aria-hidden
+                      className={`inline-block h-2 w-2 shrink-0 rounded-full ${
+                        fila.tono === "bermellon" ? "bg-bermellon" : "bg-ocre"
+                      }`}
+                    />
+                    {fila.rotulo}
+                  </span>
                 </dt>
                 <dd>
-                  <p className="text-[15px] leading-snug">{fila.quien}</p>
-                  <p className="mt-1.5 text-[13px] leading-relaxed text-tinta-media">
+                  <p className="display mt-6 text-[1.25rem] leading-snug sm:text-[1.35rem]">
+                    {fila.quien}
+                  </p>
+                  <p className="mt-3.5 text-[14.5px] leading-relaxed text-tinta-media">
                     {fila.detalle}
                   </p>
                 </dd>
@@ -137,40 +164,37 @@ export function Validacion() {
   );
 }
 
-/** Una de las dos columnas del balance, con su sello en la esquina. */
+/** Una de las dos mitades del balance. */
 function Columna({
   sello,
   tono,
   titulo,
   items,
-  className = "",
 }: {
   sello: string;
   tono: "verde" | "ocre";
   titulo: string;
   items: string[];
-  className?: string;
 }) {
-  const color = tono === "verde" ? "text-verde" : "text-ocre";
-  const borde = tono === "verde" ? "border-verde" : "border-ocre";
+  const punto = tono === "verde" ? "bg-verde" : "bg-ocre";
 
   return (
-    <div className={`p-7 sm:p-8 ${className}`}>
-      <div className="flex items-start justify-between gap-4">
-        <h3 className="display max-w-[14rem] text-[1.15rem] leading-snug">{titulo}</h3>
-        {/* Sello de tinta, ligeramente torcido como uno puesto a mano. */}
-        <span
-          className={`mono shrink-0 -rotate-3 border-2 px-2.5 py-1 text-[10px] uppercase leading-none tracking-[0.14em] opacity-85 ${color} ${borde}`}
-        >
-          {sello}
-        </span>
-      </div>
+    <div className="lamina lamina-viva flex flex-col rounded-lg p-8 sm:p-9">
+      {/* El sello era un cuño torcido con borde de 2px. Leía como el visto
+          bueno de un borrador, justo lo contrario de lo que la sección quiere
+          decir. La píldora dice lo mismo sin disfrazarse de sello de caucho. */}
+      <span className="pildora pildora-papel self-start">
+        <span aria-hidden className={`inline-block h-2 w-2 shrink-0 rounded-full ${punto}`} />
+        {sello}
+      </span>
 
-      <ul className="mt-7 space-y-5">
+      <h3 className="display mt-6 text-[1.5rem] leading-snug sm:text-[1.7rem]">{titulo}</h3>
+
+      <ul className="mt-8 space-y-6">
         {items.map((texto) => (
-          <li key={texto} className="flex gap-3.5">
+          <li key={texto} className="flex gap-4">
             <Marca tono={tono} />
-            <p className="text-[14.5px] leading-relaxed text-tinta-media">{texto}</p>
+            <p className="text-[15px] leading-relaxed text-tinta-media">{texto}</p>
           </li>
         ))}
       </ul>
@@ -180,17 +204,18 @@ function Columna({
 
 /**
  * Viñeta con forma, no con punto: el visto cerrado marca lo resuelto y el
- * cuadro abierto marca lo que falta por llenar.
+ * cuadro abierto marca lo que falta por llenar. La forma hace el trabajo sola,
+ * así que la lista sigue siendo legible sin distinguir los dos colores.
  */
 function Marca({ tono }: { tono: "verde" | "ocre" }): ReactNode {
   if (tono === "verde") {
     return (
-      <svg viewBox="0 0 14 14" className="mt-[5px] h-3.5 w-3.5 shrink-0 text-verde" aria-hidden>
+      <svg viewBox="0 0 14 14" className="mt-[5px] h-4 w-4 shrink-0 text-verde" aria-hidden>
         <path
           d="M2 7.5l3.2 3.2L12 3.5"
           fill="none"
           stroke="currentColor"
-          strokeWidth="1.8"
+          strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
         />
@@ -199,7 +224,7 @@ function Marca({ tono }: { tono: "verde" | "ocre" }): ReactNode {
   }
 
   return (
-    <svg viewBox="0 0 14 14" className="mt-[5px] h-3.5 w-3.5 shrink-0 text-ocre" aria-hidden>
+    <svg viewBox="0 0 14 14" className="mt-[5px] h-4 w-4 shrink-0 text-ocre" aria-hidden>
       <rect
         x="2.2"
         y="2.2"
@@ -207,7 +232,7 @@ function Marca({ tono }: { tono: "verde" | "ocre" }): ReactNode {
         height="9.6"
         fill="none"
         stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="1.8"
       />
     </svg>
   );

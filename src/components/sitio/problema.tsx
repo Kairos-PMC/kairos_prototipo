@@ -3,14 +3,24 @@
  *
  * El argumento no es que falten datos. Es que los datos existen y nadie los
  * baja a una sede concreta con un precio al lado. La sección está construida
- * para que esa distinción se vea antes de leerla: primero la cadena de tres
- * eslabones, después los sellos de las fuentes que ya publican todo eso.
+ * para que esa distinción se vea antes de leerla: la cadena de tres eslabones
+ * junto al dibujo que la resume, y después, en voz baja, las fuentes que ya
+ * publican todo eso.
+ *
+ * El fondo es papel y no papel alto para que las láminas tengan de dónde
+ * despegarse. Con los dos tonos iguales la elevación no se ve.
  */
 
-import { Fragment, type ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import { RotuloSeccion, Seccion, TituloSeccion } from "@/components/sitio/base";
+import { Fichas } from "@/components/sitio/hero";
 import { Revelar } from "@/components/sitio/revelar";
+
+/* El rótulo con color propio no puede construirse sobre `.rotulo`: esa clase
+   declara su color fuera de las capas de Tailwind, así que le gana a cualquier
+   utilidad que se le ponga al lado. Se replica su aspecto con utilidades. */
+const ROTULO = "mono text-[10px] uppercase tracking-[0.11em]";
 
 /** El árbol de problemas del proyecto, en sus tres eslabones. */
 const CADENA = [
@@ -87,7 +97,7 @@ const FUENTES: {
 
 export function Problema() {
   return (
-    <Seccion id="problema" tono="alto">
+    <Seccion id="problema" tono="papel">
       <RotuloSeccion n="01">El problema</RotuloSeccion>
       <TituloSeccion
         bajada={
@@ -102,68 +112,59 @@ export function Problema() {
         El dato existe. La decisión, no.
       </TituloSeccion>
 
-      {/* La cadena. En escritorio corre de izquierda a derecha con flechas
-          entre eslabones, en móvil se apila y la flecha apunta hacia abajo. */}
-      <Revelar>
-        <ol className="mt-14 grid gap-3 lg:grid-cols-[1fr_auto_1fr_auto_1fr] lg:gap-4">
-          {CADENA.map((eslabon, i) => (
-            <Fragment key={eslabon.n}>
-              <Eslabon
-                rotulo={eslabon.rotulo}
-                consecuencia={i === CADENA.length - 1}
-              >
+      {/* La cadena y el dibujo van lado a lado porque dicen lo mismo en dos
+          idiomas. Las fichas se entienden de un vistazo y preparan la lectura
+          del tercer eslabón, que es donde el argumento cobra el precio. */}
+      <div className="mt-14 grid items-start gap-10 lg:mt-16 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.08fr)] lg:gap-14">
+        <Revelar>
+          <ol className="space-y-4">
+            {CADENA.map((eslabon, i) => (
+              <Eslabon key={eslabon.n} rotulo={eslabon.rotulo} peso={i}>
                 {eslabon.texto}
               </Eslabon>
-              {i < CADENA.length - 1 && <Flecha />}
-            </Fragment>
-          ))}
-        </ol>
-      </Revelar>
+            ))}
+          </ol>
+        </Revelar>
 
-      {/* Sellos de procedencia. Van en mono y en cajas chicas porque son
-          referencias, no argumentos. */}
+        <Revelar retraso={120}>
+          <Fichas />
+        </Revelar>
+      </div>
+
+      {/* Procedencia de los datos. Es una tabla de referencia y no un
+          argumento, así que va densa, sin cajas y en voz baja. */}
       <Revelar retraso={120}>
-        <div className="mt-16">
-          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-2">
+        <div className="mt-20">
+          <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
             <p className="rotulo">Quién publica el dato</p>
-            <p className="rotulo normal-case tracking-[0.04em]">
+            <p className="procedencia">
               Dos de las seis están conectadas al prototipo
             </p>
           </div>
 
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="mt-2 grid gap-x-12 sm:grid-cols-2">
             {FUENTES.map((fuente) => (
               <li
                 key={fuente.sigla}
-                className="flex h-full flex-col rounded border border-linea bg-papel p-4"
+                className="border-t border-linea-fina py-4"
               >
-                <div className="flex items-center justify-between gap-3">
-                  <p className="mono text-[13px] font-medium tracking-[0.02em]">
+                <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+                  {/* La sigla conserva su caja original. Mayúsculas forzadas
+                      le cambiarían el nombre a DesInventar y a Open-Meteo. */}
+                  <p className="mono text-[12px] font-medium tracking-[0.03em] text-tinta">
                     {fuente.sigla}
                   </p>
-                  <span
-                    className={`rotulo flex items-center gap-1.5 whitespace-nowrap ${
-                      fuente.vivo ? "text-verde" : ""
-                    }`}
-                  >
-                    <span
-                      aria-hidden
-                      className={`inline-block h-[7px] w-[7px] rounded-full ${
-                        fuente.vivo
-                          ? "bg-verde"
-                          : "border border-tinta-tenue bg-transparent"
-                      }`}
-                    />
-                    {fuente.vivo ? "En vivo" : "Citada"}
-                  </span>
+                  {/* El punto late solo donde el dato llega de un API en
+                      vivo. Sobre las otras cuatro sería mentira. */}
+                  {fuente.vivo && (
+                    <span className="pildora pildora-papel">
+                      <span className="latido" aria-hidden />
+                      En vivo
+                    </span>
+                  )}
                 </div>
-
-                {fuente.nombre && (
-                  <p className="mt-2 text-[12px] leading-snug text-tinta-tenue">
-                    {fuente.nombre}
-                  </p>
-                )}
-                <p className="mt-3 border-t border-linea-fina pt-3 text-[13px] leading-relaxed text-tinta-media">
+                <p className="mt-2 text-[13px] leading-relaxed text-tinta-tenue">
+                  {fuente.nombre ? `${fuente.nombre}. ` : ""}
                   {fuente.publica}
                 </p>
               </li>
@@ -174,15 +175,16 @@ export function Problema() {
 
       {/* Cierre con la frase que cambió el planteamiento del proyecto. No es
           un testimonio de venta, es el hallazgo que obligó a bajar el análisis
-          regional al nivel de una sede. */}
+          regional al nivel de una sede. Va en lámina grande porque es lo
+          último que queda en la cabeza al salir de la sección. */}
       <Revelar retraso={200}>
-        <figure className="mt-16 max-w-2xl border-l-2 border-bermellon pl-5">
-          <blockquote className="display text-[17px] leading-relaxed sm:text-[19px]">
+        <figure className="lamina mt-20 max-w-3xl rounded-lg p-7 sm:p-9">
+          <blockquote className="display text-[19px] leading-[1.5] sm:text-[23px]">
             La empresa ya maneja análisis detallados de fenómenos naturales. El
             problema es que son generales y no aplican a las regiones donde
             opera.
           </blockquote>
-          <figcaption className="rotulo mt-4">
+          <figcaption className="procedencia mt-6 border-t border-linea-fina pt-4">
             Hallazgo de la entrevista de validación · sector floricultor · ago
             2026
           </figcaption>
@@ -192,47 +194,35 @@ export function Problema() {
   );
 }
 
-/** Un eslabón de la cadena. El último es la consecuencia y va en bermellón. */
+/**
+ * Un eslabón de la cadena.
+ *
+ * El peso crece con la posición porque esto es una progresión y no tres cajas
+ * iguales: la causa raíz se enuncia, la brecha se afirma y la consecuencia se
+ * dice en serif, con filete bermellón, porque es la falla que paga la empresa.
+ */
 function Eslabon({
   rotulo,
   children,
-  consecuencia = false,
+  peso,
 }: {
   rotulo: string;
   children: ReactNode;
-  consecuencia?: boolean;
+  /** 0, 1 o 2 según la posición en la cadena. */
+  peso: number;
 }) {
-  return (
-    <li
-      className={`flex h-full flex-col rounded border bg-papel p-5 ${
-        consecuencia ? "border-bermellon" : "border-linea"
-      }`}
-    >
-      <p className={`rotulo ${consecuencia ? "text-bermellon" : ""}`}>
-        {rotulo}
-      </p>
-      <p className="mt-3 text-[15px] leading-relaxed">{children}</p>
-    </li>
-  );
-}
+  const caja = ["p-5", "p-6", "filete p-6 sm:p-7"][peso];
+  const color = ["text-tinta-tenue", "text-tinta-media", "text-bermellon"][peso];
+  const cuerpo = [
+    "mt-2.5 text-[15px] leading-relaxed text-tinta-media",
+    "mt-3 text-[15.5px] leading-relaxed",
+    "display mt-3.5 text-[17px] leading-snug sm:text-[19px]",
+  ][peso];
 
-/** Flecha entre eslabones. Gira a vertical cuando la cadena se apila. */
-function Flecha() {
   return (
-    <li className="flex items-center justify-center py-1 lg:py-0" aria-hidden>
-      <svg
-        viewBox="0 0 36 14"
-        className="h-3.5 w-9 rotate-90 text-tinta-tenue lg:rotate-0"
-      >
-        <path
-          d="M1 7h30M25.5 2 31 7l-5.5 5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+    <li className={`lamina rounded-lg ${caja}`}>
+      <p className={`${ROTULO} ${color}`}>{rotulo}</p>
+      <p className={cuerpo}>{children}</p>
     </li>
   );
 }

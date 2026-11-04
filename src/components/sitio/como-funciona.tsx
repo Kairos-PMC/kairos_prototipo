@@ -28,7 +28,7 @@ export function ComoFunciona() {
         </TituloSeccion>
       </Revelar>
 
-      <div className="mt-14 grid gap-5 lg:grid-cols-3">
+      <div className="mt-14 grid gap-6 lg:mt-16 lg:grid-cols-3">
         <Revelar retraso={0}>
           <Paso
             n="01"
@@ -76,17 +76,22 @@ function Paso({
   dibujo: ReactNode;
 }) {
   return (
-    <article className="lamina lamina-esquina flex h-full flex-col rounded p-6">
-      <p className="rotulo flex items-center gap-3">
-        <span className="text-bermellon">{n}</span>
-        <span className="inline-block h-px w-7 bg-linea" />
-      </p>
-      <h3 className="display mt-4 text-[1.5rem] leading-none">{titulo}</h3>
+    <article className="lamina lamina-viva flex h-full flex-col rounded-lg p-6 sm:p-7">
+      {/* El número va grande y en azul porque marca estructura, el orden del
+          método. En bermellón diría falla, que no es lo que un paso es. */}
+      <div className="flex items-baseline gap-4">
+        <span className="display text-[2.3rem] leading-none text-azul">{n}</span>
+        <h3 className="display text-[1.55rem] leading-none">{titulo}</h3>
+      </div>
 
-      {/* El esquema va hundido sobre papel, como un recorte pegado en la lámina. */}
-      <div className="mt-6 rounded border border-linea-fina bg-papel p-3">{dibujo}</div>
+      {/* El esquema va en un hueco hundido, como un recorte pegado en la
+          lámina. El papel se conserva claro para que el azul del dibujo no
+          pierda contraste. */}
+      <div className="mt-6 rounded-lg bg-papel p-4 shadow-[inset_0_1px_4px_rgba(13,17,23,0.07)]">
+        {dibujo}
+      </div>
 
-      <p className="mt-5 flex-1 text-[14px] leading-relaxed text-tinta-media">{texto}</p>
+      <p className="mt-6 flex-1 text-[14.5px] leading-relaxed text-tinta-media">{texto}</p>
     </article>
   );
 }
@@ -175,7 +180,7 @@ function EsquemaCuantificar() {
       {/* Las dos cifras de salida. Las ranuras van marcadas con barra y no con
           dígitos: aquí no hay fuente que las sostenga. */}
       <line x1="176" y1="24" x2="176" y2="118" stroke="var(--linea)" strokeWidth="1" />
-      <g className="mono" fill="var(--tinta-tenue)" fontSize="7" letterSpacing="0.8">
+      <g className="mono" fill="var(--tinta-tenue)" fontSize="8" letterSpacing="0.8">
         <text x="186" y="52">ACTIVOS</text>
         <text x="186" y="92">PESOS</text>
       </g>
@@ -233,7 +238,7 @@ function EsquemaPriorizar() {
         y="20"
         className="mono"
         fill="var(--tinta-tenue)"
-        fontSize="7"
+        fontSize="8"
         letterSpacing="0.8"
       >
         PRESUPUESTO

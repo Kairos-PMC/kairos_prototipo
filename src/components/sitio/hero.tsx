@@ -1,91 +1,125 @@
 /**
  * Hero del sitio público.
  *
- * No usa `<Seccion>` porque necesita alto propio: es lo único que se ve sin
- * hacer scroll y tiene que sostener el titular, la bajada, las acciones y el
- * dibujo sin apretarlos. Por dentro repite el ancho de lectura del resto del
- * sitio para que nada quede desalineado al bajar.
+ * Va en oscuro y con el producto encendido encima. La versión anterior era
+ * papel sobre papel con un dibujo de contorno al lado, y a tres metros de
+ * distancia eso no se lee como un producto sino como un documento a medio
+ * hacer. Aquí la primera pantalla hace una sola cosa: mostrar el software
+ * funcionando, grande, con luz propia.
+ *
+ * No usa `<Seccion>` porque necesita alto y fondo propios.
  */
+
+import Image from "next/image";
 
 import { Boton } from "@/components/sitio/base";
 import { Revelar } from "@/components/sitio/revelar";
 import { Logotipo } from "@/components/iconos";
 
-/** Cajetín inferior. Son hechos verificables del prototipo, no promesas. */
-const CAJETIN = [
-  "5 módulos funcionando",
-  "Datos en vivo de USGS y Open-Meteo",
-  "Sin cuentas y sin cookies",
-  "ISIS 2007 · Universidad de los Andes",
+/** Hechos verificables del prototipo. Ninguno es una promesa. */
+const SELLOS = [
+  { texto: "5 módulos funcionando", vivo: false },
+  { texto: "Datos en vivo de USGS y Open-Meteo", vivo: true },
+  { texto: "Sin cuentas y sin cookies", vivo: false },
+  { texto: "Universidad de los Andes", vivo: false },
 ];
 
 export function Hero() {
   return (
-    <section className="relative flex flex-col justify-center overflow-hidden border-b border-linea sm:min-h-[88dvh]">
-      <div className="mx-auto w-full max-w-6xl px-6 pb-16 pt-28 sm:px-8 sm:pt-24 lg:pb-20 lg:pt-24">
-        {/* Identidad y marca de tiempo, como el encabezado de una lámina. */}
-        <div className="flex items-start justify-between gap-6">
+    <section className="noche-viva relative overflow-hidden text-papel">
+      {/* Filo inferior: corta el bloque oscuro con una línea de luz en vez de
+          un borde duro, para que el paso al papel no sea un escalón. */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-[color-mix(in_srgb,var(--papel)_18%,transparent)]" />
+
+      <div className="relative mx-auto w-full max-w-6xl px-6 pb-0 pt-28 sm:px-8 sm:pt-32 lg:pt-36">
+        {/* Identidad. En el hero sí se muestra, porque el encabezado la oculta
+            hasta que el usuario baja. */}
+        <Revelar>
           <div className="flex items-center gap-3">
-            <Logotipo className="h-11 w-11" />
+            <Logotipo className="h-10 w-10" />
             <div>
-              <p className="display text-xl leading-none">Kairos</p>
-              <p className="rotulo mt-1.5">Simulador digital de riesgos</p>
+              <p className="display text-lg leading-none">Kairos</p>
+              <p className="mono mt-1.5 text-[10px] uppercase tracking-[0.14em] text-[color-mix(in_srgb,var(--papel)_55%,transparent)]">
+                Simulador digital de riesgos
+              </p>
             </div>
           </div>
-          <p className="rotulo mt-1 whitespace-nowrap">Colombia · 2026</p>
-        </div>
+        </Revelar>
 
-        <div className="mt-14 grid items-center gap-12 lg:mt-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14">
-          <div>
-            <Revelar>
-              <h1 className="display text-[2.1rem] leading-[1.1] sm:text-[2.8rem] sm:leading-[1.08] lg:text-6xl">
-                Lo que golpea el fenómeno rara vez es lo caro.
-                <br />
-                <span className="text-bermellon">
-                  Lo caro es lo que ese golpe arrastra.
-                </span>
-              </h1>
-            </Revelar>
-
-            <Revelar retraso={140}>
-              <p className="mt-7 max-w-xl text-[16px] leading-relaxed text-tinta-media sm:text-[17px]">
-                Kairos simula fenómenos naturales sobre las sedes de una empresa
-                colombiana y le pone precio al efecto en cadena. Cae una
-                subestación y la plataforma muestra qué activos se detienen sin
-                haber recibido ningún golpe, cuánto cuesta eso, y en qué conviene
-                invertir primero.
-              </p>
-            </Revelar>
-
-            <Revelar retraso={260}>
-              <div className="mt-9 flex flex-wrap gap-3">
-                <Boton href="/datos" variante="principal">
-                  Entrar al prototipo
-                </Boton>
-                <Boton href="#como-funciona" variante="secundario">
-                  Cómo funciona
-                </Boton>
-              </div>
-            </Revelar>
+        <Revelar retraso={80}>
+          <div className="mt-10 flex flex-wrap gap-2.5">
+            <span className="pildora pildora-clara">
+              <span className="latido" aria-hidden />
+              Prototipo funcionando
+            </span>
+            <span className="pildora pildora-clara">Colombia · 2026</span>
           </div>
+        </Revelar>
 
-          <Revelar retraso={200}>
-            <Fichas />
-          </Revelar>
-        </div>
+        <Revelar retraso={140}>
+          {/* El corte entre las dos frases es el chiste del titular, así que
+              existe en todos los anchos y no solo en escritorio. */}
+          <h1 className="display mt-7 max-w-4xl text-[2.15rem] leading-[1.07] sm:text-[3.4rem] lg:text-[4.1rem]">
+            Lo que golpea el fenómeno rara vez es lo caro.
+            <br />
+            <span className="text-[color-mix(in_srgb,var(--bermellon)_45%,#ff9b86)]">
+              Lo caro es lo que ese golpe arrastra.
+            </span>
+          </h1>
+        </Revelar>
 
-        <Revelar retraso={340}>
-          <ul className="mono mt-14 flex flex-col gap-3 border-t border-linea pt-5 text-[11px] leading-relaxed text-tinta-media sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-0 sm:gap-y-2">
-            {CAJETIN.map((dato, i) => (
-              <li
-                key={dato}
-                className={
-                  i === 0
-                    ? "sm:pr-4"
-                    : "sm:border-l sm:border-linea-fina sm:px-4"
-                }
-              >
-                {dato}
+        <Revelar retraso={220}>
+          <p className="mt-7 max-w-2xl text-[16.5px] leading-relaxed text-[color-mix(in_srgb,var(--papel)_72%,transparent)] sm:text-[18px]">
+            Kairos simula fenómenos naturales sobre las sedes de una empresa
+            colombiana y le pone precio al efecto en cadena. Cae una subestación
+            y la plataforma muestra qué activos se detienen sin haber recibido
+            ningún golpe, cuánto cuesta eso, y en qué conviene invertir primero.
+          </p>
+        </Revelar>
+
+        <Revelar retraso={300}>
+          <div className="mt-9 flex flex-wrap items-center gap-3">
+            <Boton href="/datos" variante="claro">
+              Entrar al prototipo
+            </Boton>
+            <Boton href="#prototipo" variante="contorno-claro">
+              Ver la simulación
+            </Boton>
+          </div>
+        </Revelar>
+
+        {/* La pantalla. Está pegada al borde inferior a propósito: se corta con
+            el pliegue y eso es lo que invita a bajar. */}
+        <Revelar retraso={360}>
+          <div className="aurora relative mt-16 sm:mt-20">
+            <figure className="pantalla relative z-10 mx-auto max-w-5xl">
+              <div className="pantalla-barra">
+                <span className="pantalla-punto" />
+                <span className="pantalla-punto" />
+                <span className="pantalla-punto" />
+                <span className="mono ml-3 truncate text-[10.5px] tracking-[0.07em] text-[color-mix(in_srgb,var(--papel)_42%,transparent)]">
+                  kairos · simulación · finca la esperanza
+                </span>
+              </div>
+              <Image
+                src="/simulacion-poster.png"
+                alt="La plataforma Kairos mostrando una finca en Facatativá con la subestación eléctrica caída, las instalaciones que quedaron fuera de operación en cadena y el costo del evento en 440 millones de pesos."
+                width={1280}
+                height={760}
+                priority
+                sizes="(max-width: 1024px) 100vw, 1024px"
+                className="block h-auto w-full"
+              />
+            </figure>
+          </div>
+        </Revelar>
+
+        <Revelar retraso={420}>
+          <ul className="relative z-10 mx-auto mt-10 flex max-w-5xl flex-wrap justify-center gap-2.5 pb-16 sm:pb-20">
+            {SELLOS.map((s) => (
+              <li key={s.texto} className="pildora pildora-clara">
+                {s.vivo && <span className="latido" aria-hidden />}
+                {s.texto}
               </li>
             ))}
           </ul>
@@ -95,11 +129,13 @@ export function Hero() {
   );
 }
 
-/* ── El dibujo ─────────────────────────────────────────────────────────────
+/* ── El dibujo de las fichas ─────────────────────────────────────────────────
  *
  * Tres fichas de dominó sobre una línea de suelo: la primera ya cayó, la
- * segunda va a medio caer, la tercera sigue en pie. Es el producto entero en
- * una imagen, así que está dibujado a mano y no es un icono genérico.
+ * segunda va a medio caer, la tercera sigue en pie. Es la tesis del producto en
+ * una imagen. Salió del hero porque ahí competía con el producto de verdad, y
+ * ahora acompaña a la sección que explica el problema, que es donde una
+ * metáfora sí hace falta.
  *
  * Geometría: cada ficha mide 48 x 150 y gira alrededor de su esquina inferior
  * derecha, que es el borde sobre el que pivota una ficha que cae hacia la
@@ -125,12 +161,11 @@ const RAD_SEGUNDA = (GIRO_SEGUNDA * Math.PI) / 180;
 const PUNTA_SEGUNDA_X = X_SEGUNDA + ANCHO + ALTO * Math.sin(RAD_SEGUNDA);
 const PUNTA_SEGUNDA_Y = SUELO - ALTO * Math.cos(RAD_SEGUNDA);
 
-function Fichas() {
+export function Fichas() {
   return (
-    <figure className="lamina lamina-esquina rounded p-5 sm:p-6">
+    <figure className="lamina rounded-lg p-5 sm:p-6">
       <figcaption className="rotulo flex items-center justify-between gap-4">
         <span>Efecto en cadena</span>
-        <span>Fig. 00</span>
       </figcaption>
 
       <svg
@@ -197,7 +232,7 @@ function Fichas() {
         <Ficha x={X_SEGUNDA} giro={GIRO_SEGUNDA} color="var(--ocre)" clase="kairos-cae-2" />
         <Ficha x={X_TERCERA} giro={0} color="var(--verde)" clase="kairos-aguanta" />
 
-        {/* Los rótulos van bajo el suelo y repiten el titular en tres tiempos. */}
+        {/* Los rótulos van bajo el suelo y repiten la tesis en tres tiempos. */}
         <Rotulo x={143} color="var(--bermellon)" lineas={["LO QUE", "CAE"]} />
         <Rotulo x={287} color="var(--ocre)" lineas={["LO QUE", "ARRASTRA"]} />
         <Rotulo x={408} color="var(--verde)" lineas={["LO QUE", "SE SALVA"]} />

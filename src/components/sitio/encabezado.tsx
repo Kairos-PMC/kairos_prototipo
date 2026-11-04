@@ -57,6 +57,11 @@ export function Encabezado() {
     return () => observador.disconnect();
   }, []);
 
+  // Antes de bajar, el encabezado flota sobre el hero, que es oscuro. Si
+  // mantuviera la tinta del resto del sitio sería ilegible, así que arriba va
+  // en claro y cambia a papel en cuanto se pega.
+  const sobreOscuro = !pegado;
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-40 transition-all duration-300 ${
@@ -87,13 +92,21 @@ export function Encabezado() {
               key={s.id}
               href={`#${s.id}`}
               className={`mono rounded px-2.5 py-1.5 text-[11px] uppercase tracking-[0.1em] transition ${
-                activa === s.id
-                  ? "text-tinta"
-                  : "text-tinta-media hover:bg-papel-hundido hover:text-tinta"
+                sobreOscuro
+                  ? "text-[color-mix(in_srgb,var(--papel)_68%,transparent)] hover:bg-[color-mix(in_srgb,var(--papel)_10%,transparent)] hover:text-papel"
+                  : activa === s.id
+                    ? "text-tinta"
+                    : "text-tinta-media hover:bg-papel-hundido hover:text-tinta"
               }`}
             >
               <span
-                className={activa === s.id ? "text-bermellon" : "text-tinta-tenue"}
+                className={
+                  sobreOscuro
+                    ? "text-[color-mix(in_srgb,var(--papel)_45%,transparent)]"
+                    : activa === s.id
+                      ? "text-bermellon"
+                      : "text-tinta-tenue"
+                }
               >
                 {s.n}
               </span>{" "}
@@ -104,7 +117,11 @@ export function Encabezado() {
 
         <Link
           href="/datos"
-          className="mono ml-auto shrink-0 rounded bg-tinta px-4 py-2.5 text-[11px] uppercase tracking-[0.12em] text-papel transition hover:bg-azul lg:ml-4"
+          className={`mono ml-auto shrink-0 rounded px-4 py-2.5 text-[11px] uppercase tracking-[0.12em] transition lg:ml-4 ${
+            sobreOscuro
+              ? "bg-papel text-tinta shadow-[var(--sombra-alta)] hover:bg-papel-alto"
+              : "bg-tinta text-papel hover:bg-azul"
+          }`}
         >
           {/* En pantallas angostas el rótulo largo empuja al botón de índice
               contra el borde, así que ahí se dice lo mismo en una palabra. */}
@@ -117,7 +134,11 @@ export function Encabezado() {
           onClick={() => setAbierto((a) => !a)}
           aria-expanded={abierto}
           aria-label="Índice de secciones"
-          className="grid h-9 w-9 shrink-0 place-items-center rounded border border-linea bg-papel-alto lg:hidden"
+          className={`grid h-9 w-9 shrink-0 place-items-center rounded border transition lg:hidden ${
+            sobreOscuro
+              ? "border-[color-mix(in_srgb,var(--papel)_28%,transparent)] bg-[color-mix(in_srgb,var(--papel)_8%,transparent)] text-papel"
+              : "border-linea bg-papel-alto text-tinta"
+          }`}
         >
           <svg viewBox="0 0 16 16" className="h-4 w-4" aria-hidden>
             <path
