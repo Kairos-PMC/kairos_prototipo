@@ -186,7 +186,7 @@ export default async function CentroDeDatos() {
               </table>
               <p className="mt-4 text-xs text-tinta-media">
                 Fuente: USGS Earthquake Catalog. Se usa en vez del Servicio Geológico
-                Colombiano porque el SGC no expone un API pública documentada; la red
+                Colombiano porque el SGC no expone un API pública documentada. La red
                 global de USGS cubre el mismo territorio.
               </p>
             </div>

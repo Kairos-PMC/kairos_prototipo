@@ -414,3 +414,18 @@ html {
     100% { box-shadow: 0 0 0 0 transparent; }
   }
 }
+
+/* Latido del sello de procedencia dentro de la aplicación.
+   `.latido` del sitio público fija su propio color verde porque allí siempre
+   marca lo mismo. Acá el color lo pone el sello en línea, así que el halo se
+   construye con `currentColor` y sirve para cualquier procedencia que lo pida. */
+@media (prefers-reduced-motion: no-preference) {
+  .pulso-vivo {
+    animation: pulso-vivo 2.4s ease-out infinite;
+  }
+  @keyframes pulso-vivo {
+    0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--verde) 55%, transparent); }
+    70% { box-shadow: 0 0 0 6px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+}

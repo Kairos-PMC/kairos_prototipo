@@ -20,7 +20,7 @@ export default function Reporte() {
       <TituloPagina
         rotulo="Lámina 05"
         titulo="Reporte"
-        bajada="El documento que se lleva al comité. Todo lo que sustenta cada cifra está aquí — porque la pregunta que decide la inversión no es cuánto perdería, sino de dónde salió ese número."
+        bajada="El documento que se lleva al comité. Todo lo que sustenta cada cifra está aquí, porque la pregunta que decide la inversión no es cuánto perdería, sino de dónde salió ese número."
         extra={
           <p className="text-sm text-tinta-media">
             Generado el {hoy}
@@ -56,7 +56,7 @@ export default function Reporte() {
             . De esa cifra, {porcentaje(r.danioFisicoTotal / r.perdidaEsperadaAnual)}{" "}
             corresponde a reponer lo dañado y{" "}
             {porcentaje(r.lucroCesanteTotal / r.perdidaEsperadaAnual)} a lo que se deja
-            de producir mientras se repara —{" "}
+            de producir mientras se repara,{" "}
             <strong>incluyendo activos que no sufren daño alguno</strong> pero dejan de
             operar porque dependen de otro que sí cayó.
           </p>
@@ -189,7 +189,7 @@ pérdida esperada  = probabilidad anual × (daño físico + lucro cesante)`}
           </pre>
           <p>
             El priorizador recorre las medidas eligiendo, en cada ronda, la de mayor
-            pérdida evitada por peso invertido —{" "}
+            pérdida evitada por peso invertido,{" "}
             <strong>recalculando después de cada elección</strong>. Sin ese recálculo,
             dos medidas que protegen el mismo activo sumarían dos veces el mismo ahorro
             y el plan quedaría sobreestimado.

@@ -187,8 +187,8 @@ export default function Simulacion() {
 
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-linea px-5 py-3">
             <Leyenda color="var(--azul)" texto="En operación" />
-            <Leyenda color="var(--bermellon)" texto="Caído — recibió el golpe" />
-            <Leyenda color="var(--ocre)" texto="Arrastrado — sin daño, sin operar" />
+            <Leyenda color="var(--bermellon)" texto="Caído, recibió el golpe" />
+            <Leyenda color="var(--ocre)" texto="Arrastrado, sin daño y sin operar" />
           </div>
         </Lamina>
 
@@ -409,7 +409,7 @@ export default function Simulacion() {
               </div>
 
               <div className="bg-papel-alto p-5">
-                <Rotulo>Por activo — los cinco primeros</Rotulo>
+                <Rotulo>Por activo, los cinco primeros</Rotulo>
                 <ul className="mt-3 space-y-2.5">
                   {anual.porActivo.slice(0, 5).map((r) => {
                     const max = anual.porActivo[0].perdidaEsperada;

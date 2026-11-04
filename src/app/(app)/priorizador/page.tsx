@@ -73,7 +73,7 @@ export default function Priorizador() {
           />
           <div className="mt-1 flex justify-between text-xs text-tinta-media">
             <span>$ 0</span>
-            <span>{pesosCompactos(TOPE)} — todas las medidas</span>
+            <span>{pesosCompactos(TOPE)}, todas las medidas</span>
           </div>
         </div>
       </Lamina>
@@ -110,7 +110,7 @@ export default function Priorizador() {
                   resultado.inversionTotal / resultado.perdidaEvitadaTotal,
                   1,
                 )} años`
-              : "—"
+              : "sin medidas"
           }
           detalle="Tiempo en que el ahorro anual paga la inversión"
         />

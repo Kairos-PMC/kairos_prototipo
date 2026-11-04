@@ -15,7 +15,7 @@ export default function Sedes() {
       <TituloPagina
         rotulo="Lámina 02"
         titulo="Sedes y amenazas"
-        bajada="El catálogo de fenómenos no es una lista fija que traemos de fábrica: se configura por sede. Esto salió de la validación en campo — un floricultor nos señaló la tormenta eléctrica, que no estaba en nuestro planteamiento original."
+        bajada="El catálogo de fenómenos no es una lista fija que traemos de fábrica, se configura por sede. Esto salió de la validación en campo. Un floricultor nos señaló la tormenta eléctrica, que no estaba en nuestro planteamiento original."
       />
 
       <Lamina className="mb-4">

@@ -34,7 +34,7 @@ export const amenazas: Amenaza[] = [
     nombre: "Tormenta eléctrica",
     simbolo: "⚡",
     descripcion:
-      "Descargas y sobretensiones que dañan subestaciones, compresores y equipos de control. Apareció en la entrevista de validación; no estaba en el catálogo inicial.",
+      "Descargas y sobretensiones que dañan subestaciones, compresores y equipos de control. Apareció en la entrevista de validación y no estaba en el catálogo inicial.",
   },
   {
     id: "sismo",

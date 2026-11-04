@@ -75,8 +75,8 @@ export default function AppLayout({
                 <span className="display text-base">Kairos</span>
               </div>
               <p className="mt-4 max-w-md text-sm leading-relaxed text-tinta-media">
-                Kairos informa decisiones; no las garantiza. No pronostica si un evento
-                va a ocurrir ni cuándo — estima el costo de no estar preparado, bajo
+                Kairos informa decisiones, no las garantiza. No pronostica si un evento
+                va a ocurrir ni cuándo. Estima el costo de no estar preparado, bajo
                 supuestos que quedan a la vista y se pueden cambiar.
               </p>
               <p className="mt-4 border-l-2 border-linea pl-4 text-sm leading-relaxed text-tinta-media">

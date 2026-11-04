@@ -46,8 +46,11 @@ export function Procedencia({
         background: `color-mix(in srgb, ${e.color} 8%, transparent)`,
       }}
     >
+      {/* El punto late solo cuando el dato se acaba de consultar a un API. Sobre
+          una cifra quieta el latido sería un adorno que miente, y en una feria
+          es justo lo que alguien se para a mirar. */}
       <span
-        className="h-1.5 w-1.5 rounded-full"
+        className={`h-1.5 w-1.5 rounded-full ${tipo === "vivo" ? "pulso-vivo" : ""}`}
         style={{ background: e.color }}
         aria-hidden
       />
