@@ -105,6 +105,9 @@ function Tarjeta({ integrante }: { integrante: Integrante }) {
             alt={integrante.nombre}
             fill
             sizes="(min-width: 1024px) 15vw, (min-width: 640px) 30vw, 45vw"
+            // El encuadre va en línea y no como utilidad porque es un dato de
+            // cada persona, no una decisión de estilo repetible.
+            style={{ objectPosition: integrante.encuadre ?? "50% 35%" }}
             className="object-cover saturate-[0.65] contrast-[1.02]"
           />
         ) : (
