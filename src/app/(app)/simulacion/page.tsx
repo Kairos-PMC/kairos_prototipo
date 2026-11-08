@@ -24,7 +24,17 @@ export default function Simulacion() {
   // propósito: ese hook obliga a envolver la página en Suspense y la saca del
   // prerender estático, que es mucho precio por un parámetro opcional.
   useEffect(() => {
-    const pedidos = new URLSearchParams(window.location.search)
+    const params = new URLSearchParams(window.location.search);
+
+    // ?sede=espinal abre esa sede sin marcar nada caído. Hace falta para
+    // capturar el plano en limpio, que es el plate "antes" de los videos.
+    // Si además viene ?caidos, ese manda, porque lo marcado tiene que verse.
+    const sedePedida = params.get("sede")?.trim();
+    if (sedePedida && escenarioDemo.sedes.some((s) => s.id === sedePedida)) {
+      setSedeId(sedePedida);
+    }
+
+    const pedidos = params
       .get("caidos")
       ?.split(",")
       .map((s) => s.trim())
