@@ -4,19 +4,23 @@ Un minuto de trailer y dos de elevator pitch. 1920x1080, en español, con voz en
 
 ## Trailer, de 0:00 a 0:58
 
-Sin producto y sin cifras. Solo la pregunta.
+Dos vecinos con bodegas vecinas. La misma noticia les llega a los dos. Uno la mira y el otro hace algo con ella.
 
-| Tiempo | Imagen | Texto en pantalla | Sonido |
+| Tiempo | Qué se ve | Texto en pantalla | Sonido |
 |---|---|---|---|
-| 0:00 | La finca al amanecer. Riego andando, invernaderos cerrados, la subestación zumbando. | | Un motor, agua. Sin música. |
-| 0:08 | Cuatro pantallas sueltas y sin conectar. Un sismógrafo, un boletín del IDEAM, el clima en un celular, una alerta de la UNGRD. | El dato ya existe. | Entra un pulso bajo. |
-| 0:16 | Negro medio segundo. Después noticias de un desastre real. | | Se corta el pulso. Un segundo de silencio. |
-| 0:24 | El plano de la finca. La subestación se pone roja. Las líneas se encienden hacia invernaderos y riego, que pasan a ocre. | Lo que golpea el fenómeno rara vez es lo caro.<br>Lo caro es lo que ese golpe arrastra. | Un tono que sube. |
-| 0:36 | Fondo oscuro. Una pregunta cada 3 segundos, y se quedan. | ¿Cuánto perdería su empresa si mañana se cae la subestación?<br>¿Cuánto de eso está asegurado?<br>¿Cuánto tardaría en volver a operar? | El tono sube con cada una. |
-| 0:46 | Un celular en un escritorio, con la alerta sin abrir. | Nadie en la empresa sabe la respuesta. Y el reloj ya arrancó. | El tono cae. |
-| 0:52 | Las tres fichas de dominó. La primera caída, la segunda inclinada, la tercera en pie. | KAIROS<br>Antes de que el desastre decida por ti. | Un golpe grave y silencio. |
+| 0:00 | Pantalla partida. Dos vecinos se saludan en la mañana, cada uno frente a su bodega. Están igual de tranquilos. | TOLIMA, MARZO | Calle de pueblo. Un motor, pájaros. Sin música. |
+| 0:08 | Un televisor encendido. Noticia de sequía y Fenómeno del Niño, con riesgo de incendio forestal. Los dos la ven. | El zócalo del noticiero, ya armado. SEQUÍA Y FENÓMENO DEL NIÑO EN EL ALTO MAGDALENA, y debajo el riesgo de incendio en el Tolima | Entra el audio del televisor. La música arranca por debajo. |
+| 0:16 | Se separan. El de la izquierda se preocupa, guarda el celular y sigue con lo suyo. El de la derecha abre Kairos. | | El televisor se va al fondo. Un pulso bajo. |
+| 0:24 | La pantalla de simulación. Apaga la bodega principal y la cadena se enciende. Los números de pérdida se ponen en rojo. | Lo que calcula la app. Se rompe $ 420 M y el evento cuesta $ 851 M | Solo la música, subiendo. |
+| 0:36 | Fondo oscuro. Una pregunta cada 3 segundos, y se quedan. | ¿Cuánto perdería su empresa si se incendia la bodega principal?<br>¿Cuánto de eso está asegurado?<br>¿Cuánto tardaría en volver a operar? | La música sube un escalón con cada una. |
+| 0:46 | El mismo encuadre del 0:00, con otra luz. Una bodega parada y la otra operando. | TOLIMA, AGOSTO | Suspenso, y se va a negro. |
+| 0:52 | Las tres fichas de dominó. La primera caída, la segunda inclinada, la tercera en pie. | KAIROS<br>Antes de que el desastre decida por usted. | Un golpe grave y silencio. |
 
 Dos segundos de negro antes del pitch.
+
+El peligro es incendio y es el mismo de principio a fin. El televisor lo anuncia, la simulación lo cuantifica, las preguntas lo repiten y el final lo muestra. Si se cambia a inundación o a sismo, hay que cambiarlo en los cuatro lugares.
+
+Los rótulos de marzo y agosto son los que hacen entender que pasó el tiempo. Sin ellos el 0:46 se lee como error de continuidad.
 
 ## Pitch, de 1:00 a 3:00
 
@@ -38,20 +42,71 @@ La locución son 267 palabras y entra en 116 segundos de los 120. Ensayar con cr
 
 Están los seis puntos que la infografía marca en las seis listas. Problema, solución, modelo de negocio, competencia, equipo y la pedida.
 
-## Pendientes
+## Cómo se filma el trailer
 
-- Los roles del equipo para el minuto 2:37. Una línea por persona, con nombre completo y rol.
-- Metraje para 0:00 y 0:16. El clip de Villa de Leyva de la presentación de prueba sirve.
-- Grabar la voz en off.
-- Música. Un tema que crece en el trailer y baja durante el pitch.
+| Tiempo | Cómo se consigue | Qué hace falta | Dificultad |
+|---|---|---|---|
+| 0:00 | Rodaje | Dos actores, una bodega de fondo, luz de mañana | Fácil |
+| 0:08 | Rodaje | Un televisor en escena, apagado. El zócalo ya está hecho | Fácil |
+| 0:16 | Rodaje | Los mismos actores y dos celulares | Fácil |
+| 0:24 | Ya está hecho | `videos/trailer-espinal/renders/trailer-0-24-espinal.mp4` | Hecho |
+| 0:36 | Se arma en computador | Nada | Fácil |
+| 0:46 | Rodaje más efecto | Ver el plan B de abajo | Difícil |
+| 0:52 | Ya está hecho | La marca sale de `docs/pitch/generar-deck.js` | Fácil |
+
+**El plano del 0:24 ya está renderizado.** El archivo es
+`videos/trailer-espinal/renders/trailer-0-24-espinal.mp4`, 1920x1080 y 12 segundos
+exactos, mudo, para que vaya debajo de la música. El cursor hace clic sobre la
+Bodega principal, la caja se pone roja, las dos líneas de dependencia se trazan
+hacia la Línea de secado y la Flota de acopio, y los contadores suben hasta
+$ 420 M de reposición y $ 851 M de costo del evento. Se regenera con
+`npm run render` dentro de `videos/trailer-espinal`.
+
+**Un solo día de rodaje.** Los cuatro planos filmados son la misma locación y los mismos dos actores. Si solo consiguen una bodega, se filma desde dos ángulos y la pantalla partida se arma en edición. Los actores no hablan, así que alcanza con un saludo y dos reacciones distintas.
+
+Marzo y agosto se resuelven con la misma ropa y otra luz, o con otra hora del día. Conviene filmar los dos tiempos seguidos para no volver a la locación.
+
+**El televisor.** El zócalo ya está en `docs/video-pitch/zocalo/`, en dos versiones de 1920x1080. Una con fondo para usarla sola y otra transparente para montarla sobre metraje propio. Se filma el televisor apagado y la noticia se pone encima en edición, porque una pantalla encendida da parpadeo y muaré.
+
+**Los celulares.** Filmarlos con la pantalla apagada y poner la captura de Kairos encima. Filmar una pantalla encendida da reflejos y moiré.
+
+**El plano difícil es el 0:46.** Una bodega destruida no se consigue filmando. Tres salidas, de más barata a más cara.
+
+1. No mostrar las bodegas. Mostrar los dos celulares. El de la izquierda con llamadas perdidas, el de la derecha con el plan de Kairos andando.
+2. Usar los dos planos técnicos de Kairos. Uno en rojo y ocre, el otro en azul. Ya están animados.
+3. Archivo de incendio mezclado con el plano limpio de la bodega. Hay que mirar derechos.
+
+La 2 sale gratis y usa el lenguaje visual del producto.
+
+## Qué hay que decidir antes de grabar
+
+1. Tú o usted. Las preguntas tratan de usted. La tagline que ya existe dice "por ti". Si queda usted, hay que cambiarla también en el deck y en el logotipo.
+2. Quién actúa. Si son del grupo sale gratis.
+3. Dónde se filma. Hace falta una bodega o planta que sirva de fondo.
+4. Los roles del equipo para el minuto 2:37. Una línea por persona, con nombre completo y rol.
+5. Quién pone la voz en off. Son 267 palabras.
+6. La música. Un tema que crece en el trailer y baja durante el pitch.
 
 ## Ojo con esto
 
+- "Kairos te protege de los fenómenos naturales" no se puede decir. Kairos no protege de un incendio. Dice cuánto costaría y en qué invertir primero. Si alguien pregunta cómo protege, no hay respuesta.
 - El 70 % no va. No tiene de dónde salir. El deck del Pitch No. 2 ya trae 15 % menos costo por incidente y 78 días menos, con fuente.
 - No mezclar $440 M con $5.600 M. Los $440 M son lo que cuesta el evento. Los $5.600 M son el valor de los activos que quedan parados. Si se usa el segundo, va aparte y con su rótulo.
 - Dos erratas de la lámina 2 de la presentación de prueba, incendua y Cúanto.
 
 ## Lo que ya está hecho
+
+**El zócalo del noticiero ya está armado.** En `docs/video-pitch/zocalo/`, con el HTML fuente por si hay que cambiarle el texto y un `render.sh` que vuelve a sacar los PNG. El canal es inventado y no lleva nombre, logo ni colores de ningún noticiero real, a propósito.
+
+**La sede del trailer ya está en el prototipo.** Centro de acopio El Espinal, en el Tolima, con bodega principal, línea de secado, subestación, tanque contra incendio, flota, administración y guardarraya. Al tumbar la bodega arrastra la línea de secado y la flota, se rompen $ 420 M y el evento cuesta $ 851 M.
+
+| Para ver | Enlace |
+|---|---|
+| El plano en limpio | `/simulacion?sede=espinal` |
+| La bodega caída y la cadena | `/simulacion?caidos=bodega-pri` |
+| La cadena que arranca en la sequía | `/simulacion?caidos=tanque-e` |
+
+El tercero es el que cuenta la historia completa del trailer. La sequía vacía el tanque contra incendio, sin tanque la bodega queda sin con qué apagar un conato, y la bodega arrastra la línea de secado y la flota.
 
 La cascada animada, los contadores, el plano de la finca y las fichas de dominó ya existen en `videos/kairos-simulacion/` y en `docs/pitch/`. Los colores y tipografías están en `videos/kairos-simulacion/frame.md`.
 

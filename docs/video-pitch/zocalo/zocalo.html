@@ -1,0 +1,163 @@
+<!doctype html>
+<!--
+  Zócalo de noticiero para el plano 0:08 del trailer de Kairos.
+
+  Es una utilería inventada. El canal no existe y no lleva el nombre, el logo ni
+  los colores de ningún noticiero real, a propósito. Si se le pone la marca de un
+  canal de verdad deja de ser utilería y pasa a ser una suplantación.
+
+  Para cambiar el texto, editar las tres líneas marcadas abajo y volver a
+  renderizar con render.sh.
+-->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>Zócalo noticiero</title>
+    <style>
+      :root {
+        --azul: #10213a;
+        --rojo: #d8232a;
+        --ambar: #e8a317;
+        --blanco: #ffffff;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      html, body {
+        width: 1920px;
+        height: 1080px;
+        overflow: hidden;
+        font-family: "Arial Black", "Helvetica Neue", Arial, sans-serif;
+      }
+
+      /* Con fondo para usarlo solo. Se quita con ?transparente para componer
+         sobre metraje propio. */
+      body { background: #0b1118; }
+      body.transparente { background: transparent; }
+      body.transparente .fondo { display: none; }
+
+      .fondo {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(120% 90% at 50% 25%, #2a3a4f 0%, #141c26 55%, #0b1118 100%);
+      }
+
+      /* ── Mosca del canal, arriba a la derecha ───────────────────────────── */
+      .mosca {
+        position: absolute;
+        top: 52px;
+        right: 64px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      .mosca .marca {
+        width: 46px;
+        height: 46px;
+        background: var(--rojo);
+        clip-path: polygon(0 0, 100% 0, 100% 72%, 50% 100%, 0 72%);
+      }
+      .mosca .nombre {
+        color: var(--blanco);
+        font-size: 30px;
+        letter-spacing: 0.1em;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+      }
+
+      /* ── Bloque del zócalo, abajo ───────────────────────────────────────── */
+      .zocalo { position: absolute; left: 0; right: 0; bottom: 0; }
+
+      .etiquetas {
+        display: flex;
+        align-items: stretch;
+        gap: 10px;
+        margin: 0 0 10px 64px;
+      }
+      .etiqueta {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 24px;
+        font-size: 26px;
+        letter-spacing: 0.14em;
+        color: var(--blanco);
+      }
+      .vivo { background: var(--rojo); }
+      .vivo .punto {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: var(--blanco);
+      }
+      .alerta { background: var(--ambar); color: #231a05; }
+
+      .titular {
+        background: var(--azul);
+        border-top: 4px solid var(--rojo);
+        padding: 30px 64px 26px;
+        color: var(--blanco);
+        font-size: 74px;
+        line-height: 1.04;
+        letter-spacing: -0.012em;
+      }
+
+      .pie {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 40px;
+        background: #0a1526;
+        padding: 20px 64px;
+        color: #b9c6d8;
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        font-weight: 700;
+        font-size: 30px;
+        letter-spacing: 0.02em;
+      }
+      .pie .hora {
+        color: var(--blanco);
+        font-family: "Arial Black", Arial, sans-serif;
+        letter-spacing: 0.06em;
+        white-space: nowrap;
+      }
+
+      .cinta {
+        background: var(--rojo);
+        height: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="fondo"></div>
+
+    <div class="mosca">
+      <div class="marca"></div>
+      <!-- 1. nombre del canal, inventado a propósito -->
+      <div class="nombre">NOTICIAS</div>
+    </div>
+
+    <div class="zocalo">
+      <div class="etiquetas">
+        <div class="etiqueta vivo"><span class="punto"></span>EN VIVO</div>
+        <div class="etiqueta alerta">ALERTA</div>
+      </div>
+
+      <!-- 2. titular -->
+      <div class="titular">SEQUÍA Y FENÓMENO DEL NIÑO<br />EN EL ALTO MAGDALENA</div>
+
+      <div class="pie">
+        <!-- 3. línea de abajo -->
+        <div class="sub">Riesgo alto de incendio forestal en el Tolima durante las próximas seis semanas</div>
+        <div class="hora">12:41</div>
+      </div>
+
+      <div class="cinta"></div>
+    </div>
+
+    <script>
+      if (new URLSearchParams(location.search).has("transparente")) {
+        document.body.classList.add("transparente");
+      }
+    </script>
+  </body>
+</html>
