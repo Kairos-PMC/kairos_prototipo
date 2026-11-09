@@ -50,9 +50,9 @@ Están los seis puntos que la infografía marca en las seis listas. Problema, so
 | 0:08 | Rodaje | Un televisor en escena, apagado. El zócalo ya está hecho | Fácil |
 | 0:16 | Rodaje | Los mismos actores y dos celulares | Fácil |
 | 0:24 | Ya está hecho | `videos/trailer-espinal/renders/trailer-0-24-espinal.mp4` | Hecho |
-| 0:36 | Se arma en computador | Nada | Fácil |
+| 0:36 | Ya está hecho | `videos/trailer-preguntas/renders/trailer-0-36-preguntas.mp4` | Hecho |
 | 0:46 | Rodaje más efecto | Ver el plan B de abajo | Difícil |
-| 0:52 | Ya está hecho | La marca sale de `docs/pitch/generar-deck.js` | Fácil |
+| 0:52 | Ya está hecho | `videos/trailer-marca/renders/trailer-0-52-marca.mp4` | Hecho |
 
 **El plano del 0:24 ya está renderizado.** El archivo es
 `videos/trailer-espinal/renders/trailer-0-24-espinal.mp4`, 1920x1080 y 12 segundos
@@ -61,6 +61,14 @@ Bodega principal, la caja se pone roja, las dos líneas de dependencia se trazan
 hacia la Línea de secado y la Flota de acopio, y los contadores suben hasta
 $ 420 M de reposición y $ 851 M de costo del evento. Se regenera con
 `npm run render` dentro de `videos/trailer-espinal`.
+
+**Las otras dos piezas de computador también están.** El 0:36 son las tres
+preguntas, diez segundos, entrando una cada 2,8 segundos y quedándose en
+pantalla apagadas cuando llega la siguiente. El 0:52 es el cierre, seis
+segundos, donde las tres fichas entran de pie y dos se caen. Esa es la marca
+contada como movimiento en vez de mostrada ya resuelta, y la tercera ficha
+aguanta el golpe sin caerse. Las dos se regeneran con `npm run render` dentro
+de su carpeta.
 
 **Un solo día de rodaje.** Los cuatro planos filmados son la misma locación y los mismos dos actores. Si solo consiguen una bodega, se filma desde dos ángulos y la pantalla partida se arma en edición. Los actores no hablan, así que alcanza con un saludo y dos reacciones distintas.
 

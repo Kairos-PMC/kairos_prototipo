@@ -32,6 +32,33 @@ está grabando por primera vez, y no se arregla después.
 Son ocho encuadres y diecinueve tomas. Cabe en una mañana y una tarde del mismo
 día.
 
+## El fondo no tiene que ser una bodega
+
+Lo que dice "bodega" en el trailer no es el fondo. Lo dice el rótulo
+TOLIMA, MARZO, y lo dice la pantalla del 0:24, que muestra el Centro de acopio
+El Espinal con su bodega principal y sus cifras. El fondo solo tiene que ser un
+lugar donde dos personas con un negocio podrían estar paradas, y no
+contradecir nada.
+
+Sirve cualquiera de estos.
+
+- Un portón metálico o una puerta enrollable, de cualquier local
+- Una pared de bloque o de ladrillo, lisa, sin avisos
+- Una zona industrial, un parqueadero, un muelle de carga
+- Una reja con una calle detrás
+- Una bodega de verdad, si aparece
+
+No sirve, o cuesta caro arreglarlo después.
+
+- Avisos, marcas o nombres de otra empresa en cuadro
+- Un fondo que se lea claramente como vivienda, oficina o universidad
+- Mucha gente pasando por detrás, porque obliga a repetir hasta que el fondo
+  quede limpio y entre plano y plano no calza
+- Contraluz, el sol de frente a la cámara
+
+Lo único que sí es obligatorio del fondo es que **sea el mismo en los planos
+1, 2, 3 y 8**. Por eso se marca el piso.
+
 ## El montaje antes de grabar
 
 Cuatro de los ocho planos son el mismo encuadre. El 1, el 2, el 3 y el 8. Eso
@@ -41,7 +68,7 @@ que esos cuatro estén grabados.
 Lo que tiene que estar en ese encuadre, de una vez:
 
 ```
-        [bodega de fondo]
+        [el fondo que consigan]
 
    A                      B          <- los dos actores, a unos 2 m
                                         de distancia entre ellos
@@ -232,7 +259,7 @@ Alcanza un celular. Lo que no es opcional es el apoyo.
 | Qué | Nota |
 |---|---|
 | Dos actores | Pueden ser del grupo. No hablan, así que no hace falta que actúen mucho |
-| Una bodega o planta de fondo | Una sola alcanza, los dos vecinos quedan en el mismo cuadro |
+| Un fondo que sirva | No hace falta una bodega. Ver abajo qué sirve |
 | Un televisor | Se filma apagado |
 | Dos celulares | Se filman apagados |
 | Trípode o algo donde apoyar | Obligatorio |

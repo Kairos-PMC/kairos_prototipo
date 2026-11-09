@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" integrity="sha384-sG0Hv1tP1lZCk9KQmrIbY/XNwi+OY84GQqhMscbnsoBFqAz8KNCil1kvfL3Hbbk2" crossorigin="anonymous"></script>
+    <style>
+      @font-face{font-family:"IBM Plex Serif";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexSerif-400.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexMono-400.woff2") format("woff2");}
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+
+      /* ── Kairos · plano 0:36 del trailer ────────────────────────────────────
+         Las tres preguntas. La lámina es la misma del resto del sistema, dada
+         vuelta: tinta de fondo y papel para el texto. Las preguntas se quedan
+         en pantalla y se apagan cuando entra la siguiente, así la última es
+         siempre la que se lee y las anteriores siguen pesando. */
+      #root {
+        position: relative; width: 1920px; height: 1080px; overflow: hidden;
+        --papel: #f0ece1;
+        --tinta: #16191d;
+        --golpe: #c4372a;
+        --serif: "IBM Plex Serif", Georgia, serif;
+        --mono: "IBM Plex Mono", monospace;
+        background: var(--tinta);
+      }
+      #root *, #root *::before, #root *::after { box-sizing: border-box; }
+
+      .ground {
+        position: absolute; inset: 0; z-index: 0;
+        background-color: var(--tinta);
+        background-image:
+          linear-gradient(to right, rgba(240,236,225,.055) 0 1px, transparent 1px 100%),
+          linear-gradient(to bottom, rgba(240,236,225,.055) 0 1px, transparent 1px 100%);
+        background-size: 38.4px 38.4px;
+      }
+
+      .hair { position: absolute; left: 76.8px; width: 1766.4px; height: 2.3px;
+              background: rgba(240,236,225,.26); z-index: 5; transform-origin: 0% 50%; }
+      .hair-top { top: 58px; }
+      .hair-bottom { top: 1022px; }
+
+      .preguntas { position: absolute; left: 232px; top: 330px; width: 1560px; z-index: 10; }
+
+      .q { position: relative; margin-bottom: 74px; padding-left: 52px; }
+      .q:last-child { margin-bottom: 0; }
+
+      /* el filete bermellón que marca cuál es la pregunta viva */
+      .q-tick { position: absolute; left: 0; top: 10px; width: 6px; height: 54px;
+                background: var(--golpe); transform-origin: 50% 0%; }
+
+      .q-texto {
+        font-family: var(--serif); font-weight: 400; font-size: 55px; line-height: 1.16;
+        letter-spacing: -.006em; color: var(--papel);
+      }
+      .q-word { display: inline-block; }
+
+      .pie { position: absolute; left: 232px; top: 946px; font-family: var(--mono);
+             font-size: 20px; letter-spacing: .14em; text-transform: uppercase;
+             color: rgba(240,236,225,.66); z-index: 10; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="10" data-width="1920" data-height="1080">
+      <div class="clip ground" data-start="0" data-duration="10" data-track-index="0"></div>
+      <div class="clip hair hair-top" id="hair-top" data-start="0" data-duration="10" data-track-index="1"></div>
+      <div class="clip hair hair-bottom" id="hair-bottom" data-start="0" data-duration="10" data-track-index="2"></div>
+
+      <div class="clip preguntas" data-start="0" data-duration="10" data-track-index="3">
+        <div class="q" id="q1">
+          <span class="q-tick" id="t1"></span>
+          <div class="q-texto" id="x1"></div>
+        </div>
+        <div class="q" id="q2">
+          <span class="q-tick" id="t2"></span>
+          <div class="q-texto" id="x2"></div>
+        </div>
+        <div class="q" id="q3">
+          <span class="q-tick" id="t3"></span>
+          <div class="q-texto" id="x3"></div>
+        </div>
+      </div>
+
+      <div class="clip pie" id="pie" data-start="0" data-duration="10" data-track-index="4">
+        Nadie en la empresa sabe la respuesta
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        /* Las tres preguntas se parten en palabras desde acá y no en el HTML,
+           para que el texto quede en un solo lugar y no haya que contar spans
+           a mano si alguna cambia. */
+        var PREGUNTAS = [
+          "¿Cuánto perdería su empresa si se incendia la bodega principal?",
+          "¿Cuánto de eso está asegurado?",
+          "¿Cuánto tardaría en volver a operar?"
+        ];
+        PREGUNTAS.forEach(function (texto, i) {
+          document.getElementById("x" + (i + 1)).innerHTML = texto
+            .split(" ")
+            .map(function (w) { return '<span class="q-word">' + w + "</span>"; })
+            .join(" ");
+        });
+
+        var tl = gsap.timeline({ paused: true });
+
+        /* ── estado en t=0 ─────────────────────────────────────────────────
+           Línea base explícita, para que un seek a cualquier t anterior a un
+           beat encuentre el reposo y no lo que dejó el último fromTo. */
+        tl.set([".hair-top", ".hair-bottom"], { scaleX: 0 }, 0);
+        tl.set(".q-word", { opacity: 0, y: 26 }, 0);
+        tl.set(".q-tick", { scaleY: 0 }, 0);
+        tl.set(["#q1", "#q2", "#q3"], { opacity: 1 }, 0);
+        tl.set("#pie", { opacity: 0 }, 0);
+
+        tl.to([".hair-top", ".hair-bottom"], { scaleX: 1, duration: 0.9, ease: "power3.out" }, 0.1);
+
+        /* ── una pregunta cada 2.8s ────────────────────────────────────────
+           Entra por palabras, con su filete. Al entrar la siguiente, la
+           anterior se apaga a la mitad: se queda, pero deja de ser la que se
+           está leyendo. */
+        var ENTRADAS = [0.72, 3.52, 6.32];
+        ENTRADAS.forEach(function (t, i) {
+          var n = i + 1;
+          tl.to("#t" + n, { scaleY: 1, duration: 0.42, ease: "power3.out" }, t);
+          tl.to("#x" + n + " .q-word", {
+            opacity: 1, y: 0, duration: 0.52, ease: "power3.out", stagger: 0.042
+          }, t + 0.06);
+          if (i > 0) {
+            tl.to("#q" + i, { opacity: 0.34, duration: 0.6, ease: "power2.inOut" }, t);
+          }
+        });
+
+        tl.to("#pie", { opacity: 1, duration: 0.6, ease: "power2.out" }, 8.1);
+
+        // Y después quieto. El corte lo pone el montaje del trailer.
+        tl.to({}, { duration: 10 }, 0);
+
+        tl.seek(0);
+        window.__timelines = window.__timelines || {};
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

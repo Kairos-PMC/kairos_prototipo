@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" integrity="sha384-sG0Hv1tP1lZCk9KQmrIbY/XNwi+OY84GQqhMscbnsoBFqAz8KNCil1kvfL3Hbbk2" crossorigin="anonymous"></script>
+    <style>
+      @font-face{font-family:"IBM Plex Serif";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexSerif-400.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexSans-400.woff2") format("woff2");}
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+
+      /* ── Kairos · plano 0:52 del trailer, el cierre ─────────────────────────
+         Las tres fichas entran de pie y dos se caen. La tercera no. Ese es el
+         logotipo y es también el argumento del producto, así que acá se cuenta
+         como movimiento en vez de mostrarse ya resuelto.
+         Geometría tomada de la función marca() de docs/pitch/generar-deck.js:
+         ancho = alto * 0.23, separación 0.42 y 0.84 del alto, ángulos 34, 16
+         y 0 grados. Acá las fichas giran sobre su base, que es como cae una
+         ficha de verdad, y no sobre su centro como en el deck. */
+      #root {
+        position: relative; width: 1920px; height: 1080px; overflow: hidden;
+        --papel: #f0ece1;
+        --tinta: #16191d;
+        --golpe: #c4372a;
+        --arrastrado: #a8710c;
+        --enpie: #3d9168;
+        --serif: "IBM Plex Serif", Georgia, serif;
+        --sans: "IBM Plex Sans", Inter, sans-serif;
+        background: var(--tinta);
+      }
+      #root *, #root *::before, #root *::after { box-sizing: border-box; }
+
+      .ground {
+        position: absolute; inset: 0; z-index: 0;
+        background-color: var(--tinta);
+        background-image:
+          linear-gradient(to right, rgba(240,236,225,.055) 0 1px, transparent 1px 100%),
+          linear-gradient(to bottom, rgba(240,236,225,.055) 0 1px, transparent 1px 100%);
+        background-size: 38.4px 38.4px;
+      }
+
+      .hair { position: absolute; left: 76.8px; width: 1766.4px; height: 2.3px;
+              background: rgba(240,236,225,.26); z-index: 5; transform-origin: 0% 50%; }
+      .hair-top { top: 58px; }
+      .hair-bottom { top: 1022px; }
+
+      /* las tres fichas */
+      .fichas { position: absolute; left: 799px; top: 242px; width: 321px; height: 300px; z-index: 10; }
+      .ficha { position: absolute; bottom: 0; width: 69px; height: 300px; transform-origin: 50% 100%; }
+      .f1 { left: 0; background: var(--golpe); }
+      .f2 { left: 126px; background: var(--arrastrado); }
+      .f3 { left: 252px; background: var(--enpie); }
+
+      .marca { position: absolute; left: 0; top: 596px; width: 1920px; text-align: center;
+               font-family: var(--serif); font-weight: 400; font-size: 148px; line-height: 1;
+               letter-spacing: -.012em; color: var(--papel); z-index: 10; }
+
+      .tagline { position: absolute; left: 0; top: 800px; width: 1920px; text-align: center;
+                 font-family: var(--sans); font-weight: 400; font-size: 39px; line-height: 1.2;
+                 color: var(--arrastrado); z-index: 10; }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="6" data-width="1920" data-height="1080">
+      <div class="clip ground" data-start="0" data-duration="6" data-track-index="0"></div>
+      <div class="clip hair hair-top" id="hair-top" data-start="0" data-duration="6" data-track-index="1"></div>
+      <div class="clip hair hair-bottom" id="hair-bottom" data-start="0" data-duration="6" data-track-index="2"></div>
+
+      <div class="clip fichas" data-start="0" data-duration="6" data-track-index="3" aria-hidden="true">
+        <div class="ficha f1" id="f1"></div>
+        <div class="ficha f2" id="f2"></div>
+        <div class="ficha f3" id="f3"></div>
+      </div>
+
+      <div class="clip marca" id="marca" data-start="0" data-duration="6" data-track-index="4">Kairos</div>
+      <div class="clip tagline" id="tagline" data-start="0" data-duration="6" data-track-index="5">
+        Antes de que el desastre decida por usted.
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        var tl = gsap.timeline({ paused: true });
+
+        /* ── estado en t=0 · las tres de pie ───────────────────────────────
+           Línea base explícita, para que un seek a cualquier t anterior a un
+           beat encuentre el reposo y no lo que dejó el último fromTo. */
+        tl.set([".hair-top", ".hair-bottom"], { scaleX: 0 }, 0);
+        tl.set(["#f1", "#f2", "#f3"], { rotation: 0, opacity: 0, y: 22 }, 0);
+        tl.set(["#marca", "#tagline"], { opacity: 0, y: 20 }, 0);
+
+        tl.to([".hair-top", ".hair-bottom"], { scaleX: 1, duration: 0.9, ease: "power3.out" }, 0.1);
+
+        /* ── 0.45–1.2s · las tres entran de pie ────────────────────────── */
+        tl.to(["#f1", "#f2", "#f3"], {
+          opacity: 1, y: 0, duration: 0.56, ease: "power3.out", stagger: 0.11
+        }, 0.45);
+
+        /* ── 1.5–2.2s · la cadena arranca y se detiene ─────────────────────
+           La primera cae del todo. La segunda alcanza a inclinarse. La tercera
+           queda en pie, y ese es el único momento del video que importa. */
+        tl.to("#f1", { rotation: 34, duration: 0.44, ease: "power2.in" }, 1.5);
+        tl.to("#f2", { rotation: 16, duration: 0.38, ease: "power2.in" }, 1.8);
+        // La tercera acusa el golpe y aguanta. Un grado y medio, nada más.
+        tl.to("#f3", { rotation: -1.5, duration: 0.14, ease: "power2.out" }, 2.1);
+        tl.to("#f3", { rotation: 0, duration: 0.6, ease: "elastic.out(1, 0.55)" }, 2.24);
+
+        /* ── 2.7–4.0s · la marca ───────────────────────────────────────── */
+        tl.to("#marca", { opacity: 1, y: 0, duration: 0.72, ease: "power3.out" }, 2.72);
+        tl.to("#tagline", { opacity: 1, y: 0, duration: 0.66, ease: "power3.out" }, 3.36);
+
+        // Y después quieto, con la URL fuera: esto entra en un trailer, no es
+        // una pieza suelta.
+        tl.to({}, { duration: 6 }, 0);
+
+        tl.seek(0);
+        window.__timelines = window.__timelines || {};
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>
