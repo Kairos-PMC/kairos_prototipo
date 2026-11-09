@@ -48,7 +48,7 @@ Están los seis puntos que la infografía marca en las seis listas. Problema, so
 |---|---|---|---|
 | 0:00 | Rodaje | Dos actores, una bodega de fondo, luz de mañana | Fácil |
 | 0:08 | Rodaje | Un televisor en escena, apagado. El zócalo ya está hecho | Fácil |
-| 0:16 | Rodaje | Los mismos actores y dos celulares | Fácil |
+| 0:16 | Rodaje | Los mismos actores y dos celulares. La pantalla ya está hecha | Fácil |
 | 0:24 | Ya está hecho | `videos/trailer-espinal/renders/trailer-0-24-espinal.mp4` | Hecho |
 | 0:36 | Ya está hecho | `videos/trailer-preguntas/renders/trailer-0-36-preguntas.mp4` | Hecho |
 | 0:46 | Rodaje más efecto | Ver el plan B de abajo | Difícil |
@@ -75,6 +75,15 @@ de su carpeta.
 Marzo y agosto se resuelven con la misma ropa y otra luz, o con otra hora del día. Conviene filmar los dos tiempos seguidos para no volver a la locación.
 
 **El televisor.** El zócalo ya está en `docs/video-pitch/zocalo/`, en dos versiones de 1920x1080. Una con fondo para usarla sola y otra transparente para montarla sobre metraje propio. Se filma el televisor apagado y la noticia se pone encima en edición, porque una pantalla encendida da parpadeo y muaré.
+
+**La pantalla del celular está en**
+`videos/trailer-celular/renders/trailer-0-16-celular.mp4`, 1080x1920 y ocho
+segundos, para montar sobre el celular filmado apagado. Conviene decir qué es
+y qué no es. El prototipo es de escritorio y a ancho de teléfono se desborda,
+así que eso no es una captura de la app. Es el mismo plano y las mismas cifras
+que la app calcula, puestos en vertical con su propio sistema visual. No lleva
+nada que insinúe una función que no existe, ni notificación, ni alerta, ni
+botones. Si alguien pregunta, la respuesta es esa.
 
 **Los celulares.** Filmarlos con la pantalla apagada y poner la captura de Kairos encima. Filmar una pantalla encendida da reflejos y moiré.
 

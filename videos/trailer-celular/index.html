@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" integrity="sha384-sG0Hv1tP1lZCk9KQmrIbY/XNwi+OY84GQqhMscbnsoBFqAz8KNCil1kvfL3Hbbk2" crossorigin="anonymous"></script>
+    <style>
+      @font-face{font-family:"IBM Plex Serif";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexSerif-400.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexSans-400.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:600;font-display:block;src:url("assets/fonts/IBMPlexSans-600.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexMono-400.woff2") format("woff2");}
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1080px; height: 1920px; overflow: hidden; background: #000; }
+
+      /* ── Kairos · la pantalla del celular, plano 0:16 ───────────────────────
+         9:16 para montar sobre un celular filmado apagado.
+         Qué es y qué no es: el prototipo es de escritorio y a ancho de
+         teléfono se desborda, así que esto no es una captura. Es el mismo
+         plano y las mismas cifras que calcula la app, puestos en vertical con
+         su propio sistema visual. No lleva nada que insinúe una función que
+         no existe, ni notificación, ni alerta, ni botones. */
+      #root {
+        position: relative; width: 1080px; height: 1920px; overflow: hidden;
+        --papel: #f0ece1;
+        --papel-alto: #faf8f3;
+        --tinta: #16191d;
+        --tinta-media: #55606d;
+        --linea: rgba(205, 198, 181, 0.55);
+        --golpe: #c4372a;
+        --arrastrado-texto: #91610a;
+        --serif: "IBM Plex Serif", Georgia, serif;
+        --sans: "IBM Plex Sans", Inter, sans-serif;
+        --mono: "IBM Plex Mono", monospace;
+        font-family: var(--sans); color: var(--tinta);
+      }
+      #root *, #root *::before, #root *::after { box-sizing: border-box; }
+
+      .ground {
+        position: absolute; inset: 0; z-index: 0;
+        background-color: var(--papel);
+        background-image:
+          linear-gradient(to right, var(--linea) 0 1px, transparent 1px 100%),
+          linear-gradient(to bottom, var(--linea) 0 1px, transparent 1px 100%);
+        background-size: 36px 36px;
+      }
+
+      .cabecera { position: absolute; left: 60px; top: 96px; width: 960px; z-index: 10;
+                  display: flex; justify-content: space-between; align-items: baseline;
+                  font-family: var(--mono); font-size: 24px; letter-spacing: .12em;
+                  text-transform: uppercase; color: var(--tinta-media); }
+      .regla { position: absolute; left: 60px; width: 960px; height: 3px;
+               background: var(--tinta); z-index: 10; transform-origin: 0% 50%; }
+      .regla-top { top: 142px; }
+
+      .plano { position: absolute; left: 60px; top: 196px; width: 960px; height: 669px; z-index: 10; }
+      .plano img { display: block; width: 960px; height: 669px; }
+
+      .cifra { position: absolute; left: 60px; width: 960px; z-index: 10; padding: 26px 30px 30px 30px; }
+      .cifra-1 { top: 960px; height: 230px; border-top: 3px solid var(--tinta); }
+      .cifra-2 { top: 1230px; height: 290px; background: var(--tinta); }
+      .cifra-rot { font-family: var(--sans); font-weight: 600; font-size: 25px; letter-spacing: .16em;
+                   text-transform: uppercase; color: var(--tinta-media); }
+      .cifra-2 .cifra-rot { color: rgba(240,236,225,.78); }
+      .num { display: flex; align-items: baseline; margin-top: 12px; font-family: var(--serif);
+             font-size: 104px; line-height: 1; letter-spacing: -.015em;
+             font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1;
+             color: var(--tinta); transform-origin: 0% 58%; }
+      .cifra-2 .num { color: var(--papel); font-size: 132px; }
+      .affix { font-size: .58em; color: var(--tinta-media); }
+      .cifra-2 .affix { color: rgba(240,236,225,.78); }
+      .pre { margin-right: .3em; } .suf { margin-left: .3em; }
+      .cifra-sub { margin-top: 14px; font-family: var(--mono); font-size: 26px;
+                   letter-spacing: .05em; color: var(--tinta-media); }
+      .cifra-2 .cifra-sub { color: rgba(240,236,225,.78); }
+
+      .pie { position: absolute; left: 60px; top: 1590px; width: 960px; z-index: 10;
+             font-family: var(--sans); font-size: 30px; line-height: 1.35; color: var(--tinta-media); }
+      .pie b { font-weight: 600; color: var(--golpe); }
+      .pie i { font-style: normal; font-weight: 600; color: var(--arrastrado-texto); }
+
+      .regla-bottom { top: 1790px; }
+      .marca-pie { position: absolute; left: 60px; top: 1818px; width: 960px; z-index: 10;
+                   font-family: var(--mono); font-size: 23px; letter-spacing: .12em;
+                   text-transform: uppercase; color: var(--tinta-media); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="8" data-width="1080" data-height="1920">
+      <div class="clip ground" data-start="0" data-duration="8" data-track-index="0"></div>
+
+      <div class="clip cabecera" id="cabecera" data-start="0" data-duration="8" data-track-index="1">
+        <span>Kairos</span><span>El Espinal</span>
+      </div>
+      <div class="clip regla regla-top" id="regla-top" data-start="0" data-duration="8" data-track-index="2"></div>
+
+      <div class="clip plano" id="plano" data-start="0" data-duration="8" data-track-index="3">
+        <img src="assets/plates/plano-caido@2x.png" alt="" />
+      </div>
+
+      <div class="clip cifra cifra-1" id="cifra-1" data-start="0" data-duration="8" data-track-index="4">
+        <div class="cifra-rot">Reposición</div>
+        <div class="num" id="num-1"><span class="affix pre">$</span><span id="v-repo">0</span><span class="affix suf" id="suf-repo">M</span></div>
+      </div>
+
+      <div class="clip cifra cifra-2" id="cifra-2" data-start="0" data-duration="8" data-track-index="5">
+        <div class="cifra-rot">Costo del evento</div>
+        <div class="num" id="num-2"><span class="affix pre">$</span><span id="v-costo">0</span><span class="affix suf" id="suf-costo">M</span></div>
+        <div class="cifra-sub">35 días sin operar</div>
+      </div>
+
+      <div class="clip pie" id="pie" data-start="0" data-duration="8" data-track-index="6">
+        Se incendia la <b>bodega principal</b> y arrastra la <i>línea de secado</i> y la <i>flota de acopio</i>.
+      </div>
+
+      <div class="clip regla regla-bottom" id="regla-bottom" data-start="0" data-duration="8" data-track-index="7"></div>
+      <div class="clip marca-pie" id="marca-pie" data-start="0" data-duration="8" data-track-index="8">
+        Simulador de riesgos
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+        var tl = gsap.timeline({ paused: true });
+
+        /* ── estado en t=0 ─────────────────────────────────────────────────
+           Línea base explícita, para que un seek a cualquier t anterior a un
+           beat encuentre el reposo y no lo que dejó el último fromTo. */
+        tl.set([".regla-top", ".regla-bottom"], { scaleX: 0 }, 0);
+        tl.set(["#cabecera", "#marca-pie"], { opacity: 0 }, 0);
+        tl.set("#plano", { opacity: 0, y: 18 }, 0);
+        tl.set(["#cifra-1", "#cifra-2"], { opacity: 0, y: 26 }, 0);
+        tl.set(["#suf-repo", "#suf-costo"], { opacity: 0 }, 0);
+        tl.set("#pie", { opacity: 0 }, 0);
+
+        tl.to([".regla-top", ".regla-bottom"], { scaleX: 1, duration: 0.7, ease: "power3.out" }, 0.1);
+        tl.to(["#cabecera", "#marca-pie"], { opacity: 1, duration: 0.5, ease: "power2.out" }, 0.22);
+        tl.to("#plano", { opacity: 1, y: 0, duration: 0.74, ease: "power3.out" }, 0.4);
+        tl.to("#cifra-1", { opacity: 1, y: 0, duration: 0.62, ease: "power3.out" }, 1.1);
+        tl.to("#cifra-2", { opacity: 1, y: 0, duration: 0.62, ease: "power3.out" }, 1.32);
+
+        /* ── contadores deterministas ──────────────────────────────────────
+           Cada entero se precalcula por fotograma a 30fps y se escribe con
+           tl.set, así cualquier seek muestra el mismo valor. */
+        var FPS = 30;
+        var easeCount = gsap.parseEase("sine.inOut");
+        function contador(valorSel, lockupSel, desde, hasta, inicio, dur) {
+          var last = Math.max(1, Math.round(dur * FPS));
+          for (var f = 0; f <= last; f += 1) {
+            var v = Math.round(desde + (hasta - desde) * easeCount(f / last));
+            tl.set(valorSel, { textContent: String(v) }, inicio + dur * (f / last));
+          }
+          tl.to(lockupSel, { scale: 1.06, duration: 0.16, ease: "power3.out" }, inicio + dur);
+          tl.to(lockupSel, { scale: 1, duration: 0.16, ease: "power2.out" }, inicio + dur + 0.16);
+        }
+
+        contador("#v-repo", "#num-1", 0, 420, 1.74, 0.78);
+        tl.to("#suf-repo", { opacity: 1, duration: 0.28, ease: "power2.out" }, 1.86);
+
+        contador("#v-costo", "#num-2", 0, 851, 2.16, 1.05);
+        tl.to("#suf-costo", { opacity: 1, duration: 0.28, ease: "power2.out" }, 2.3);
+
+        tl.to("#pie", { opacity: 1, duration: 0.6, ease: "power2.out" }, 3.5);
+
+        // Y después quieto. El plano dura lo que dure la toma del celular.
+        tl.to({}, { duration: 8 }, 0);
+
+        tl.seek(0);
+        window.__timelines = window.__timelines || {};
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

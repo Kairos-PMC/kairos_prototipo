@@ -1,0 +1,7 @@
+# Artefactos de corrida del CLI, no son fuente
+.hyperframes/artifacts/
+.hyperframes/cache/
+.hyperframes/*-lock
+.hyperframes/history-id
+.hyperframes/render-outputs.json
+.hyperframes/video-state.json
