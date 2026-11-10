@@ -71,7 +71,7 @@ export function Pie() {
           </div>
 
           <p className="display mt-9 text-[2.3rem] leading-[1.06] sm:text-[3rem] lg:text-[3.3rem]">
-            Antes de que el desastre decida por ti.
+            Antes de que el desastre decida por usted.
           </p>
 
           <div className="mt-10 flex justify-center">

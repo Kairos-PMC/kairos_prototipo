@@ -35,7 +35,7 @@ Los rótulos de marzo y agosto son los que hacen entender que pasó el tiempo. S
 | 2:09 | 3.251 grande. Manufactura 1.920, construcción 756, agropecuario 393, minero 182. Fuente Colfirma 2024. | Tres mil doscientas cincuenta y una empresas grandes en cuatro sectores. Ese es el techo inicial. |
 | 2:16 | "Contra quién competimos de verdad." Cuatro columnas y cuatro filas. ¿Es por sede? ¿Trae precio? ¿Cubre lo arrastrado? ¿Prioriza la inversión? | No competimos vendiendo datos, el IDEAM los regala. Competimos contra el estudio general de consultoría, y contra la póliza, que no cubre lo que se detiene. |
 | 2:28 | "Una entrevista cambió el producto. Y una no alcanza." Lo que confirmó y lo que falta. | Una entrevista en floricultura nos hizo agregar la tormenta eléctrica, que no teníamos mapeada. Una no alcanza. Faltan ocho. |
-| 2:37 | Cinco tarjetas con foto, nombre completo y rol. | Falta escribir. |
+| 2:37 | Cinco tarjetas con foto, nombre y rol, en español. Raúl, negocio. María Alejandra, datos. Juan Camilo, software. Samuel, física e ingeniería. Antonio, medios. | Somos cinco. Negocio, datos, software, ingeniería y medios. El prototipo que vieron funcionando lo construimos nosotros. |
 | 2:46 | "Buscamos USD 450.000 para dieciocho meses." Para qué, cuánto dura, la meta. Al final el logo y kairos-prototipo.vercel.app. | Buscamos cuatrocientos cincuenta mil dólares para dieciocho meses. Con eso cerramos las ocho entrevistas que faltan, corremos tres pilotos pagos y llegamos a quince clientes. El equilibrio está en diecinueve. |
 
 La locución son 267 palabras y entra en 116 segundos de los 120. Ensayar con cronómetro. Si un beat se pasa, recortar la frase.
@@ -95,14 +95,22 @@ botones. Si alguien pregunta, la respuesta es esa.
 
 La 2 sale gratis y usa el lenguaje visual del producto.
 
-## Qué hay que decidir antes de grabar
+## Quién hace qué
 
-1. Tú o usted. Las preguntas tratan de usted. La tagline que ya existe dice "por ti". Si queda usted, hay que cambiarla también en el deck y en el logotipo.
-2. Quién actúa. Si son del grupo sale gratis.
-3. Dónde se filma. Hace falta una bodega o planta que sirva de fondo.
-4. Los roles del equipo para el minuto 2:37. Una línea por persona, con nombre completo y rol.
-5. Quién pone la voz en off. Son 267 palabras.
-6. La música. Un tema que crece en el trailer y baja durante el pitch.
+| Parte | Quién | Dónde está |
+|---|---|---|
+| Trailer, el primer minuto | Raúl graba los ocho encuadres, con una segunda persona en cuadro | El plan del día en [plan-de-hoy.md](plan-de-hoy.md) |
+| Pitch, los dos minutos | Antonio y María Alejandra ponen la voz en off | El texto es la columna "Lo que se dice" de la tabla de arriba |
+| El prototipo | Juan Camilo y Samuel | En curso |
+| Edición | María Alejandra | Lo que hay que entregarle está en [guia-de-rodaje.md](guia-de-rodaje.md) |
+
+**Queda el trato de usted.** Las tres preguntas del 0:36 y el cierre del 0:52 ya
+están renderizados tratando de usted, así que el video entero va en usted. El
+pie del prototipo web decía "por ti" y se cambió. Si el deck todavía dice "por
+ti", hay que cambiarlo ahí también.
+
+Las tarjetas del 2:37 están hoy en inglés en la lámina del equipo. En el video
+van en español, porque todo lo demás está en español.
 
 ## Ojo con esto
 
@@ -128,3 +136,10 @@ El tercero es el que cuenta la historia completa del trailer. La sequía vacía 
 La cascada animada, los contadores, el plano de la finca y las fichas de dominó ya existen en `videos/kairos-simulacion/` y en `docs/pitch/`. Los colores y tipografías están en `videos/kairos-simulacion/frame.md`.
 
 Los precios, el ARPA y el equilibrio en 19 clientes salen de `docs/modelo-de-negocio/parametros.md`.
+
+**La música ya está elegida.** En el trailer va la opción 2, con el corte de 60
+segundos que llega a su punto más alto en el plano de agosto y se apaga solo en
+0:53, así que el dominó del 0:52 queda en silencio sin fundido dibujado a mano.
+En el pitch va una segunda pieza de cama, con un corte de 120 segundos que entra
+en 1:00 y se apaga solo en 3:00, encima del logo. Los archivos, los cortes
+listos y las mediciones de volumen están en `docs/video-pitch/musica/`.
