@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.14.2/dist/gsap.min.js" integrity="sha384-sG0Hv1tP1lZCk9KQmrIbY/XNwi+OY84GQqhMscbnsoBFqAz8KNCil1kvfL3Hbbk2" crossorigin="anonymous"></script>
+    <style>
+      @font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexSans-400.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Sans";font-style:normal;font-weight:600;font-display:block;src:url("assets/fonts/IBMPlexSans-600.woff2") format("woff2");}
+      @font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:block;src:url("assets/fonts/IBMPlexMono-400.woff2") format("woff2");}
+
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 1920px; height: 1080px; overflow: hidden; background: #000; }
+
+      /* ── Kairos · el montaje del trailer ────────────────────────────────────
+         Sesenta segundos. Metraje filmado en la terraza, cuatro piezas ya
+         renderizadas, la emisión de Caracol en el televisor y la música.
+         Los tiempos salen de docs/video-pitch/escaleta-3min.md.
+
+         Esta pasada es la de acabado. Cada plano quieto lleva un acercamiento
+         lento, los cortes que importan llevan golpe, y el 0:46 se cuenta como
+         pantalla partida porque el plano 8 no se pudo filmar con luz de día. */
+      #root {
+        position: relative; width: 1920px; height: 1080px; overflow: hidden;
+        --papel: #f0ece1;
+        --tinta: #16191d;
+        --golpe: #c4372a;
+        --enpie: #56c08e;
+        --sans: "IBM Plex Sans", Inter, sans-serif;
+        --mono: "IBM Plex Mono", monospace;
+        background: #000;
+      }
+      #root *, #root *::before, #root *::after { box-sizing: border-box; }
+
+      video.plano { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px;
+                    object-fit: cover; display: block; z-index: 10; }
+
+      /* Las dos mitades del 0:46. Una parada y la otra operando. */
+      video.mitad { position: absolute; top: 0; width: 960px; height: 1080px;
+                    object-fit: cover; display: block; z-index: 12; }
+      video.izq { left: 0; }
+      video.der { left: 960px; }
+      /* La línea del 0:46. Va oscura porque las dos mitades son la misma pared
+         clara, y sin un corte visible la pantalla partida se lee como un
+         encuadre mal hecho en vez de como una decisión. */
+      .divisor { position: absolute; left: 954px; top: 0; width: 12px; height: 1080px;
+                 background: var(--tinta); z-index: 14;
+                 box-shadow: 0 0 44px 10px rgba(9,11,13,.55); }
+
+      /* El hueco del televisor, que todavía no se filma. */
+      .hueco {
+        position: absolute; inset: 0; z-index: 10; background: var(--tinta);
+        display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px;
+      }
+      .hueco b { font-family: var(--sans); font-weight: 600; font-size: 66px;
+                 letter-spacing: .02em; color: #8a9099; }
+      .hueco span { font-family: var(--mono); font-size: 30px; color: rgb(95,101,110); }
+
+      /* La emisión, encima del televisor apagado. Va con su marca y su rótulo,
+         como cita, y por eso no lleva ningún zócalo nuestro encima. */
+      /* La noticia, alineada sobre la pantalla real del televisor filmado.
+         Las medidas salen del fotograma: con el recorte crop=2900:1631:458:0
+         la pantalla cae en estas coordenadas del cuadro de 1920 por 1080. Va
+         con fill y no con cover porque la pantalla quedó en 1,73 y el clip en
+         1,78, y es mejor estirar un tres por ciento que dejar un filo de
+         reflejo sin tapar. */
+      video.noticia { position: absolute; left: 267px; top: 115px; width: 1386px; height: 803px;
+                      object-fit: fill; display: block; z-index: 20; }
+
+      /* Los rótulos. Son los que hacen entender que pasó el tiempo entre el
+         0:00 y el 0:46. Sin ellos el 0:46 se lee como error de continuidad. */
+      .rotulo { position: absolute; left: 140px; top: 858px; z-index: 30;
+                font-family: var(--sans); font-weight: 600; font-size: 52px;
+                letter-spacing: .2em; color: var(--papel); opacity: 0;
+                text-shadow: 0 3px 30px rgba(0,0,0,.85); }
+      .barra { position: absolute; left: 140px; top: 826px; width: 118px; height: 5px;
+               background: var(--golpe); z-index: 30; transform-origin: 0% 50%; }
+
+      /* El degradado de abajo. Existe para que el rótulo se lea sobre una
+         pared clara, y de paso le da peso al pie del cuadro. */
+.scrim { position: absolute; left: 0; top: 0; width: 1920px; height: 1080px; z-index: 28;
+               opacity: 0;
+               background: linear-gradient(to top, rgba(9,11,13,.93) 0%, rgba(9,11,13,.74) 20%, rgba(9,11,13,.34) 40%, rgba(9,11,13,.08) 54%, rgba(9,11,13,0) 66%); }
+
+
+      /* Las frases que llevan la historia. Un trailer comercial no deja que el
+         que mira adivine de qué se trata, se lo dice. Van abajo como los
+         rótulos pero en caja baja y más grandes, para que se lean como
+         narración y no como un letrero de lugar. */
+      .frase { position: absolute; left: 140px; top: 758px; width: 1360px; z-index: 30;
+               font-family: var(--sans); font-weight: 600; font-size: 64px; line-height: 1.12;
+               letter-spacing: -.012em; color: var(--papel); opacity: 0;
+               text-shadow: 0 3px 34px rgba(0,0,0,.8); }
+
+
+      /* El estado de cada mitad en el 0:46. Las palabras y los colores son los
+         de la propia app, donde el rojo es lo que recibió el golpe y el verde
+         lo que quedó en pie. Decirlo así ata el final del trailer a la
+         pantalla que se acaba de ver, y no promete que Kairos apague
+         incendios, que es lo único que no se puede decir. */
+      .marca-estado { display: block; font-size: 28px; letter-spacing: .28em; font-weight: 400;
+                      color: var(--papel); opacity: .8; margin-bottom: 15px; }
+      /* La regla de color sobre cada estado. Es lo que lo vuelve un sello y no
+         un pie de foto, y de paso repite el rojo y el verde del producto una
+         vez más antes del logotipo. */
+      .estado::before { content: ""; position: absolute; left: 50%; top: -26px;
+                        width: 104px; height: 5px; margin-left: -52px;
+                        background: currentColor; }
+      .estado { position: absolute; top: 862px; width: 960px; z-index: 30; text-align: center;
+                font-family: var(--sans); font-weight: 600; font-size: 52px;
+                letter-spacing: .16em; opacity: 0; text-shadow: 0 3px 30px rgba(0,0,0,.85); }
+      .estado-izq { left: 0; color: var(--golpe); }
+      .estado-der { left: 960px; color: var(--enpie); }
+
+      .negro { position: absolute; inset: 0; z-index: 40; background: #000; opacity: 0; }
+    </style>
+  </head>
+  <body>
+    <div data-hf-id="hf-9w29" id="root" data-composition-id="main" data-start="0" data-duration="60" data-width="1920" data-height="1080" data-composition-variables="[
+           {&quot;id&quot;:&quot;rotulo_marzo&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Rótulo del primer tiempo&quot;,&quot;default&quot;:&quot;TOLIMA, MARZO&quot;},
+           {&quot;id&quot;:&quot;rotulo_agosto&quot;,&quot;type&quot;:&quot;string&quot;,&quot;label&quot;:&quot;Rótulo del segundo tiempo&quot;,&quot;default&quot;:&quot;TOLIMA, AGOSTO&quot;},
+           {&quot;id&quot;:&quot;noticia_src&quot;,&quot;type&quot;:&quot;image&quot;,&quot;label&quot;:&quot;La noticia del televisor&quot;,&quot;default&quot;:&quot;assets/piezas/tv-noticia.mp4&quot;},
+           {&quot;id&quot;:&quot;espinal_src&quot;,&quot;type&quot;:&quot;image&quot;,&quot;label&quot;:&quot;La simulación de El Espinal&quot;,&quot;default&quot;:&quot;assets/piezas/0-24-espinal.mp4&quot;},
+           {&quot;id&quot;:&quot;preguntas_src&quot;,&quot;type&quot;:&quot;image&quot;,&quot;label&quot;:&quot;Las tres preguntas&quot;,&quot;default&quot;:&quot;assets/piezas/0-36-preguntas.mp4&quot;},
+           {&quot;id&quot;:&quot;marca_src&quot;,&quot;type&quot;:&quot;image&quot;,&quot;label&quot;:&quot;El cierre de marca&quot;,&quot;default&quot;:&quot;assets/piezas/0-52-marca.mp4&quot;}
+         ]">
+
+      <!-- ── 0:00 a 0:08 · el saludo ──────────────────────────────────────── -->
+      <video data-color-grading="{&quot;preset&quot;:null,&quot;intensity&quot;:1,&quot;adjust&quot;:{&quot;exposure&quot;:0,&quot;contrast&quot;:0,&quot;highlights&quot;:0,&quot;shadows&quot;:0,&quot;whites&quot;:0,&quot;blacks&quot;:0,&quot;temperature&quot;:0,&quot;tint&quot;:0,&quot;vibrance&quot;:0,&quot;saturation&quot;:0},&quot;details&quot;:{&quot;vignette&quot;:0,&quot;vignetteMidpoint&quot;:0.5,&quot;vignetteRoundness&quot;:0,&quot;vignetteFeather&quot;:0.65,&quot;grain&quot;:0,&quot;grainSize&quot;:0.25,&quot;grainRoughness&quot;:0.5},&quot;effects&quot;:{&quot;blur&quot;:0,&quot;pixelate&quot;:0,&quot;chromaBleed&quot;:0,&quot;tapeDamage&quot;:0,&quot;tapeTracking&quot;:0,&quot;tapeNoise&quot;:1,&quot;tapeSpeed&quot;:0.5,&quot;filmArtifacts&quot;:0,&quot;halftone&quot;:0,&quot;halftoneSize&quot;:0,&quot;twoInkPrint&quot;:0,&quot;twoInkPrintSize&quot;:0,&quot;ascii&quot;:0,&quot;asciiSize&quot;:0.06578947368421052,&quot;asciiInvert&quot;:0,&quot;asciiStyle&quot;:0,&quot;asciiColor&quot;:1,&quot;asciiRotation&quot;:0,&quot;dither&quot;:0,&quot;ditherSize&quot;:0,&quot;bloom&quot;:0,&quot;bloomRadius&quot;:8,&quot;monoScreen&quot;:0,&quot;monoScreenSize&quot;:0,&quot;monoScreenAngle&quot;:0,&quot;monoScreenSpread&quot;:0,&quot;monoScreenShape&quot;:0,&quot;monoScreenInvert&quot;:0,&quot;scanlines&quot;:0,&quot;scanlineCount&quot;:0,&quot;scanlineSoftness&quot;:0,&quot;chromaticAberration&quot;:0,&quot;chromaticAngle&quot;:0,&quot;crtCurvature&quot;:0,&quot;digitalGlitch&quot;:0,&quot;digitalGlitchColorSplit&quot;:0,&quot;digitalGlitchLineTear&quot;:0,&quot;digitalGlitchPixelate&quot;:0,&quot;digitalGlitchBlockAmount&quot;:0,&quot;digitalGlitchBlockDisplacement&quot;:0,&quot;digitalGlitchBlockOpacity&quot;:0,&quot;digitalGlitchSpeed&quot;:0,&quot;engraving&quot;:0,&quot;engravingSpacing&quot;:0.4117647058823529,&quot;engravingMinThickness&quot;:0.2,&quot;engravingMaxThickness&quot;:0.4571428571428572,&quot;engravingAngle&quot;:0.25,&quot;engravingContrast&quot;:0.4666666666666667,&quot;engravingSharpness&quot;:0.59,&quot;engravingWave&quot;:0.2,&quot;engravingWaveFrequency&quot;:0.2222222222222222,&quot;crosshatch&quot;:0,&quot;crosshatchSpacing&quot;:0.28,&quot;crosshatchThickness&quot;:0.25,&quot;crosshatchAngle&quot;:0.25,&quot;crosshatchContrast&quot;:0.3333333333333333,&quot;crosshatchEdges&quot;:0.5,&quot;crosshatchLineWeight&quot;:0,&quot;crosshatchWave&quot;:0.33,&quot;crosshatchWaveFrequency&quot;:0.2222222222222222,&quot;kuwahara&quot;:0,&quot;kuwaharaRadius&quot;:0.14285714285714285,&quot;kuwaharaSharpness&quot;:0.3125,&quot;kuwaharaSaturation&quot;:0.5},&quot;lut&quot;:{&quot;src&quot;:&quot;.media/luts/grade_001.cube&quot;,&quot;intensity&quot;:0.6},&quot;colorSpace&quot;:&quot;rec709&quot;}" data-hf-id="hf-kyu1" class="clip plano" id="p01" data-start="0" data-duration="8" data-track-index="0" data-track-kind="graphics" src="assets/rodaje/plano-01.mp4" muted playsinline></video>
+      <div data-hf-id="hf-3bxw" class="clip scrim" id="scrim-marzo" data-start="0.7" data-duration="3.7" data-track-index="3"></div>
+      <div data-hf-id="hf-gi2h" class="clip barra" id="barra-marzo" data-start="0.7" data-duration="3.7" data-track-index="4"></div>
+      <div data-hf-id="hf-x9q4" class="clip rotulo" id="rotulo-marzo" data-start="0.7" data-duration="3.7" data-track-index="4" data-var-text="rotulo_marzo">TOLIMA, MARZO</div>
+
+      <!-- ── 0:08 a 0:16 · la noticia ─────────────────────────────────────── -->
+      <video data-color-grading="{&quot;preset&quot;:null,&quot;intensity&quot;:1,&quot;adjust&quot;:{&quot;exposure&quot;:0,&quot;contrast&quot;:0,&quot;highlights&quot;:0,&quot;shadows&quot;:0,&quot;whites&quot;:0,&quot;blacks&quot;:0,&quot;temperature&quot;:0,&quot;tint&quot;:0,&quot;vibrance&quot;:0,&quot;saturation&quot;:0},&quot;details&quot;:{&quot;vignette&quot;:0,&quot;vignetteMidpoint&quot;:0.5,&quot;vignetteRoundness&quot;:0,&quot;vignetteFeather&quot;:0.65,&quot;grain&quot;:0,&quot;grainSize&quot;:0.25,&quot;grainRoughness&quot;:0.5},&quot;effects&quot;:{&quot;blur&quot;:0,&quot;pixelate&quot;:0,&quot;chromaBleed&quot;:0,&quot;tapeDamage&quot;:0,&quot;tapeTracking&quot;:0,&quot;tapeNoise&quot;:1,&quot;tapeSpeed&quot;:0.5,&quot;filmArtifacts&quot;:0,&quot;halftone&quot;:0,&quot;halftoneSize&quot;:0,&quot;twoInkPrint&quot;:0,&quot;twoInkPrintSize&quot;:0,&quot;ascii&quot;:0,&quot;asciiSize&quot;:0.06578947368421052,&quot;asciiInvert&quot;:0,&quot;asciiStyle&quot;:0,&quot;asciiColor&quot;:1,&quot;asciiRotation&quot;:0,&quot;dither&quot;:0,&quot;ditherSize&quot;:0,&quot;bloom&quot;:0,&quot;bloomRadius&quot;:8,&quot;monoScreen&quot;:0,&quot;monoScreenSize&quot;:0,&quot;monoScreenAngle&quot;:0,&quot;monoScreenSpread&quot;:0,&quot;monoScreenShape&quot;:0,&quot;monoScreenInvert&quot;:0,&quot;scanlines&quot;:0,&quot;scanlineCount&quot;:0,&quot;scanlineSoftness&quot;:0,&quot;chromaticAberration&quot;:0,&quot;chromaticAngle&quot;:0,&quot;crtCurvature&quot;:0,&quot;digitalGlitch&quot;:0,&quot;digitalGlitchColorSplit&quot;:0,&quot;digitalGlitchLineTear&quot;:0,&quot;digitalGlitchPixelate&quot;:0,&quot;digitalGlitchBlockAmount&quot;:0,&quot;digitalGlitchBlockDisplacement&quot;:0,&quot;digitalGlitchBlockOpacity&quot;:0,&quot;digitalGlitchSpeed&quot;:0,&quot;engraving&quot;:0,&quot;engravingSpacing&quot;:0.4117647058823529,&quot;engravingMinThickness&quot;:0.2,&quot;engravingMaxThickness&quot;:0.4571428571428572,&quot;engravingAngle&quot;:0.25,&quot;engravingContrast&quot;:0.4666666666666667,&quot;engravingSharpness&quot;:0.59,&quot;engravingWave&quot;:0.2,&quot;engravingWaveFrequency&quot;:0.2222222222222222,&quot;crosshatch&quot;:0,&quot;crosshatchSpacing&quot;:0.28,&quot;crosshatchThickness&quot;:0.25,&quot;crosshatchAngle&quot;:0.25,&quot;crosshatchContrast&quot;:0.3333333333333333,&quot;crosshatchEdges&quot;:0.5,&quot;crosshatchLineWeight&quot;:0,&quot;crosshatchWave&quot;:0.33,&quot;crosshatchWaveFrequency&quot;:0.2222222222222222,&quot;kuwahara&quot;:0,&quot;kuwaharaRadius&quot;:0.14285714285714285,&quot;kuwaharaSharpness&quot;:0.3125,&quot;kuwaharaSaturation&quot;:0.5},&quot;lut&quot;:{&quot;src&quot;:&quot;.media/luts/grade_001.cube&quot;,&quot;intensity&quot;:0.6},&quot;colorSpace&quot;:&quot;rec709&quot;}" data-hf-id="hf-53n5" class="clip plano" id="p02" data-start="8" data-duration="3" data-track-index="0" src="assets/rodaje/plano-02.mp4" muted playsinline></video>
+      <video data-color-grading="{&quot;preset&quot;:null,&quot;intensity&quot;:1,&quot;adjust&quot;:{&quot;exposure&quot;:0,&quot;contrast&quot;:0,&quot;highlights&quot;:0,&quot;shadows&quot;:0,&quot;whites&quot;:0,&quot;blacks&quot;:0,&quot;temperature&quot;:0,&quot;tint&quot;:0,&quot;vibrance&quot;:0,&quot;saturation&quot;:0},&quot;details&quot;:{&quot;vignette&quot;:0,&quot;vignetteMidpoint&quot;:0.5,&quot;vignetteRoundness&quot;:0,&quot;vignetteFeather&quot;:0.65,&quot;grain&quot;:0,&quot;grainSize&quot;:0.25,&quot;grainRoughness&quot;:0.5},&quot;effects&quot;:{&quot;blur&quot;:0,&quot;pixelate&quot;:0,&quot;chromaBleed&quot;:0,&quot;tapeDamage&quot;:0,&quot;tapeTracking&quot;:0,&quot;tapeNoise&quot;:1,&quot;tapeSpeed&quot;:0.5,&quot;filmArtifacts&quot;:0,&quot;halftone&quot;:0,&quot;halftoneSize&quot;:0,&quot;twoInkPrint&quot;:0,&quot;twoInkPrintSize&quot;:0,&quot;ascii&quot;:0,&quot;asciiSize&quot;:0.06578947368421052,&quot;asciiInvert&quot;:0,&quot;asciiStyle&quot;:0,&quot;asciiColor&quot;:1,&quot;asciiRotation&quot;:0,&quot;dither&quot;:0,&quot;ditherSize&quot;:0,&quot;bloom&quot;:0,&quot;bloomRadius&quot;:8,&quot;monoScreen&quot;:0,&quot;monoScreenSize&quot;:0,&quot;monoScreenAngle&quot;:0,&quot;monoScreenSpread&quot;:0,&quot;monoScreenShape&quot;:0,&quot;monoScreenInvert&quot;:0,&quot;scanlines&quot;:0,&quot;scanlineCount&quot;:0,&quot;scanlineSoftness&quot;:0,&quot;chromaticAberration&quot;:0,&quot;chromaticAngle&quot;:0,&quot;crtCurvature&quot;:0,&quot;digitalGlitch&quot;:0,&quot;digitalGlitchColorSplit&quot;:0,&quot;digitalGlitchLineTear&quot;:0,&quot;digitalGlitchPixelate&quot;:0,&quot;digitalGlitchBlockAmount&quot;:0,&quot;digitalGlitchBlockDisplacement&quot;:0,&quot;digitalGlitchBlockOpacity&quot;:0,&quot;digitalGlitchSpeed&quot;:0,&quot;engraving&quot;:0,&quot;engravingSpacing&quot;:0.4117647058823529,&quot;engravingMinThickness&quot;:0.2,&quot;engravingMaxThickness&quot;:0.4571428571428572,&quot;engravingAngle&quot;:0.25,&quot;engravingContrast&quot;:0.4666666666666667,&quot;engravingSharpness&quot;:0.59,&quot;engravingWave&quot;:0.2,&quot;engravingWaveFrequency&quot;:0.2222222222222222,&quot;crosshatch&quot;:0,&quot;crosshatchSpacing&quot;:0.28,&quot;crosshatchThickness&quot;:0.25,&quot;crosshatchAngle&quot;:0.25,&quot;crosshatchContrast&quot;:0.3333333333333333,&quot;crosshatchEdges&quot;:0.5,&quot;crosshatchLineWeight&quot;:0,&quot;crosshatchWave&quot;:0.33,&quot;crosshatchWaveFrequency&quot;:0.2222222222222222,&quot;kuwahara&quot;:0,&quot;kuwaharaRadius&quot;:0.14285714285714285,&quot;kuwaharaSharpness&quot;:0.3125,&quot;kuwaharaSaturation&quot;:0.5},&quot;lut&quot;:{&quot;src&quot;:&quot;.media/luts/grade_001.cube&quot;,&quot;intensity&quot;:0.35},&quot;colorSpace&quot;:&quot;rec709&quot;}" data-hf-id="hf-19db" class="clip plano" id="p06" data-start="11" data-duration="5" data-track-index="0" src="assets/rodaje/plano-06.mp4" muted playsinline></video>
+      <video data-hf-id="hf-fmt4" class="clip noticia" id="noticia" data-start="11" data-duration="5" data-track-index="2" src="assets/piezas/tv-noticia.mp4" data-var-src="noticia_src" muted playsinline data-hold=""></video>
+
+      <!-- ── 0:16 a 0:24 · se separan ───────────────────────────────────────
+           Dos planos medios seguidos, uno de cada uno. Ella mira el celular y
+           lo baja. Él lo saca y lo abre. La historia entera del trailer son
+           estos ocho segundos. -->
+      <video data-color-grading="{&quot;preset&quot;:null,&quot;intensity&quot;:1,&quot;adjust&quot;:{&quot;exposure&quot;:0,&quot;contrast&quot;:0,&quot;highlights&quot;:0,&quot;shadows&quot;:0,&quot;whites&quot;:0,&quot;blacks&quot;:0,&quot;temperature&quot;:0,&quot;tint&quot;:0,&quot;vibrance&quot;:0,&quot;saturation&quot;:0},&quot;details&quot;:{&quot;vignette&quot;:0,&quot;vignetteMidpoint&quot;:0.5,&quot;vignetteRoundness&quot;:0,&quot;vignetteFeather&quot;:0.65,&quot;grain&quot;:0,&quot;grainSize&quot;:0.25,&quot;grainRoughness&quot;:0.5},&quot;effects&quot;:{&quot;blur&quot;:0,&quot;pixelate&quot;:0,&quot;chromaBleed&quot;:0,&quot;tapeDamage&quot;:0,&quot;tapeTracking&quot;:0,&quot;tapeNoise&quot;:1,&quot;tapeSpeed&quot;:0.5,&quot;filmArtifacts&quot;:0,&quot;halftone&quot;:0,&quot;halftoneSize&quot;:0,&quot;twoInkPrint&quot;:0,&quot;twoInkPrintSize&quot;:0,&quot;ascii&quot;:0,&quot;asciiSize&quot;:0.06578947368421052,&quot;asciiInvert&quot;:0,&quot;asciiStyle&quot;:0,&quot;asciiColor&quot;:1,&quot;asciiRotation&quot;:0,&quot;dither&quot;:0,&quot;ditherSize&quot;:0,&quot;bloom&quot;:0,&quot;bloomRadius&quot;:8,&quot;monoScreen&quot;:0,&quot;monoScreenSize&quot;:0,&quot;monoScreenAngle&quot;:0,&quot;monoScreenSpread&quot;:0,&quot;monoScreenShape&quot;:0,&quot;monoScreenInvert&quot;:0,&quot;scanlines&quot;:0,&quot;scanlineCount&quot;:0,&quot;scanlineSoftness&quot;:0,&quot;chromaticAberration&quot;:0,&quot;chromaticAngle&quot;:0,&quot;crtCurvature&quot;:0,&quot;digitalGlitch&quot;:0,&quot;digitalGlitchColorSplit&quot;:0,&quot;digitalGlitchLineTear&quot;:0,&quot;digitalGlitchPixelate&quot;:0,&quot;digitalGlitchBlockAmount&quot;:0,&quot;digitalGlitchBlockDisplacement&quot;:0,&quot;digitalGlitchBlockOpacity&quot;:0,&quot;digitalGlitchSpeed&quot;:0,&quot;engraving&quot;:0,&quot;engravingSpacing&quot;:0.4117647058823529,&quot;engravingMinThickness&quot;:0.2,&quot;engravingMaxThickness&quot;:0.4571428571428572,&quot;engravingAngle&quot;:0.25,&quot;engravingContrast&quot;:0.4666666666666667,&quot;engravingSharpness&quot;:0.59,&quot;engravingWave&quot;:0.2,&quot;engravingWaveFrequency&quot;:0.2222222222222222,&quot;crosshatch&quot;:0,&quot;crosshatchSpacing&quot;:0.28,&quot;crosshatchThickness&quot;:0.25,&quot;crosshatchAngle&quot;:0.25,&quot;crosshatchContrast&quot;:0.3333333333333333,&quot;crosshatchEdges&quot;:0.5,&quot;crosshatchLineWeight&quot;:0,&quot;crosshatchWave&quot;:0.33,&quot;crosshatchWaveFrequency&quot;:0.2222222222222222,&quot;kuwahara&quot;:0,&quot;kuwaharaRadius&quot;:0.14285714285714285,&quot;kuwaharaSharpness&quot;:0.3125,&quot;kuwaharaSaturation&quot;:0.5},&quot;lut&quot;:{&quot;src&quot;:&quot;.media/luts/grade_001.cube&quot;,&quot;intensity&quot;:0.6},&quot;colorSpace&quot;:&quot;rec709&quot;}" data-hf-id="hf-e5cr" class="clip plano" id="p04" data-start="16" data-duration="4" data-track-index="0" src="assets/rodaje/plano-04.mp4" muted playsinline></video>
+      <video data-color-grading="{&quot;preset&quot;:null,&quot;intensity&quot;:1,&quot;adjust&quot;:{&quot;exposure&quot;:0,&quot;contrast&quot;:0,&quot;highlights&quot;:0,&quot;shadows&quot;:0,&quot;whites&quot;:0,&quot;blacks&quot;:0,&quot;temperature&quot;:0,&quot;tint&quot;:0,&quot;vibrance&quot;:0,&quot;saturation&quot;:0},&quot;details&quot;:{&quot;vignette&quot;:0,&quot;vignetteMidpoint&quot;:0.5,&quot;vignetteRoundness&quot;:0,&quot;vignetteFeather&quot;:0.65,&quot;grain&quot;:0,&quot;grainSize&quot;:0.25,&quot;grainRoughness&quot;:0.5},&quot;effects&quot;:{&quot;blur&quot;:0,&quot;pixelate&quot;:0,&quot;chromaBleed&quot;:0,&quot;tapeDamage&quot;:0,&quot;tapeTracking&quot;:0,&quot;tapeNoise&quot;:1,&quot;tapeSpeed&quot;:0.5,&quot;filmArtifacts&quot;:0,&quot;halftone&quot;:0,&quot;halftoneSize&quot;:0,&quot;twoInkPrint&quot;:0,&quot;twoInkPrintSize&quot;:0,&quot;ascii&quot;:0,&quot;asciiSize&quot;:0.06578947368421052,&quot;asciiInvert&quot;:0,&quot;asciiStyle&quot;:0,&quot;asciiColor&quot;:1,&quot;asciiRotation&quot;:0,&quot;dither&quot;:0,&quot;ditherSize&quot;:0,&quot;bloom&quot;:0,&quot;bloomRadius&quot;:8,&quot;monoScreen&quot;:0,&quot;monoScreenSize&quot;:0,&quot;monoScreenAngle&quot;:0,&quot;monoScreenSpread&quot;:0,&quot;monoScreenShape&quot;:0,&quot;monoScreenInvert&quot;:0,&quot;scanlines&quot;:0,&quot;scanlineCount&quot;:0,&quot;scanlineSoftness&quot;:0,&quot;chromaticAberration&quot;:0,&quot;chromaticAngle&quot;:0,&quot;crtCurvature&quot;:0,&quot;digitalGlitch&quot;:0,&quot;digitalGlitchColorSplit&quot;:0,&quot;digitalGlitchLineTear&quot;:0,&quot;digitalGlitchPixelate&quot;:0,&quot;digitalGlitchBlockAmount&quot;:0,&quot;digitalGlitchBlockDisplacement&quot;:0,&quot;digitalGlitchBlockOpacity&quot;:0,&quot;digitalGlitchSpeed&quot;:0,&quot;engraving&quot;:0,&quot;engravingSpacing&quot;:0.4117647058823529,&quot;engravingMinThickness&quot;:0.2,&quot;engravingMaxThickness&quot;:0.4571428571428572,&quot;engravingAngle&quot;:0.25,&quot;engravingContrast&quot;:0.4666666666666667,&quot;engravingSharpness&quot;:0.59,&quot;engravingWave&quot;:0.2,&quot;engravingWaveFrequency&quot;:0.2222222222222222,&quot;crosshatch&quot;:0,&quot;crosshatchSpacing&quot;:0.28,&quot;crosshatchThickness&quot;:0.25,&quot;crosshatchAngle&quot;:0.25,&quot;crosshatchContrast&quot;:0.3333333333333333,&quot;crosshatchEdges&quot;:0.5,&quot;crosshatchLineWeight&quot;:0,&quot;crosshatchWave&quot;:0.33,&quot;crosshatchWaveFrequency&quot;:0.2222222222222222,&quot;kuwahara&quot;:0,&quot;kuwaharaRadius&quot;:0.14285714285714285,&quot;kuwaharaSharpness&quot;:0.3125,&quot;kuwaharaSaturation&quot;:0.5},&quot;lut&quot;:{&quot;src&quot;:&quot;.media/luts/grade_001.cube&quot;,&quot;intensity&quot;:0.6},&quot;colorSpace&quot;:&quot;rec709&quot;}" data-hf-id="hf-vcli" class="clip plano" id="p05" data-start="20" data-duration="4" data-track-index="0" src="assets/rodaje/plano-05.mp4" muted playsinline></video>
+
+      <!-- ── 0:24 a 0:36 · la simulación ──────────────────────────────────── -->
+      <video data-hf-id="hf-7q3b" class="clip plano" id="espinal" data-start="24" data-duration="12" data-track-index="1" src="assets/piezas/0-24-espinal.mp4" data-var-src="espinal_src" muted playsinline></video>
+
+      <!-- ── 0:36 a 0:46 · las tres preguntas ─────────────────────────────── -->
+      <video data-hf-id="hf-dpyw" class="clip plano" id="preguntas" data-start="36" data-duration="10" data-track-index="1" src="assets/piezas/0-36-preguntas.mp4" data-var-src="preguntas_src" muted playsinline></video>
+
+      <!-- ── 0:46 a 0:52 · meses después, en pantalla partida ──────────────
+           El plano 8 no se pudo filmar con luz de día. Se cuenta con el mismo
+           recurso que la escaleta pide en el 0:00, la pantalla partida. A la
+           izquierda la que no hizo nada, a la derecha el que sí. -->
+      <video data-color-grading="{&quot;preset&quot;:null,&quot;intensity&quot;:1,&quot;adjust&quot;:{&quot;exposure&quot;:0,&quot;contrast&quot;:0,&quot;highlights&quot;:0,&quot;shadows&quot;:0,&quot;whites&quot;:0,&quot;blacks&quot;:0,&quot;temperature&quot;:0,&quot;tint&quot;:0,&quot;vibrance&quot;:0,&quot;saturation&quot;:0},&quot;details&quot;:{&quot;vignette&quot;:0,&quot;vignetteMidpoint&quot;:0.5,&quot;vignetteRoundness&quot;:0,&quot;vignetteFeather&quot;:0.65,&quot;grain&quot;:0,&quot;grainSize&quot;:0.25,&quot;grainRoughness&quot;:0.5},&quot;effects&quot;:{&quot;blur&quot;:0,&quot;pixelate&quot;:0,&quot;chromaBleed&quot;:0,&quot;tapeDamage&quot;:0,&quot;tapeTracking&quot;:0,&quot;tapeNoise&quot;:1,&quot;tapeSpeed&quot;:0.5,&quot;filmArtifacts&quot;:0,&quot;halftone&quot;:0,&quot;halftoneSize&quot;:0,&quot;twoInkPrint&quot;:0,&quot;twoInkPrintSize&quot;:0,&quot;ascii&quot;:0,&quot;asciiSize&quot;:0.06578947368421052,&quot;asciiInvert&quot;:0,&quot;asciiStyle&quot;:0,&quot;asciiColor&quot;:1,&quot;asciiRotation&quot;:0,&quot;dither&quot;:0,&quot;ditherSize&quot;:0,&quot;bloom&quot;:0,&quot;bloomRadius&quot;:8,&quot;monoScreen&quot;:0,&quot;monoScreenSize&quot;:0,&quot;monoScreenAngle&quot;:0,&quot;monoScreenSpread&quot;:0,&quot;monoScreenShape&quot;:0,&quot;monoScreenInvert&quot;:0,&quot;scanlines&quot;:0,&quot;scanlineCount&quot;:0,&quot;scanlineSoftness&quot;:0,&quot;chromaticAberration&quot;:0,&quot;chromaticAngle&quot;:0,&quot;crtCurvature&quot;:0,&quot;digitalGlitch&quot;:0,&quot;digitalGlitchColorSplit&quot;:0,&quot;digitalGlitchLineTear&quot;:0,&quot;digitalGlitchPixelate&quot;:0,&quot;digitalGlitchBlockAmount&quot;:0,&quot;digitalGlitchBlockDisplacement&quot;:0,&quot;digitalGlitchBlockOpacity&quot;:0,&quot;digitalGlitchSpeed&quot;:0,&quot;engraving&quot;:0,&quot;engravingSpacing&quot;:0.4117647058823529,&quot;engravingMinThickness&quot;:0.2,&quot;engravingMaxThickness&quot;:0.4571428571428572,&quot;engravingAngle&quot;:0.25,&quot;engravingContrast&quot;:0.4666666666666667,&quot;engravingSharpness&quot;:0.59,&quot;engravingWave&quot;:0.2,&quot;engravingWaveFrequency&quot;:0.2222222222222222,&quot;crosshatch&quot;:0,&quot;crosshatchSpacing&quot;:0.28,&quot;crosshatchThickness&quot;:0.25,&quot;crosshatchAngle&quot;:0.25,&quot;crosshatchContrast&quot;:0.3333333333333333,&quot;crosshatchEdges&quot;:0.5,&quot;crosshatchLineWeight&quot;:0,&quot;crosshatchWave&quot;:0.33,&quot;crosshatchWaveFrequency&quot;:0.2222222222222222,&quot;kuwahara&quot;:0,&quot;kuwaharaRadius&quot;:0.14285714285714285,&quot;kuwaharaSharpness&quot;:0.3125,&quot;kuwaharaSaturation&quot;:0.5},&quot;lut&quot;:{&quot;src&quot;:&quot;.media/luts/grade_002.cube&quot;,&quot;intensity&quot;:0.8},&quot;colorSpace&quot;:&quot;rec709&quot;}" data-hf-id="hf-y2yq" class="clip mitad izq" id="p08izq" data-start="46" data-duration="6" data-track-index="0" src="assets/rodaje/plano-08-izq.mp4" muted playsinline></video>
+      <video data-color-grading="{&quot;preset&quot;:null,&quot;intensity&quot;:1,&quot;adjust&quot;:{&quot;exposure&quot;:0,&quot;contrast&quot;:0,&quot;highlights&quot;:0,&quot;shadows&quot;:0,&quot;whites&quot;:0,&quot;blacks&quot;:0,&quot;temperature&quot;:0,&quot;tint&quot;:0,&quot;vibrance&quot;:0,&quot;saturation&quot;:0},&quot;details&quot;:{&quot;vignette&quot;:0,&quot;vignetteMidpoint&quot;:0.5,&quot;vignetteRoundness&quot;:0,&quot;vignetteFeather&quot;:0.65,&quot;grain&quot;:0,&quot;grainSize&quot;:0.25,&quot;grainRoughness&quot;:0.5},&quot;effects&quot;:{&quot;blur&quot;:0,&quot;pixelate&quot;:0,&quot;chromaBleed&quot;:0,&quot;tapeDamage&quot;:0,&quot;tapeTracking&quot;:0,&quot;tapeNoise&quot;:1,&quot;tapeSpeed&quot;:0.5,&quot;filmArtifacts&quot;:0,&quot;halftone&quot;:0,&quot;halftoneSize&quot;:0,&quot;twoInkPrint&quot;:0,&quot;twoInkPrintSize&quot;:0,&quot;ascii&quot;:0,&quot;asciiSize&quot;:0.06578947368421052,&quot;asciiInvert&quot;:0,&quot;asciiStyle&quot;:0,&quot;asciiColor&quot;:1,&quot;asciiRotation&quot;:0,&quot;dither&quot;:0,&quot;ditherSize&quot;:0,&quot;bloom&quot;:0,&quot;bloomRadius&quot;:8,&quot;monoScreen&quot;:0,&quot;monoScreenSize&quot;:0,&quot;monoScreenAngle&quot;:0,&quot;monoScreenSpread&quot;:0,&quot;monoScreenShape&quot;:0,&quot;monoScreenInvert&quot;:0,&quot;scanlines&quot;:0,&quot;scanlineCount&quot;:0,&quot;scanlineSoftness&quot;:0,&quot;chromaticAberration&quot;:0,&quot;chromaticAngle&quot;:0,&quot;crtCurvature&quot;:0,&quot;digitalGlitch&quot;:0,&quot;digitalGlitchColorSplit&quot;:0,&quot;digitalGlitchLineTear&quot;:0,&quot;digitalGlitchPixelate&quot;:0,&quot;digitalGlitchBlockAmount&quot;:0,&quot;digitalGlitchBlockDisplacement&quot;:0,&quot;digitalGlitchBlockOpacity&quot;:0,&quot;digitalGlitchSpeed&quot;:0,&quot;engraving&quot;:0,&quot;engravingSpacing&quot;:0.4117647058823529,&quot;engravingMinThickness&quot;:0.2,&quot;engravingMaxThickness&quot;:0.4571428571428572,&quot;engravingAngle&quot;:0.25,&quot;engravingContrast&quot;:0.4666666666666667,&quot;engravingSharpness&quot;:0.59,&quot;engravingWave&quot;:0.2,&quot;engravingWaveFrequency&quot;:0.2222222222222222,&quot;crosshatch&quot;:0,&quot;crosshatchSpacing&quot;:0.28,&quot;crosshatchThickness&quot;:0.25,&quot;crosshatchAngle&quot;:0.25,&quot;crosshatchContrast&quot;:0.3333333333333333,&quot;crosshatchEdges&quot;:0.5,&quot;crosshatchLineWeight&quot;:0,&quot;crosshatchWave&quot;:0.33,&quot;crosshatchWaveFrequency&quot;:0.2222222222222222,&quot;kuwahara&quot;:0,&quot;kuwaharaRadius&quot;:0.14285714285714285,&quot;kuwaharaSharpness&quot;:0.3125,&quot;kuwaharaSaturation&quot;:0.5},&quot;lut&quot;:{&quot;src&quot;:&quot;.media/luts/grade_001.cube&quot;,&quot;intensity&quot;:0.6},&quot;colorSpace&quot;:&quot;rec709&quot;}" data-hf-id="hf-7uy0" class="clip mitad der" id="p08der" data-start="46" data-duration="6" data-track-index="1" src="assets/rodaje/plano-08-der.mp4" muted playsinline></video>
+      <div data-hf-id="hf-ql3l" class="clip divisor" id="divisor" data-start="46" data-duration="6" data-track-index="3"></div>
+      <div data-hf-id="hf-nkwj" class="clip scrim" id="scrim-agosto" data-start="46.6" data-duration="5.4" data-track-index="4"></div>
+      <div data-hf-id="hf-lktq" class="clip barra" id="barra-agosto" data-start="46.6" data-duration="1.8" data-track-index="5"></div>
+      <div data-hf-id="hf-6rvn" class="clip rotulo" id="rotulo-agosto" data-start="46.6" data-duration="1.8" data-track-index="5" data-var-text="rotulo_agosto">TOLIMA, AGOSTO</div>
+
+      <!-- ── 0:52 a 0:58 · el cierre de marca ─────────────────────────────── -->
+      <video data-hf-id="hf-z195" class="clip plano" id="marca" data-start="52" data-duration="6" data-track-index="1" src="assets/piezas/0-52-marca.mp4" data-var-src="marca_src" muted playsinline data-hold=""></video>
+
+      <!-- ── 0:58 a 1:00 · los dos segundos de negro antes del pitch ──────── -->
+      <div data-hf-id="hf-k7lu" class="clip negro" id="negro" data-start="58" data-duration="2" data-track-index="6" data-hold=""></div>
+
+      <div data-hf-id="hf-p7li" class="clip scrim" id="scrim-f1" data-start="4.5" data-duration="3.6" data-track-index="20"></div>
+      <div data-hf-id="hf-igdu" class="clip frase" id="f1" data-start="4.5" data-duration="3.6" data-track-index="30">El mismo negocio. El mismo riesgo.</div>
+      <div data-hf-id="hf-7ff8" class="clip scrim" id="scrim-f2" data-start="16.7" data-duration="3.0" data-track-index="21"></div>
+      <div data-hf-id="hf-8pzt" class="clip frase" id="f2" data-start="16.7" data-duration="3.0" data-track-index="31">Uno la vio pasar.</div>
+      <div data-hf-id="hf-1wxk" class="clip scrim" id="scrim-f3" data-start="20.7" data-duration="3.2" data-track-index="22"></div>
+      <div data-hf-id="hf-wcmh" class="clip frase" id="f3" data-start="20.7" data-duration="3.2" data-track-index="32">El otro abrió Kairos.</div>
+      <div data-hf-id="hf-oeku" class="clip scrim" id="scrim-f4" data-start="25.1" data-duration="4.1" data-track-index="23"></div>
+      <div data-hf-id="hf-3fre" class="clip frase" id="f4" data-start="25.1" data-duration="4.1" data-track-index="33">Kairos simula el desastre antes de que ocurra.</div>
+      <div data-hf-id="hf-2yzn" class="clip scrim" id="scrim-f5" data-start="30.9" data-duration="2.6" data-track-index="24"></div>
+      <div data-hf-id="hf-zjk6" class="clip frase" id="f5" data-start="30.9" data-duration="2.6" data-track-index="34">Y le pone precio.</div>
+      <div data-hf-id="hf-kfws" class="clip estado estado-izq" id="est-izq" data-start="48.5" data-duration="3.5" data-track-index="40"><span data-hf-id="hf-m809" class="marca-estado">SIN KAIROS</span>OPERACIÓN DETENIDA</div>
+      <div data-hf-id="hf-inrb" class="clip estado estado-der" id="est-der" data-start="48.5" data-duration="3.5" data-track-index="41"><span data-hf-id="hf-rrtf" class="marca-estado">CON KAIROS</span>OPERANDO</div>
+      <!-- La voz de Raúl. La música va por un compresor con cadena lateral
+           disparada por estas mismas pistas, así que baja sola entre 7 y 10 dB
+           cada vez que él habla y vuelve cuando calla. -->
+      <audio id="voz1" src="assets/audio/voz/voz-1.mp3" class="clip" data-start="4.4" data-duration="3.6" data-track-index="14"></audio>
+      <audio id="voz2" src="assets/audio/voz/voz-2.mp3" class="clip" data-start="16.6" data-duration="3.0" data-track-index="15"></audio>
+      <audio id="voz3" src="assets/audio/voz/voz-3.mp3" class="clip" data-start="20.6" data-duration="3.2" data-track-index="16"></audio>
+      <audio id="voz4" src="assets/audio/voz/voz-4.mp3" class="clip" data-start="25.0" data-duration="4.1" data-track-index="17"></audio>
+      <audio id="voz5" src="assets/audio/voz/voz-5.mp3" class="clip" data-start="30.8" data-duration="2.6" data-track-index="18"></audio>
+      <audio id="preg1" src="assets/audio/voz/preg-1.mp3" class="clip" data-start="36.2" data-duration="3.3" data-track-index="19"></audio>
+      <audio id="preg2" src="assets/audio/voz/preg-2.mp3" class="clip" data-start="39.5" data-duration="2.1" data-track-index="20"></audio>
+      <audio id="preg3" src="assets/audio/voz/preg-3.mp3" class="clip" data-start="42.0" data-duration="1.9" data-track-index="21"></audio>
+      <audio id="voz6" src="assets/audio/voz/voz-6.mp3" class="clip" data-start="52.8" data-duration="6.0" data-track-index="22"></audio>
+      <audio data-hf-id="hf-avi7" id="tv" src="assets/audio/tv-noticia.mp3" class="clip" data-start="8" data-duration="10" data-track-index="7"></audio>
+      <audio data-hf-id="hf-fk7a" id="riser1" src="assets/audio/whoosh-corto.mp3" class="clip" data-start="20.8" data-duration="3.2" data-track-index="8"></audio>
+      <audio data-hf-id="hf-hb4y" id="hit1" src="assets/audio/impacto-corto.mp3" class="clip" data-start="24" data-duration="2.5" data-track-index="9"></audio>
+      <audio data-hf-id="hf-nj62" id="riser2" src="assets/audio/whoosh-corto.mp3" class="clip" data-start="42.8" data-duration="3.2" data-track-index="10"></audio>
+      <audio data-hf-id="hf-jevm" id="hit2" src="assets/audio/impacto-corto.mp3" class="clip" data-start="46" data-duration="2.5" data-track-index="11"></audio>
+      <audio data-hf-id="hf-zrd7" id="hit3" src="assets/audio/impacto.mp3" class="clip" data-start="52" data-duration="7" data-track-index="12"></audio>
+      <audio data-hf-id="hf-aghv" id="bgm" src="assets/audio/bgm.mp3" class="clip" data-start="0" data-duration="53" data-track-index="13"></audio>
+    </div>
+
+    <script>
+      (function () {
+        "use strict";
+
+        /* ── estado en t=0, fuera de la línea de tiempo ───────────────────── */
+        gsap.set(["#rotulo-marzo", "#rotulo-agosto"], { opacity: 0, x: -30 });
+        gsap.set(["#barra-marzo", "#barra-agosto"], { scaleX: 0 });
+        gsap.set(["#noticia", "#negro", "#scrim-marzo", "#scrim-agosto"], { opacity: 0 });
+        gsap.set(["#est-izq", "#est-der"], { opacity: 0, scale: 0.88 });
+        gsap.set(["#f1", "#f2", "#f3", "#f4", "#f5"], { opacity: 0, y: 26 });
+        gsap.set(["#scrim-f1", "#scrim-f2", "#scrim-f3", "#scrim-f4", "#scrim-f5"], { opacity: 0 });
+        gsap.set("#divisor", { scaleY: 0 });
+        gsap.set(["#p08izq", "#p08der"], { scale: 1.08 });
+
+        var tl = gsap.timeline({ paused: true });
+
+        /* ── Los acercamientos ─────────────────────────────────────────────
+           Un plano de celular en trípode es una foto que se mueve sola. El
+           acercamiento lento le devuelve la respiración y no se lee como
+           efecto, solo como que la imagen está viva. Van sobre metraje 4K
+           reducido a 1080, así que no se pierde definición. */
+        tl.fromTo("#p01",       { scale: 1.00 }, { scale: 1.07, duration: 8,  ease: "none" }, 0);
+        tl.fromTo("#p02",       { scale: 1.02 }, { scale: 1.07, duration: 3,  ease: "none" }, 8);
+        tl.fromTo("#p04",       { scale: 1.00 }, { scale: 1.06, duration: 4,  ease: "none" }, 16);
+        tl.fromTo("#p05",       { scale: 1.03 }, { scale: 1.09, duration: 4,  ease: "none" }, 20);
+        tl.fromTo("#espinal",   { scale: 1.00 }, { scale: 1.09, duration: 12, ease: "none" }, 24);
+        tl.fromTo("#preguntas", { scale: 1.00 }, { scale: 1.05, duration: 10, ease: "none" }, 36);
+
+        /* ── 0:00.7 · TOLIMA, MARZO. La barra se traza y el texto entra. ──── */
+        tl.to("#scrim-marzo", { opacity: 1, duration: 0.5, ease: "power2.out" }, 0.7);
+        tl.to("#barra-marzo", { scaleX: 1, duration: 0.42, ease: "power3.out" }, 0.7);
+        tl.to("#rotulo-marzo", { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 0.86);
+        tl.to(["#rotulo-marzo", "#barra-marzo", "#scrim-marzo"], { opacity: 0, duration: 0.5, ease: "power2.in" }, 3.9);
+
+        /* ── 0:11 · la emisión entra sobre el televisor ─────────────────────
+           El audio del noticiero ya viene sonando desde el 0:08. */
+        tl.to("#noticia", { opacity: 1, duration: 0.22, ease: "power2.out" }, 11);
+        tl.to("#noticia", { opacity: 0, duration: 0.01 }, 15.98);
+
+        /* ── 0:46 · el golpe de la pantalla partida ────────────────────────
+           Las dos mitades aterrizan desde un poco más grandes y la línea se
+           abre de un tirón. El impacto cae en el mismo fotograma. */
+        tl.to(["#p08izq", "#p08der"], { scale: 1, duration: 0.5, ease: "power3.out" }, 46);
+        tl.to("#divisor", { scaleY: 1, duration: 0.38, ease: "power4.out" }, 46);
+
+        /* ── 0:46.7 · TOLIMA, AGOSTO, igual que el de marzo a propósito ──── */
+        tl.to("#scrim-agosto", { opacity: 1, duration: 0.5, ease: "power2.out" }, 46.7);
+        tl.to("#barra-agosto", { scaleX: 1, duration: 0.42, ease: "power3.out" }, 46.7);
+        tl.to("#rotulo-agosto", { opacity: 1, x: 0, duration: 0.6, ease: "power3.out" }, 46.86);
+        tl.to(["#rotulo-agosto", "#barra-agosto"], { opacity: 0, duration: 0.38, ease: "power2.in" }, 48.05);
+
+        /* ── 0:49 · el estado de cada mitad ────────────────────────────────
+           Primero el rótulo dice que es agosto, y recién después se dice qué
+           pasó con cada uno. En ese orden, porque el tiempo tiene que haber
+           pasado antes de que el resultado signifique algo. */
+        tl.fromTo("#est-izq", { opacity: 0, scale: 0.88 },
+                  { opacity: 1, scale: 1, duration: 0.46, ease: "back.out(1.9)" }, 48.5);
+        tl.fromTo("#est-der", { opacity: 0, scale: 0.88 },
+                  { opacity: 1, scale: 1, duration: 0.46, ease: "back.out(1.9)" }, 48.86);
+        // Se quedan hasta el corte al logotipo. Son dos líneas y hay que poder
+        // leerlas, así que no se van antes: las corta el corte.
+        tl.to("#scrim-agosto", { opacity: 0, duration: 0.3, ease: "power2.in" }, 51.7);
+
+
+        /* ── Las frases ────────────────────────────────────────────────────
+           Entran desde abajo, se quedan quietas y se van antes del corte. */
+        tl.to("#scrim-f1", { opacity: 1, duration: 0.4, ease: "power2.out" }, 4.5);
+        tl.to("#f1", { opacity: 1, y: 0, duration: 0.52, ease: "power3.out" }, 4.58);
+        tl.to(["#f1", "#scrim-f1"], { opacity: 0, duration: 0.38, ease: "power2.in" }, 7.68);
+        tl.to("#scrim-f2", { opacity: 1, duration: 0.4, ease: "power2.out" }, 16.7);
+        tl.to("#f2", { opacity: 1, y: 0, duration: 0.52, ease: "power3.out" }, 16.78);
+        tl.to(["#f2", "#scrim-f2"], { opacity: 0, duration: 0.38, ease: "power2.in" }, 19.28);
+        tl.to("#scrim-f3", { opacity: 1, duration: 0.4, ease: "power2.out" }, 20.7);
+        tl.to("#f3", { opacity: 1, y: 0, duration: 0.52, ease: "power3.out" }, 20.78);
+        tl.to(["#f3", "#scrim-f3"], { opacity: 0, duration: 0.38, ease: "power2.in" }, 23.48);
+        tl.to("#scrim-f4", { opacity: 1, duration: 0.4, ease: "power2.out" }, 25.1);
+        tl.to("#f4", { opacity: 1, y: 0, duration: 0.52, ease: "power3.out" }, 25.18);
+        tl.to(["#f4", "#scrim-f4"], { opacity: 0, duration: 0.38, ease: "power2.in" }, 28.78);
+        tl.to("#scrim-f5", { opacity: 1, duration: 0.4, ease: "power2.out" }, 30.9);
+        tl.to("#f5", { opacity: 1, y: 0, duration: 0.52, ease: "power3.out" }, 30.98);
+        tl.to(["#f5", "#scrim-f5"], { opacity: 0, duration: 0.38, ease: "power2.in" }, 33.08);
+
+        /* ── 0:58 · negro, el respiro antes del pitch ─────────────────────── */
+        tl.to("#negro", { opacity: 1, duration: 0.35, ease: "power2.inOut" }, 57.85);
+
+        // La duración la manda el root.
+        tl.to({}, { duration: 60 }, 0);
+
+        tl.seek(0);
+        window.__timelines = window.__timelines || {};
+        window.__timelines["main"] = tl;
+      })();
+    </script>
+  </body>
+</html>

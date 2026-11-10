@@ -1,0 +1,6 @@
+# Estado y capturas que el CLI regenera
+.hyperframes/artifacts/
+.hyperframes/cache/
+
+# El borrador pesa 57 MB y ya lo reemplaza trailer-kairos-60s.mp4
+renders/trailer-borrador.mp4
